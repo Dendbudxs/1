@@ -1,0 +1,7 @@
+{
+  "watch": ["src", "public"],
+  "ext": "js,json,html,css,svg",
+  "ignore": ["data/**", "public/uploads/**"],
+  "exec": "node src/server.js",
+  "delay": "120"
+}

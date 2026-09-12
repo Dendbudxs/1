@@ -1,0 +1,29 @@
+{
+  "name": "dark-games-fullstack",
+  "version": "2.3.0",
+  "private": true,
+  "description": "DARK Games full-stack Minecraft portal and CMS, Railway-ready with persistent storage",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon",
+    "dev:native": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/storage.js && node --check src/db.js && node --check src/auth.js && node --check src/media.js && node --check src/discord.js && node --check src/serverControl.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
