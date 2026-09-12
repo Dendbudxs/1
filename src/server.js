@@ -877,8 +877,8 @@ app.use((err, _req, res, _next) => {
 });
 
 ensureBootstrapAdmin().then(() => {
-  app.listen(PORT, () => {
-    console.log(`DARK Games v5.3 running on port ${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`DARK Games v5.3.1 running on http://0.0.0.0:${PORT}`);
     if (!isDiscordConfigured()) console.log('Discord OAuth is disabled until DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are set.');
   });
 }).catch((error) => {
