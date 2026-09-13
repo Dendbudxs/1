@@ -1,6 +1,6 @@
 {
   "name": "dark-games-fullstack",
-  "version": "5.5.2",
+  "version": "5.5.4",
   "private": true,
   "description": "DARK Games full-stack Minecraft portal and CMS, Railway-ready with persistent storage",
   "main": "src/server.js",
