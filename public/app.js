@@ -293,18 +293,17 @@ function routeMotionEnabled() {
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-const ROUTE_SLIDE_DURATION = 640;
-const ROUTE_SLIDE_EASING = 'cubic-bezier(.16,1,.3,1)';
+const ROUTE_OUT_DURATION = 170;
+const ROUTE_IN_DURATION = 390;
+const ROUTE_SLIDE_EASING_OUT = 'cubic-bezier(.4,0,.8,.2)';
+const ROUTE_SLIDE_EASING_IN = 'cubic-bezier(.16,1,.3,1)';
 let routeTransitionId = 0;
 
-function nextFrame() {
-  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-}
-
 async function animateRouteSwitch(path, direction = 'forward') {
-  const nextPage = document.querySelector(`.page[data-page="${pageForPath(path)}"]`);
   const currentPage = document.querySelector('.page.active');
   const main = document.querySelector('.app-main');
+  const targetName = pageForPath(path);
+  const nextPage = document.querySelector(`.page[data-page="${targetName}"]`);
 
   if (!nextPage || !currentPage || currentPage === nextPage || !main || !routeMotionEnabled() || !currentPage.animate || !nextPage.animate) {
     performPageSwitch(path);
@@ -313,63 +312,58 @@ async function animateRouteSwitch(path, direction = 'forward') {
 
   const transitionId = ++routeTransitionId;
   const sign = direction === 'back' ? -1 : 1;
-  const distance = Math.max(34, Math.min(82, window.innerWidth * 0.055));
+  const outDistance = Math.max(18, Math.min(36, window.innerWidth * .025));
+  const inDistance = Math.max(24, Math.min(48, window.innerWidth * .035));
 
-  // Both pages are composited on top of each other. The main container keeps a
-  // fixed height for the short duration of the transition, so the footer and
-  // scenic background do not jump.
-  window.scrollTo({ top: 0, behavior: 'instant' });
-  main.classList.add('route-slide-stage');
   document.documentElement.classList.add('route-sliding');
   document.documentElement.dataset.routeDirection = direction;
-
-  nextPage.classList.add('route-slide-visible', 'route-slide-next');
-  currentPage.classList.add('route-slide-current');
-  nextPage.setAttribute('aria-hidden', 'false');
-  currentPage.setAttribute('aria-hidden', 'true');
-  nextPage.inert = false;
+  main.classList.add('route-sequential-stage');
   currentPage.inert = true;
 
-  const currentHeight = currentPage.scrollHeight;
-  const nextHeight = nextPage.scrollHeight;
-  main.style.minHeight = `${Math.max(currentHeight, nextHeight, window.innerHeight * .55)}px`;
+  // Keep the footer from jumping while the old page slides away.
+  main.style.minHeight = `${Math.max(currentPage.scrollHeight, window.innerHeight * .55)}px`;
 
-  await nextFrame();
-  if (transitionId !== routeTransitionId) return;
-
-  const timing = { duration: ROUTE_SLIDE_DURATION, easing: ROUTE_SLIDE_EASING, fill: 'both' };
-  const currentAnimation = currentPage.animate([
+  const outAnimation = currentPage.animate([
     { transform: 'translate3d(0,0,0)', opacity: 1 },
-    { transform: `translate3d(${sign * -distance}px,0,0)`, opacity: .22 }
-  ], timing);
-  const nextAnimation = nextPage.animate([
-    { transform: `translate3d(${sign * distance}px,0,0)`, opacity: .18 },
-    { transform: 'translate3d(0,0,0)', opacity: 1 }
-  ], timing);
+    { transform: `translate3d(${sign * -outDistance}px,0,0)`, opacity: 0 }
+  ], {
+    duration: ROUTE_OUT_DURATION,
+    easing: ROUTE_SLIDE_EASING_OUT,
+    fill: 'both'
+  });
 
   try {
-    await Promise.allSettled([currentAnimation.finished, nextAnimation.finished]);
-  } finally {
+    await outAnimation.finished.catch(() => {});
     if (transitionId !== routeTransitionId) return;
-    $$('.page').forEach(section => {
-      const isNext = section === nextPage;
-      section.classList.toggle('active', isNext);
-      section.classList.remove('route-slide-visible', 'route-slide-next', 'route-slide-current');
-      section.inert = !isNext;
-      section.removeAttribute('aria-hidden');
-    });
-    currentAnimation.cancel();
-    nextAnimation.cancel();
-    main.classList.remove('route-slide-stage');
-    main.style.minHeight = '';
-    document.documentElement.classList.remove('route-sliding');
-    delete document.documentElement.dataset.routeDirection;
+    outAnimation.cancel();
 
-    const page = pageForPath(path);
-    document.body.classList.toggle('admin-mode', page === 'admin');
-    updateActiveNav(path);
-    const heading = document.querySelector('.page.active h1');
-    document.title = `${heading?.textContent || 'DARK'} · DARK Games`;
+    // The old page is fully gone before the new page becomes visible.
+    // This is intentional: no stacking / ghosting between routes.
+    performPageSwitch(path);
+    const activeNext = document.querySelector('.page.active');
+    if (!activeNext) return;
+    activeNext.inert = false;
+    main.style.minHeight = `${Math.max(currentPage.scrollHeight, activeNext.scrollHeight, window.innerHeight * .55)}px`;
+
+    const inAnimation = activeNext.animate([
+      { transform: `translate3d(${sign * inDistance}px,0,0)`, opacity: 0 },
+      { transform: 'translate3d(0,0,0)', opacity: 1 }
+    ], {
+      duration: ROUTE_IN_DURATION,
+      easing: ROUTE_SLIDE_EASING_IN,
+      fill: 'both'
+    });
+
+    await inAnimation.finished.catch(() => {});
+    inAnimation.cancel();
+  } finally {
+    if (transitionId === routeTransitionId) {
+      $$('.page').forEach(section => { section.inert = !section.classList.contains('active'); });
+      main.style.minHeight = '';
+      main.classList.remove('route-sequential-stage');
+      document.documentElement.classList.remove('route-sliding');
+      delete document.documentElement.dataset.routeDirection;
+    }
   }
 }
 
@@ -843,53 +837,49 @@ async function fileToDataUrl(file, maxBytes = 4 * 1024 * 1024) {
 
 // Admin -----------------------------------------------------------------------
 const ADMIN_TAB_ORDER = ['overview', 'news', 'lore', 'rules', 'banners', 'users', 'settings'];
-let adminTabAnimation = null;
+let adminTabTransitionId = 0;
 
-function setAdminTabUI(tab) {
+async function setAdminTabUI(tab) {
   const panels = $$('[data-admin-panel]');
   const current = panels.find(panel => panel.classList.contains('active'));
   const next = panels.find(panel => panel.dataset.adminPanel === tab);
   const previousTab = state.admin.activeTab;
   state.admin.activeTab = tab;
   $$('[data-admin-tab]').forEach((button) => button.classList.toggle('active', button.dataset.adminTab === tab));
-  if (!next || current === next || !routeMotionEnabled() || !next.animate) {
+
+  if (!next || current === next || !current || !routeMotionEnabled() || !current.animate || !next.animate) {
     panels.forEach(panel => panel.classList.toggle('active', panel === next));
     return;
   }
 
-  if (adminTabAnimation) {
-    adminTabAnimation.forEach(animation => animation.cancel());
-    adminTabAnimation = null;
-  }
+  const transitionId = ++adminTabTransitionId;
   const fromIndex = ADMIN_TAB_ORDER.indexOf(previousTab);
   const toIndex = ADMIN_TAB_ORDER.indexOf(tab);
   const direction = fromIndex !== -1 && toIndex !== -1 && toIndex < fromIndex ? -1 : 1;
-  next.classList.add('active', 'admin-slide-next');
-  current?.classList.add('admin-slide-current');
-  const shift = 34;
-  const timing = { duration: 460, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' };
-  const animations = [];
-  if (current?.animate) animations.push(current.animate([
+  const shell = current.parentElement;
+  if (shell) shell.classList.add('admin-tab-switching');
+
+  const out = current.animate([
     { transform: 'translate3d(0,0,0)', opacity: 1 },
-    { transform: `translate3d(${direction * -shift}px,0,0)`, opacity: .20 }
-  ], timing));
-  animations.push(next.animate([
-    { transform: `translate3d(${direction * shift}px,0,0)`, opacity: .18 },
+    { transform: `translate3d(${direction * -22}px,0,0)`, opacity: 0 }
+  ], { duration: 130, easing: 'cubic-bezier(.4,0,.8,.2)', fill: 'both' });
+
+  await out.finished.catch(() => {});
+  if (transitionId !== adminTabTransitionId) return;
+  out.cancel();
+
+  panels.forEach(panel => panel.classList.toggle('active', panel === next));
+  const incoming = next.animate([
+    { transform: `translate3d(${direction * 28}px,0,0)`, opacity: 0 },
     { transform: 'translate3d(0,0,0)', opacity: 1 }
-  ], timing));
-  adminTabAnimation = animations;
-  Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
-    if (adminTabAnimation !== animations) return;
-    panels.forEach(panel => panel.classList.toggle('active', panel === next));
-    current?.classList.remove('admin-slide-current');
-    next.classList.remove('admin-slide-next');
-    animations.forEach(animation => animation.cancel());
-    adminTabAnimation = null;
-  });
+  ], { duration: 300, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
+  await incoming.finished.catch(() => {});
+  incoming.cancel();
+  if (shell) shell.classList.remove('admin-tab-switching');
 }
 
 async function openAdminTab(tab) {
-  setAdminTabUI(tab);
+  await setAdminTabUI(tab);
   try {
     if (tab === 'overview') await loadAdminOverview();
     if (tab === 'news') await loadAdminNews();
@@ -1246,6 +1236,7 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     return;
   }
   if (current === next) return;
+
   let viewport = document.getElementById('homeStageViewport');
   if (!viewport) {
     viewport = node('div', 'home-stage-viewport');
@@ -1253,50 +1244,60 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     current.before(viewport);
     panels.forEach(panel => viewport.append(panel));
   }
+
   const direction = panels.indexOf(next) > panels.indexOf(current) ? 1 : -1;
-  const animations = [];
   homeStageTransitioning = true;
   viewport.classList.add('is-sliding');
-  const oldHeight = Math.max(viewport.getBoundingClientRect().height, current.offsetHeight, Number.parseFloat(viewport.style.minHeight) || 0);
-  viewport.style.minHeight = oldHeight + 'px';
+  viewport.style.minHeight = `${Math.max(viewport.offsetHeight, current.offsetHeight)}px`;
+
   $$('[data-home-stage]').forEach(tab => {
     const selected = tab.dataset.homeStage === name;
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
   });
+
   try {
-    // Grid overlays the panels at exactly the same origin. Neither pushes the other down.
-    next.hidden = false;
+    if (routeMotionEnabled() && current.animate && next.animate) {
+      const outShift = Math.max(16, Math.min(30, viewport.clientWidth * .035));
+      const incomingShift = Math.max(22, Math.min(38, viewport.clientWidth * .045));
+      const out = current.animate([
+        { transform: 'translate3d(0,0,0)', opacity: 1 },
+        { transform: `translate3d(${direction * -outShift}px,0,0)`, opacity: 0 }
+      ], { duration: 130, easing: 'cubic-bezier(.4,0,.8,.2)', fill: 'both' });
+      await out.finished.catch(() => {});
+      out.cancel();
+    }
+
+    // Swap only after the first panel is fully gone. No visual overlap.
+    current.hidden = true;
     current.inert = true;
     current.setAttribute('aria-hidden', 'true');
+    next.hidden = false;
     next.inert = false;
     next.removeAttribute('aria-hidden');
-    viewport.style.minHeight = Math.max(oldHeight, next.offsetHeight) + 'px';
-    if (routeMotionEnabled() && current.animate && next.animate) {
-      // A short compositor-only slide feels much smoother than moving a full
-      // viewport width. Opacity is subtle, while transform stays on the GPU.
-      const shift = Math.max(30, Math.min(72, viewport.clientWidth * .07));
-      const timing = { duration: 620, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' };
-      animations.push(current.animate([
-        { transform: 'translate3d(0,0,0)', opacity: 1 },
-        { transform: `translate3d(${direction * -shift}px,0,0)`, opacity: .30 }
-      ], timing));
-      animations.push(next.animate([
-        { transform: `translate3d(${direction * shift}px,0,0)`, opacity: .22 },
+    viewport.style.minHeight = `${Math.max(Number.parseFloat(viewport.style.minHeight) || 0, next.offsetHeight)}px`;
+
+    if (routeMotionEnabled() && next.animate) {
+      const incomingShift = Math.max(22, Math.min(38, viewport.clientWidth * .045));
+      const incoming = next.animate([
+        { transform: `translate3d(${direction * incomingShift}px,0,0)`, opacity: 0 },
         { transform: 'translate3d(0,0,0)', opacity: 1 }
-      ], timing));
-      await Promise.allSettled(animations.map(animation => animation.finished));
+      ], { duration: 330, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
+      await incoming.finished.catch(() => {});
+      incoming.cancel();
     }
   } finally {
     panels.forEach(panel => {
-      panel.hidden = panel !== next;
-      panel.inert = panel !== next;
+      const active = panel === next;
+      panel.hidden = !active;
+      panel.inert = !active;
       panel.removeAttribute('aria-hidden');
     });
-    animations.forEach(animation => animation.cancel());
+    viewport.style.minHeight = '';
     viewport.classList.remove('is-sliding');
     homeStageTransitioning = false;
   }
+
   if (focusPanel) next.focus({ preventScroll: true });
   watchReveals();
   const pending = pendingHomeStage;

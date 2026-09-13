@@ -5662,3 +5662,61 @@ html:not(.motion-off) .admin-tab {
     will-change: auto !important;
   }
 }
+
+/* 5.6.3 — no-overlap sequential silk slide -------------------------------- */
+/* v5.6.2 deliberately stacked current + next pages. That looked like one tab
+   was sitting on top of another. v5.6.3 never renders two visible routes at
+   once: old slides away first, then the new page enters. */
+.app-main.route-sequential-stage {
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+html.route-sliding .site-header,
+html.route-sliding .app-main {
+  pointer-events: none;
+}
+
+/* Neutralize all previous route-overlap helpers if stale classes ever remain. */
+.app-main.route-slide-stage > .page.active,
+.app-main.route-slide-stage > .page.route-slide-visible,
+.page.route-slide-visible,
+.page.route-slide-next,
+.page.route-slide-current {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+}
+.page.route-slide-visible:not(.active) { display: none !important; }
+html.route-sliding .site-footer { visibility: visible !important; }
+
+/* Home stages are now sequential too, so they do not need grid-like overlap. */
+.home-stage-viewport {
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+.home-stage-viewport.is-sliding > .home-stage {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  will-change: transform, opacity;
+}
+
+/* Admin panels also swap sequentially. */
+.admin-tab.admin-slide-current,
+.admin-tab.admin-slide-next {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+}
+.admin-tab-switching { overflow-x: clip; }
+
+/* Keep compositor hints only during motion; permanent will-change wastes VRAM. */
+html.route-sliding .page.active,
+.home-stage-viewport.is-sliding > .home-stage,
+.admin-tab-switching > .admin-tab.active {
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+  will-change: transform, opacity;
+}
