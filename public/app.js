@@ -1034,29 +1034,55 @@ function watchReveals() {
   });
 }
 
+function updateHeaderClock() {
+  const timeNode = $('#headerClockTime');
+  const dateNode = $('#headerClockDate');
+  if (!timeNode || !dateNode) return;
+  const now = new Date();
+  timeNode.textContent = new Intl.DateTimeFormat('ru-RU', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).format(now);
+  dateNode.textContent = new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit', month: 'short'
+  }).format(now).replace('.', '');
+  $('#headerClock')?.setAttribute('aria-label', `Локальное время ${timeNode.textContent}`);
+}
+updateHeaderClock();
+setInterval(updateHeaderClock, 1000);
+
 // Event wiring ---------------------------------------------------------------
 let homeStageTransitioning = false;
 
 async function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
-  if (!next || !next.classList.contains('home-stage') || !next.hidden || homeStageTransitioning) return;
+  if (!next || !next.classList.contains('home-stage')) return;
 
-  const panels = $('.home-stage');
+  const panels = $$('.home-stage');
   const current = panels.find(panel => !panel.hidden);
+  if (!current || current === next || homeStageTransitioning) return;
+
   const currentIndex = Math.max(0, panels.indexOf(current));
   const nextIndex = Math.max(0, panels.indexOf(next));
   const direction = nextIndex >= currentIndex ? 1 : -1;
-  const motionEnabled = !document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motionEnabled = !document.documentElement.classList.contains('motion-off')
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   homeStageTransitioning = true;
+  const tabs = $$('[data-home-stage]');
+  tabs.forEach(tab => {
+    const selected = tab.dataset.homeStage === name;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+  });
+
   try {
-    if (motionEnabled && current?.animate) {
+    if (motionEnabled && current.animate) {
       const out = current.animate([
         { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: .22, transform: `translate3d(${direction * -18}px,0,0)` }
+        { opacity: .82, transform: `translate3d(${direction * -10}px,0,0)` }
       ], {
-        duration: 240,
-        easing: 'cubic-bezier(.4,0,.2,1)',
+        duration: 180,
+        easing: 'cubic-bezier(.33,1,.68,1)',
         fill: 'forwards'
       });
       await out.finished.catch(() => {});
@@ -1064,18 +1090,14 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     }
 
     panels.forEach(panel => { panel.hidden = panel !== next; });
-    $('[data-home-stage]').forEach(tab => {
-      const selected = tab.dataset.homeStage === name;
-      tab.setAttribute('aria-selected', String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-    });
 
     if (motionEnabled && next.animate) {
       const incoming = next.animate([
-        { opacity: .22, transform: `translate3d(${direction * 24}px,0,0)` },
+        { opacity: .62, transform: `translate3d(${direction * 18}px,0,0)` },
+        { opacity: .90, transform: `translate3d(${direction * 4}px,0,0)`, offset: .58 },
         { opacity: 1, transform: 'translate3d(0,0,0)' }
       ], {
-        duration: 520,
+        duration: 780,
         easing: 'cubic-bezier(.16,1,.3,1)',
         fill: 'both'
       });

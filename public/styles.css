@@ -5174,3 +5174,201 @@ html[data-route-direction="back"]::view-transition-new(portal-page) {
   .page.active { animation: none !important; }
 }
 html.motion-off .page.active { animation: none !important; }
+
+/* v5.5.8 — seamless scenic pages, clock, and silk transitions ------------- */
+
+/* One neutral background treatment everywhere. The previous violet page-wide
+   tint is intentionally removed: internal pages now see the same landscape as Home. */
+.page-texture {
+  background:
+    linear-gradient(180deg, rgba(5, 9, 14, .38) 0%, rgba(5, 9, 14, .48) 42%, rgba(5, 9, 14, .64) 100%),
+    radial-gradient(circle at 82% 16%, rgba(140,255,59,.035), transparent 24%),
+    url('/home-bg.png') center center / cover no-repeat !important;
+  background-attachment: scroll !important;
+}
+.page:not([data-page="admin"]) {
+  background: transparent !important;
+}
+
+/* Remove the violet cast from interior glass panels. */
+[data-page="news"] .article-page,
+[data-page="lore"] .lore-header,
+[data-page="lore"] .lore-categories,
+[data-page="lore"] .lore-toc-list,
+[data-page="lore"] .book-sheet,
+[data-page="rules"] .simple-head,
+[data-page="rules"] .rule-item,
+[data-page="contact"] .simple-head,
+[data-page="contact"] .contact-line,
+[data-page="account"] .profile-hero,
+[data-page="account"] .settings-section,
+[data-page="play"] .simple-head,
+[data-page="play"] .play-steps li,
+[data-page="clans"] .simple-head,
+[data-page="clans"] .placeholder-section,
+[data-page="notfound"] .simple-head {
+  background:
+    radial-gradient(circle at 94% 8%, rgba(140,255,59,.028), transparent 28%),
+    linear-gradient(180deg, rgba(7, 14, 21, .67), rgba(5, 11, 18, .57)) !important;
+  border-color: rgba(185, 222, 228, .14) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+[data-page="news"] .article-body {
+  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
+  border-color: rgba(185,222,228,.12) !important;
+}
+[data-page="rules"] .rule-item,
+[data-page="contact"] .contact-line {
+  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
+}
+[data-page="lore"] .book-sheet {
+  background:
+    radial-gradient(circle at 96% 6%, rgba(184,255,114,.035), transparent 28%),
+    linear-gradient(180deg, rgba(7,14,21,.66), rgba(5,11,18,.56)) !important;
+}
+
+/* Contact header no longer reads as a purple rectangle. */
+[data-page="contact"] .simple-head,
+[data-page="rules"] .simple-head,
+[data-page="lore"] .lore-header {
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(17px) saturate(114%);
+  backdrop-filter: blur(17px) saturate(114%);
+}
+
+/* Account screenshot fix: four children now have four intended columns, so the
+   second logout button no longer wraps underneath the avatar. */
+[data-page="account"] .account-page { max-width: 1080px; }
+[data-page="account"] .profile-hero {
+  grid-template-columns: auto minmax(0,1fr) auto auto;
+  gap: 18px;
+  padding: 24px 26px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(17px) saturate(114%);
+  backdrop-filter: blur(17px) saturate(114%);
+}
+[data-page="account"] .profile-hero .logout-link {
+  align-self: center;
+  margin: 0;
+  white-space: nowrap;
+}
+[data-page="account"] .settings-section {
+  padding: 24px 26px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(185,222,228,.12);
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(16px) saturate(112%);
+  backdrop-filter: blur(16px) saturate(112%);
+}
+
+/* Header clock: compact enough to live next to server status. */
+.header-clock {
+  min-width: 78px;
+  min-height: 40px;
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 1px;
+  padding: 5px 10px;
+  border: 1px solid rgba(185,222,228,.10);
+  border-radius: 12px;
+  background: rgba(7, 14, 22, .46);
+  color: #eef8fa;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+  backdrop-filter: blur(14px) saturate(112%);
+}
+.header-clock span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .045em;
+}
+.header-clock small {
+  color: #90a7ae;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Silk route transitions: the old and new page overlap gently for the whole
+   animation instead of snapping at the midpoint. */
+::view-transition-group(portal-page) {
+  overflow: clip;
+  animation-duration: 900ms !important;
+  animation-timing-function: cubic-bezier(.22,1,.36,1) !important;
+}
+::view-transition-old(portal-page),
+::view-transition-new(portal-page) {
+  mix-blend-mode: normal;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+@keyframes portal-silk-out-forward {
+  0%   { opacity: 1; transform: translate3d(0,0,0); }
+  55%  { opacity: .58; transform: translate3d(-12px,0,0); }
+  100% { opacity: 0; transform: translate3d(-22px,0,0); }
+}
+@keyframes portal-silk-in-forward {
+  0%   { opacity: 0; transform: translate3d(24px,0,0); }
+  45%  { opacity: .70; transform: translate3d(8px,0,0); }
+  100% { opacity: 1; transform: translate3d(0,0,0); }
+}
+@keyframes portal-silk-out-back {
+  0%   { opacity: 1; transform: translate3d(0,0,0); }
+  55%  { opacity: .58; transform: translate3d(12px,0,0); }
+  100% { opacity: 0; transform: translate3d(22px,0,0); }
+}
+@keyframes portal-silk-in-back {
+  0%   { opacity: 0; transform: translate3d(-24px,0,0); }
+  45%  { opacity: .70; transform: translate3d(-8px,0,0); }
+  100% { opacity: 1; transform: translate3d(0,0,0); }
+}
+html[data-route-direction="forward"]::view-transition-old(portal-page) {
+  animation: portal-silk-out-forward 760ms cubic-bezier(.22,1,.36,1) both !important;
+}
+html[data-route-direction="forward"]::view-transition-new(portal-page) {
+  animation: portal-silk-in-forward 900ms cubic-bezier(.16,1,.3,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-old(portal-page) {
+  animation: portal-silk-out-back 760ms cubic-bezier(.22,1,.36,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-new(portal-page) {
+  animation: portal-silk-in-back 900ms cubic-bezier(.16,1,.3,1) both !important;
+}
+
+/* Home tabs stay compositor-only. */
+.home-stage {
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  contain: layout style;
+}
+
+@media (max-width: 980px) {
+  .header-clock small { display: none; }
+  .header-clock { min-width: 58px; }
+  [data-page="account"] .profile-hero {
+    grid-template-columns: auto minmax(0,1fr) auto;
+  }
+  [data-page="account"] .profile-hero .logout-link:last-child {
+    grid-column: 3;
+  }
+}
+@media (max-width: 760px) {
+  .page-texture {
+    background:
+      linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
+      url('/home-bg.png') 34% center / cover no-repeat !important;
+  }
+  .header-clock { display: none; }
+  [data-page="account"] .profile-hero {
+    grid-template-columns: auto 1fr;
+    padding: 20px;
+  }
+  [data-page="account"] .profile-hero .logout-link {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  [data-page="account"] .settings-section { padding: 20px; }
+}
