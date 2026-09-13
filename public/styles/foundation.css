@@ -1,0 +1,98 @@
+/* DARK base layout and components. */
+:root {
+  color-scheme: dark;
+  --bg: #0a0c0f;
+  --bg-2: #0e1115;
+  --bg-top: #0b0d10;
+  --bg-bottom: #090b0e;
+  --ambient-a: rgba(87, 102, 113, .10);
+  --ambient-b: rgba(68, 81, 91, .07);
+  --surface-rgb: 20 24 29;
+  --surface-opacity: .74;
+  --surface: rgb(var(--surface-rgb) / var(--surface-opacity));
+  --surface-strong: rgb(var(--surface-rgb) / .90);
+  --surface-soft: rgba(255, 255, 255, .025);
+  --line: rgba(255, 255, 255, .085);
+  --line-strong: rgba(255, 255, 255, .14);
+  --text: #f2f3f2;
+  --muted: #8d969f;
+  --muted-2: #646d75;
+  --accent: #7b98a3;
+  --accent-soft: rgba(123, 152, 163, .14);
+  --accent-focus: rgba(123, 152, 163, .50);
+  --accent-switch: rgba(123, 152, 163, .20);
+  --accent-switch-line: rgba(123, 152, 163, .36);
+  --good: #80a58b;
+  --warn: #b39b6e;
+  --bad: #a77a7a;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --acrylic-blur: 22px;
+  --texture-opacity: .22;
+  --ui-font-size: 15px;
+  --shadow: 0 24px 70px rgba(0, 0, 0, .36);
+  --font: "Segoe UI Variable Text", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --display: "Segoe UI Variable Display", "Segoe UI", Inter, system-ui, sans-serif;
+  --book: Georgia, "Times New Roman", serif;
+  --editorial: "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
+}
+
+html[data-theme="obsidian"] { --bg:#070809; --bg-2:#0b0c0e; --bg-top:#08090b; --bg-bottom:#050607; --ambient-a:rgba(92,98,105,.055); --ambient-b:rgba(80,86,92,.035); --surface-rgb:13 15 18; --line:rgba(255,255,255,.075); --muted:#8c9297; }
+html[data-theme="steel"] { --bg:#0a0e12; --bg-2:#10161c; --bg-top:#0c1116; --bg-bottom:#080b0f; --ambient-a:rgba(88,116,139,.13); --ambient-b:rgba(67,88,105,.09); --surface-rgb:18 25 31; --muted:#93a0aa; --muted-2:#687681; }
+html[data-theme="warm"] { --bg:#0e0c0b; --bg-2:#15110f; --bg-top:#100d0c; --bg-bottom:#0a0807; --ambient-a:rgba(126,102,83,.11); --ambient-b:rgba(96,77,66,.07); --surface-rgb:28 23 20; --muted:#a0968f; --muted-2:#746a64; }
+html[data-density="compact"] { --ui-font-size:14px; }
+html[data-density="relaxed"] { --ui-font-size:16px; }
+html[data-corners="sharp"] { --radius:10px; --radius-sm:7px; --radius-lg:12px; }
+html[data-corners="round"] { --radius:26px; --radius-sm:15px; --radius-lg:28px; }
+html[data-font="clean"] { --font: Inter, Arial, system-ui, sans-serif; --display: Inter, Arial, system-ui, sans-serif; }
+html[data-font="technical"] { --font: Bahnschrift, "Arial Narrow", Arial, sans-serif; --display: Bahnschrift, "Arial Narrow", Arial, sans-serif; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; background: var(--bg); }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% -10%, var(--ambient-a), transparent 30%),
+    radial-gradient(circle at 90% 10%, var(--ambient-b), transparent 28%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--ui-font-size);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body.menu-open, body.dialog-open { overflow: hidden; }
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { border: 0; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+[hidden] { display: none !important; }
+
+.page-texture {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--texture-opacity);
+  background-image:
+    linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.009) 1px, transparent 1px);
+  background-size: 4px 4px, 5px 5px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.75), rgba(0,0,0,.25));
+}
+
+.content-width { width: min(1160px, calc(100% - 48px)); margin-inline: auto; }
+.kicker {
+  margin: 0;
+  color: var(--accent);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
