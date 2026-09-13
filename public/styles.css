@@ -5720,3 +5720,95 @@ html.route-sliding .page.active,
   transform: translate3d(0,0,0);
   will-change: transform, opacity;
 }
+
+/* 5.6.4 — static switching, no transparent-to-fill morph ------------------ */
+/* Route/page/tab switching is now immediate. Old slide/fade helpers are
+   neutralized so stale classes cannot reintroduce motion or ghosting. */
+html.route-sliding,
+html.route-switching {
+  scroll-behavior: auto !important;
+}
+.app-main.route-sequential-stage,
+.app-main.route-slide-stage,
+.home-stage-viewport,
+.admin-tab-switching {
+  overflow-x: visible !important;
+  contain: none !important;
+}
+.page,
+.page.active,
+.home-stage,
+.admin-tab,
+.admin-tab.active {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+}
+.page:not(.active),
+.home-stage[hidden],
+.admin-tab:not(.active) {
+  display: none !important;
+}
+.route-veil { display: none !important; }
+
+/* Top navigation: every item always has a soft filled acrylic surface.
+   Active state changes only border/text, not transparent -> filled. */
+.desktop-nav a {
+  background: rgba(10, 16, 24, .48) !important;
+  border: 1px solid rgba(185, 222, 228, .09) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018) !important;
+  transition: color .16s ease, border-color .16s ease !important;
+}
+.desktop-nav a:hover {
+  background: rgba(10, 16, 24, .48) !important;
+  border-color: rgba(185, 222, 228, .15) !important;
+}
+.desktop-nav a.active {
+  background: rgba(10, 16, 24, .48) !important;
+  border-color: rgba(140,255,59,.24) !important;
+  box-shadow: inset 0 -2px 0 rgba(140,255,59,.52), inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+
+/* Home stage tabs stay filled all the time as well. */
+[data-page="home"] .home-stage-nav button {
+  background: rgba(10, 16, 24, .46) !important;
+  border: 1px solid rgba(185, 222, 228, .08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.016) !important;
+  transition: color .16s ease, border-color .16s ease !important;
+}
+[data-page="home"] .home-stage-nav button:hover {
+  background: rgba(10, 16, 24, .46) !important;
+  transform: none !important;
+  border-color: rgba(185, 222, 228, .14) !important;
+}
+[data-page="home"] .home-stage-nav button[aria-selected="true"] {
+  background: rgba(10, 16, 24, .46) !important;
+  border-color: rgba(140,255,59,.22) !important;
+  box-shadow: inset 0 -2px 0 rgba(140,255,59,.56), inset 0 1px 0 rgba(255,255,255,.018) !important;
+  text-shadow: none !important;
+}
+
+/* Admin tab buttons: static filled base, no morphing. */
+[data-admin-tab] {
+  background: rgba(10,16,24,.44) !important;
+  border: 1px solid rgba(185,222,228,.08) !important;
+  transition: color .16s ease, border-color .16s ease !important;
+}
+[data-admin-tab]:hover {
+  background: rgba(10,16,24,.44) !important;
+  border-color: rgba(185,222,228,.14) !important;
+}
+[data-admin-tab].active {
+  background: rgba(10,16,24,.44) !important;
+  border-color: rgba(140,255,59,.22) !important;
+  box-shadow: inset 0 -2px 0 rgba(140,255,59,.48) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-nav a,
+  [data-page="home"] .home-stage-nav button,
+  [data-admin-tab] { transition: none !important; }
+}

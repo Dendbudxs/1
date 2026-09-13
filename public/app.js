@@ -300,71 +300,9 @@ const ROUTE_SLIDE_EASING_IN = 'cubic-bezier(.16,1,.3,1)';
 let routeTransitionId = 0;
 
 async function animateRouteSwitch(path, direction = 'forward') {
-  const currentPage = document.querySelector('.page.active');
-  const main = document.querySelector('.app-main');
-  const targetName = pageForPath(path);
-  const nextPage = document.querySelector(`.page[data-page="${targetName}"]`);
-
-  if (!nextPage || !currentPage || currentPage === nextPage || !main || !routeMotionEnabled() || !currentPage.animate || !nextPage.animate) {
-    performPageSwitch(path);
-    return;
-  }
-
-  const transitionId = ++routeTransitionId;
-  const sign = direction === 'back' ? -1 : 1;
-  const outDistance = Math.max(18, Math.min(36, window.innerWidth * .025));
-  const inDistance = Math.max(24, Math.min(48, window.innerWidth * .035));
-
-  document.documentElement.classList.add('route-sliding');
-  document.documentElement.dataset.routeDirection = direction;
-  main.classList.add('route-sequential-stage');
-  currentPage.inert = true;
-
-  // Keep the footer from jumping while the old page slides away.
-  main.style.minHeight = `${Math.max(currentPage.scrollHeight, window.innerHeight * .55)}px`;
-
-  const outAnimation = currentPage.animate([
-    { transform: 'translate3d(0,0,0)', opacity: 1 },
-    { transform: `translate3d(${sign * -outDistance}px,0,0)`, opacity: 0 }
-  ], {
-    duration: ROUTE_OUT_DURATION,
-    easing: ROUTE_SLIDE_EASING_OUT,
-    fill: 'both'
-  });
-
-  try {
-    await outAnimation.finished.catch(() => {});
-    if (transitionId !== routeTransitionId) return;
-    outAnimation.cancel();
-
-    // The old page is fully gone before the new page becomes visible.
-    // This is intentional: no stacking / ghosting between routes.
-    performPageSwitch(path);
-    const activeNext = document.querySelector('.page.active');
-    if (!activeNext) return;
-    activeNext.inert = false;
-    main.style.minHeight = `${Math.max(currentPage.scrollHeight, activeNext.scrollHeight, window.innerHeight * .55)}px`;
-
-    const inAnimation = activeNext.animate([
-      { transform: `translate3d(${sign * inDistance}px,0,0)`, opacity: 0 },
-      { transform: 'translate3d(0,0,0)', opacity: 1 }
-    ], {
-      duration: ROUTE_IN_DURATION,
-      easing: ROUTE_SLIDE_EASING_IN,
-      fill: 'both'
-    });
-
-    await inAnimation.finished.catch(() => {});
-    inAnimation.cancel();
-  } finally {
-    if (transitionId === routeTransitionId) {
-      $$('.page').forEach(section => { section.inert = !section.classList.contains('active'); });
-      main.style.minHeight = '';
-      main.classList.remove('route-sequential-stage');
-      document.documentElement.classList.remove('route-sliding');
-      delete document.documentElement.dataset.routeDirection;
-    }
-  }
+  // v5.6.4: route switching is intentionally instant. We no longer animate
+  // opacity/transform or stack route pages while navigating.
+  performPageSwitch(path);
 }
 
 async function ensureRouteData(path) {
@@ -840,42 +778,9 @@ const ADMIN_TAB_ORDER = ['overview', 'news', 'lore', 'rules', 'banners', 'users'
 let adminTabTransitionId = 0;
 
 async function setAdminTabUI(tab) {
-  const panels = $$('[data-admin-panel]');
-  const current = panels.find(panel => panel.classList.contains('active'));
-  const next = panels.find(panel => panel.dataset.adminPanel === tab);
-  const previousTab = state.admin.activeTab;
   state.admin.activeTab = tab;
   $$('[data-admin-tab]').forEach((button) => button.classList.toggle('active', button.dataset.adminTab === tab));
-
-  if (!next || current === next || !current || !routeMotionEnabled() || !current.animate || !next.animate) {
-    panels.forEach(panel => panel.classList.toggle('active', panel === next));
-    return;
-  }
-
-  const transitionId = ++adminTabTransitionId;
-  const fromIndex = ADMIN_TAB_ORDER.indexOf(previousTab);
-  const toIndex = ADMIN_TAB_ORDER.indexOf(tab);
-  const direction = fromIndex !== -1 && toIndex !== -1 && toIndex < fromIndex ? -1 : 1;
-  const shell = current.parentElement;
-  if (shell) shell.classList.add('admin-tab-switching');
-
-  const out = current.animate([
-    { transform: 'translate3d(0,0,0)', opacity: 1 },
-    { transform: `translate3d(${direction * -22}px,0,0)`, opacity: 0 }
-  ], { duration: 130, easing: 'cubic-bezier(.4,0,.8,.2)', fill: 'both' });
-
-  await out.finished.catch(() => {});
-  if (transitionId !== adminTabTransitionId) return;
-  out.cancel();
-
-  panels.forEach(panel => panel.classList.toggle('active', panel === next));
-  const incoming = next.animate([
-    { transform: `translate3d(${direction * 28}px,0,0)`, opacity: 0 },
-    { transform: 'translate3d(0,0,0)', opacity: 1 }
-  ], { duration: 300, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
-  await incoming.finished.catch(() => {});
-  incoming.cancel();
-  if (shell) shell.classList.remove('admin-tab-switching');
+  $$('[data-admin-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.adminPanel === tab));
 }
 
 async function openAdminTab(tab) {
@@ -1229,26 +1134,7 @@ let pendingHomeStage = null;
 async function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
   const panels = $$('.home-stage');
-  const current = panels.find(panel => !panel.hidden);
-  if (!next || !panels.includes(next) || !current) return;
-  if (homeStageTransitioning) {
-    pendingHomeStage = { name, focusPanel };
-    return;
-  }
-  if (current === next) return;
-
-  let viewport = document.getElementById('homeStageViewport');
-  if (!viewport) {
-    viewport = node('div', 'home-stage-viewport');
-    viewport.id = 'homeStageViewport';
-    current.before(viewport);
-    panels.forEach(panel => viewport.append(panel));
-  }
-
-  const direction = panels.indexOf(next) > panels.indexOf(current) ? 1 : -1;
-  homeStageTransitioning = true;
-  viewport.classList.add('is-sliding');
-  viewport.style.minHeight = `${Math.max(viewport.offsetHeight, current.offsetHeight)}px`;
+  if (!next || !panels.includes(next)) return;
 
   $$('[data-home-stage]').forEach(tab => {
     const selected = tab.dataset.homeStage === name;
@@ -1256,53 +1142,17 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     tab.tabIndex = selected ? 0 : -1;
   });
 
-  try {
-    if (routeMotionEnabled() && current.animate && next.animate) {
-      const outShift = Math.max(16, Math.min(30, viewport.clientWidth * .035));
-      const incomingShift = Math.max(22, Math.min(38, viewport.clientWidth * .045));
-      const out = current.animate([
-        { transform: 'translate3d(0,0,0)', opacity: 1 },
-        { transform: `translate3d(${direction * -outShift}px,0,0)`, opacity: 0 }
-      ], { duration: 130, easing: 'cubic-bezier(.4,0,.8,.2)', fill: 'both' });
-      await out.finished.catch(() => {});
-      out.cancel();
-    }
-
-    // Swap only after the first panel is fully gone. No visual overlap.
-    current.hidden = true;
-    current.inert = true;
-    current.setAttribute('aria-hidden', 'true');
-    next.hidden = false;
-    next.inert = false;
-    next.removeAttribute('aria-hidden');
-    viewport.style.minHeight = `${Math.max(Number.parseFloat(viewport.style.minHeight) || 0, next.offsetHeight)}px`;
-
-    if (routeMotionEnabled() && next.animate) {
-      const incomingShift = Math.max(22, Math.min(38, viewport.clientWidth * .045));
-      const incoming = next.animate([
-        { transform: `translate3d(${direction * incomingShift}px,0,0)`, opacity: 0 },
-        { transform: 'translate3d(0,0,0)', opacity: 1 }
-      ], { duration: 330, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
-      await incoming.finished.catch(() => {});
-      incoming.cancel();
-    }
-  } finally {
-    panels.forEach(panel => {
-      const active = panel === next;
-      panel.hidden = !active;
-      panel.inert = !active;
-      panel.removeAttribute('aria-hidden');
-    });
-    viewport.style.minHeight = '';
-    viewport.classList.remove('is-sliding');
-    homeStageTransitioning = false;
-  }
+  panels.forEach(panel => {
+    const active = panel === next;
+    panel.hidden = !active;
+    panel.inert = !active;
+    panel.removeAttribute('aria-hidden');
+    panel.style.removeProperty('transform');
+    panel.style.removeProperty('opacity');
+  });
 
   if (focusPanel) next.focus({ preventScroll: true });
   watchReveals();
-  const pending = pendingHomeStage;
-  pendingHomeStage = null;
-  if (pending) await selectHomeStage(pending.name, { focusPanel: pending.focusPanel });
 }
 $$('[data-home-stage]').forEach((tab, index, tabs) => {
   tab.addEventListener('click', () => selectHomeStage(tab.dataset.homeStage));
