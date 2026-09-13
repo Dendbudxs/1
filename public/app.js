@@ -293,9 +293,84 @@ function routeMotionEnabled() {
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-async function animateRouteSwitch(path) {
-  // Keep backdrop-filter panels fully opaque throughout navigation.
-  performPageSwitch(path);
+const ROUTE_SLIDE_DURATION = 640;
+const ROUTE_SLIDE_EASING = 'cubic-bezier(.16,1,.3,1)';
+let routeTransitionId = 0;
+
+function nextFrame() {
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
+async function animateRouteSwitch(path, direction = 'forward') {
+  const nextPage = document.querySelector(`.page[data-page="${pageForPath(path)}"]`);
+  const currentPage = document.querySelector('.page.active');
+  const main = document.querySelector('.app-main');
+
+  if (!nextPage || !currentPage || currentPage === nextPage || !main || !routeMotionEnabled() || !currentPage.animate || !nextPage.animate) {
+    performPageSwitch(path);
+    return;
+  }
+
+  const transitionId = ++routeTransitionId;
+  const sign = direction === 'back' ? -1 : 1;
+  const distance = Math.max(34, Math.min(82, window.innerWidth * 0.055));
+
+  // Both pages are composited on top of each other. The main container keeps a
+  // fixed height for the short duration of the transition, so the footer and
+  // scenic background do not jump.
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  main.classList.add('route-slide-stage');
+  document.documentElement.classList.add('route-sliding');
+  document.documentElement.dataset.routeDirection = direction;
+
+  nextPage.classList.add('route-slide-visible', 'route-slide-next');
+  currentPage.classList.add('route-slide-current');
+  nextPage.setAttribute('aria-hidden', 'false');
+  currentPage.setAttribute('aria-hidden', 'true');
+  nextPage.inert = false;
+  currentPage.inert = true;
+
+  const currentHeight = currentPage.scrollHeight;
+  const nextHeight = nextPage.scrollHeight;
+  main.style.minHeight = `${Math.max(currentHeight, nextHeight, window.innerHeight * .55)}px`;
+
+  await nextFrame();
+  if (transitionId !== routeTransitionId) return;
+
+  const timing = { duration: ROUTE_SLIDE_DURATION, easing: ROUTE_SLIDE_EASING, fill: 'both' };
+  const currentAnimation = currentPage.animate([
+    { transform: 'translate3d(0,0,0)', opacity: 1 },
+    { transform: `translate3d(${sign * -distance}px,0,0)`, opacity: .22 }
+  ], timing);
+  const nextAnimation = nextPage.animate([
+    { transform: `translate3d(${sign * distance}px,0,0)`, opacity: .18 },
+    { transform: 'translate3d(0,0,0)', opacity: 1 }
+  ], timing);
+
+  try {
+    await Promise.allSettled([currentAnimation.finished, nextAnimation.finished]);
+  } finally {
+    if (transitionId !== routeTransitionId) return;
+    $$('.page').forEach(section => {
+      const isNext = section === nextPage;
+      section.classList.toggle('active', isNext);
+      section.classList.remove('route-slide-visible', 'route-slide-next', 'route-slide-current');
+      section.inert = !isNext;
+      section.removeAttribute('aria-hidden');
+    });
+    currentAnimation.cancel();
+    nextAnimation.cancel();
+    main.classList.remove('route-slide-stage');
+    main.style.minHeight = '';
+    document.documentElement.classList.remove('route-sliding');
+    delete document.documentElement.dataset.routeDirection;
+
+    const page = pageForPath(path);
+    document.body.classList.toggle('admin-mode', page === 'admin');
+    updateActiveNav(path);
+    const heading = document.querySelector('.page.active h1');
+    document.title = `${heading?.textContent || 'DARK'} · DARK Games`;
+  }
 }
 
 async function ensureRouteData(path) {
@@ -368,11 +443,22 @@ function closeAuth() {
 }
 
 function selectAuthTab(tab) {
+  const login = $('#loginForm');
+  const register = $('#registerForm');
+  const next = tab === 'login' ? login : register;
+  const previous = !login.hidden ? login : (!register.hidden ? register : null);
   $$('[data-auth-tab]').forEach((button) => button.classList.toggle('active', button.dataset.authTab === tab));
-  $('#loginForm').hidden = tab !== 'login';
-  $('#registerForm').hidden = tab !== 'register';
+  login.hidden = tab !== 'login';
+  register.hidden = tab !== 'register';
   $('#authDialogTitle').textContent = tab === 'login' ? 'Вход' : 'Регистрация';
   $('#authMessage').textContent = '';
+  if (next && previous !== next && routeMotionEnabled() && next.animate) {
+    const direction = tab === 'register' ? 1 : -1;
+    next.animate([
+      { transform: `translate3d(${direction * 22}px,0,0)`, opacity: .18 },
+      { transform: 'translate3d(0,0,0)', opacity: 1 }
+    ], { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' });
+  }
 }
 
 function renderDiscordAvailability() {
@@ -756,10 +842,50 @@ async function fileToDataUrl(file, maxBytes = 4 * 1024 * 1024) {
 }
 
 // Admin -----------------------------------------------------------------------
+const ADMIN_TAB_ORDER = ['overview', 'news', 'lore', 'rules', 'banners', 'users', 'settings'];
+let adminTabAnimation = null;
+
 function setAdminTabUI(tab) {
+  const panels = $$('[data-admin-panel]');
+  const current = panels.find(panel => panel.classList.contains('active'));
+  const next = panels.find(panel => panel.dataset.adminPanel === tab);
+  const previousTab = state.admin.activeTab;
   state.admin.activeTab = tab;
   $$('[data-admin-tab]').forEach((button) => button.classList.toggle('active', button.dataset.adminTab === tab));
-  $$('[data-admin-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.adminPanel === tab));
+  if (!next || current === next || !routeMotionEnabled() || !next.animate) {
+    panels.forEach(panel => panel.classList.toggle('active', panel === next));
+    return;
+  }
+
+  if (adminTabAnimation) {
+    adminTabAnimation.forEach(animation => animation.cancel());
+    adminTabAnimation = null;
+  }
+  const fromIndex = ADMIN_TAB_ORDER.indexOf(previousTab);
+  const toIndex = ADMIN_TAB_ORDER.indexOf(tab);
+  const direction = fromIndex !== -1 && toIndex !== -1 && toIndex < fromIndex ? -1 : 1;
+  next.classList.add('active', 'admin-slide-next');
+  current?.classList.add('admin-slide-current');
+  const shift = 34;
+  const timing = { duration: 460, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' };
+  const animations = [];
+  if (current?.animate) animations.push(current.animate([
+    { transform: 'translate3d(0,0,0)', opacity: 1 },
+    { transform: `translate3d(${direction * -shift}px,0,0)`, opacity: .20 }
+  ], timing));
+  animations.push(next.animate([
+    { transform: `translate3d(${direction * shift}px,0,0)`, opacity: .18 },
+    { transform: 'translate3d(0,0,0)', opacity: 1 }
+  ], timing));
+  adminTabAnimation = animations;
+  Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
+    if (adminTabAnimation !== animations) return;
+    panels.forEach(panel => panel.classList.toggle('active', panel === next));
+    current?.classList.remove('admin-slide-current');
+    next.classList.remove('admin-slide-next');
+    animations.forEach(animation => animation.cancel());
+    adminTabAnimation = null;
+  });
 }
 
 async function openAdminTab(tab) {
@@ -1147,15 +1273,17 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     next.removeAttribute('aria-hidden');
     viewport.style.minHeight = Math.max(oldHeight, next.offsetHeight) + 'px';
     if (routeMotionEnabled() && current.animate && next.animate) {
-      // Only translation: changing ancestor opacity breaks the glass backdrop.
-      const timing = { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' };
+      // A short compositor-only slide feels much smoother than moving a full
+      // viewport width. Opacity is subtle, while transform stays on the GPU.
+      const shift = Math.max(30, Math.min(72, viewport.clientWidth * .07));
+      const timing = { duration: 620, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' };
       animations.push(current.animate([
-        { transform: 'translate3d(0,0,0)' },
-        { transform: `translate3d(${direction * -100}%,0,0)` }
+        { transform: 'translate3d(0,0,0)', opacity: 1 },
+        { transform: `translate3d(${direction * -shift}px,0,0)`, opacity: .30 }
       ], timing));
       animations.push(next.animate([
-        { transform: `translate3d(${direction * 100}%,0,0)` },
-        { transform: 'translate3d(0,0,0)' }
+        { transform: `translate3d(${direction * shift}px,0,0)`, opacity: .22 },
+        { transform: 'translate3d(0,0,0)', opacity: 1 }
       ], timing));
       await Promise.allSettled(animations.map(animation => animation.finished));
     }
