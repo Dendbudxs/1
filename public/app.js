@@ -266,6 +266,18 @@ function updateActiveNav(path) {
   });
 }
 
+const ROUTE_ORDER = ['/', '/lore', '/rules', '/contact', '/clans', '/account', '/admin', '/play'];
+function routeTransitionDirection(fromPath, toPath) {
+  const from = normalizePath(fromPath);
+  const to = normalizePath(toPath);
+  const fromBase = /^\/news\/\d+$/.test(from) ? '/' : from;
+  const toBase = /^\/news\/\d+$/.test(to) ? '/' : to;
+  const fromIndex = ROUTE_ORDER.indexOf(fromBase);
+  const toIndex = ROUTE_ORDER.indexOf(toBase);
+  if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return 'forward';
+  return toIndex > fromIndex ? 'forward' : 'back';
+}
+
 function performPageSwitch(path) {
   const page = pageForPath(path);
   $$('.page').forEach((section) => section.classList.toggle('active', section.dataset.page === page));
@@ -306,12 +318,19 @@ async function navigate(rawPath, { replace = false } = {}) {
   const allowed = await ensureRouteData(path);
   if (allowed === false) return;
 
+  const current = normalizePath(location.pathname);
+  const direction = routeTransitionDirection(current, path);
+  document.documentElement.dataset.routeDirection = direction;
   const switchPage = () => performPageSwitch(path);
   const canTransition = document.startViewTransition && !document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (canTransition) document.startViewTransition(switchPage);
-  else switchPage();
+  if (canTransition) {
+    const transition = document.startViewTransition(switchPage);
+    transition.finished.finally(() => { delete document.documentElement.dataset.routeDirection; });
+  } else {
+    switchPage();
+    delete document.documentElement.dataset.routeDirection;
+  }
 
-  const current = normalizePath(location.pathname);
   const fullPath = path + destination.search + destination.hash;
   if (fullPath !== location.pathname + location.search + location.hash || replace) history[replace ? 'replaceState' : 'pushState']({}, '', fullPath);
   closeMobileMenu();
@@ -1019,14 +1038,31 @@ function watchReveals() {
 function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
   if (!next || !next.classList.contains('home-stage') || !next.hidden) return;
-  $$('.home-stage').forEach(panel => { panel.hidden = panel !== next; });
+  const panels = $$('.home-stage');
+  const current = panels.find(panel => !panel.hidden);
+  const currentIndex = Math.max(0, panels.indexOf(current));
+  const nextIndex = Math.max(0, panels.indexOf(next));
+  const direction = nextIndex >= currentIndex ? 1 : -1;
+  const motionEnabled = !document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (motionEnabled && current?.animate) {
+    current.animate([
+      { opacity: 1, transform: 'translateX(0) scale(1)' },
+      { opacity: 0, transform: `translateX(${direction * -28}px) scale(.992)` }
+    ], { duration: 220, easing: 'cubic-bezier(.4,0,.2,1)' });
+  }
+
+  panels.forEach(panel => { panel.hidden = panel !== next; });
   $$('[data-home-stage]').forEach(tab => {
     const selected = tab.dataset.homeStage === name;
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
   });
-  if (!document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && next.animate) {
-    next.animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 580, easing: 'cubic-bezier(.22,1,.36,1)' });
+  if (motionEnabled && next.animate) {
+    next.animate([
+      { opacity: 0, transform: `translateX(${direction * 42}px) scale(.988)`, filter: 'blur(5px)' },
+      { opacity: 1, transform: 'translateX(0) scale(1)', filter: 'blur(0)' }
+    ], { duration: 520, easing: 'cubic-bezier(.16,1,.3,1)' });
   }
   if (focusPanel) next.focus({ preventScroll: true });
   const nav = $('.home-stage-nav');
@@ -1090,7 +1126,19 @@ window.addEventListener('popstate', async () => {
   if (location.pathname === '/lore') selectLoreFromHash();
   const path = normalizePath(location.pathname);
   const allowed = await ensureRouteData(path);
-  if (allowed !== false) performPageSwitch(path);
+  if (allowed === false) return;
+  const activePage = $('.page.active');
+  const currentPageName = activePage?.dataset.page || 'home';
+  const pathForCurrentPage = currentPageName === 'home' ? '/' : `/${currentPageName}`;
+  document.documentElement.dataset.routeDirection = routeTransitionDirection(pathForCurrentPage, path);
+  const canTransition = document.startViewTransition && !document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (canTransition) {
+    const transition = document.startViewTransition(() => performPageSwitch(path));
+    transition.finished.finally(() => { delete document.documentElement.dataset.routeDirection; });
+  } else {
+    performPageSwitch(path);
+    delete document.documentElement.dataset.routeDirection;
+  }
 });
 
 $('#menuButton').addEventListener('click', openMobileMenu);
