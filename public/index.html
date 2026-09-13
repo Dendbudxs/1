@@ -68,8 +68,8 @@
       <div class="content-width home-intro">
         <div class="intro-copy">
           <p class="kicker">DARK GAMES · MINECRAFT SMP</p>
-          <h1 id="homeTitle">Добро пожаловать в DARK.</h1>
-          <p class="intro-text">Мир, который создают сами игроки. История сервера, важные события и новости проекта собраны в одном месте.</p>
+          <h1 id="homeTitle">Твоя история.<br>Мир DARK.</h1>
+          <p class="intro-text">Выживай, строй и оставляй свой след в мире, который создают игроки.</p>
           <div class="hero-actions"><a class="primary-button" href="/play" data-route="/play">Как начать играть →</a><a class="subtle-button" href="/lore" data-route="/lore">Открыть книгу мира</a></div>
           <div class="intro-meta">
             <button class="status-line" id="heroStatus" type="button">
@@ -91,9 +91,17 @@
       </div>
 
       <p class="content-width status-source">Статус обновляет администрация; это не автоматическая проверка сервера.</p>
-      <div class="content-width banner-strip" id="bannerStrip" hidden></div>
+      <div class="content-width banner-strip" id="bannerStrip" data-reveal hidden></div>
 
-      <div class="content-width section-heading">
+      <section class="content-width world-section" aria-labelledby="worldTitle" data-reveal>
+        <div class="world-heading"><p class="kicker">ЗА ПРЕДЕЛАМИ СПАВНА</p><h2 id="worldTitle">У каждого места —<br>своя история.</h2><p>Познакомься с миром перед первым входом. Или найди главу, которую продолжишь сам.</p></div>
+        <div class="world-links">
+          <a class="world-link" href="/lore" data-route="/lore"><span class="world-number">01 / АРХИВ</span><h3>Книга мира</h3><p>Истории, города и персонажи DARK.</p><span class="world-arrow" aria-hidden="true">↗</span></a>
+          <a class="world-link" href="/rules" data-route="/rules"><span class="world-number">02 / ПЕРЕД СТАРТОМ</span><h3>Правила игры</h3><p>Всё, о чём стоит договориться на берегу.</p><span class="world-arrow" aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+
+      <div class="content-width section-heading home-news-heading" data-reveal>
         <div>
           <p class="kicker">ЖУРНАЛ ПРОЕКТА</p>
           <h2>Новости сервера</h2>
@@ -103,6 +111,7 @@
       <div class="content-width news-list" id="newsList">
         <div class="empty-line">Загрузка новостей…</div>
       </div>
+      <div class="content-width news-more-wrap"><button class="subtle-button" id="newsMoreButton" type="button" aria-controls="newsList" hidden>Показать ещё новости</button></div>
     </section>
 
     <section class="page" data-page="news" aria-labelledby="newsDetailTitle">

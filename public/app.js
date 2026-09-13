@@ -3,6 +3,7 @@ const state = {
   config: null,
   serverState: 'loading',
   home: { news: [], banners: [] },
+  newsVisibleCount: 3,
   lore: { book: null, chapters: [] },
   loreCategory: 'all',
   loreSelectedId: null,
@@ -382,12 +383,16 @@ function renderHome() {
 
   const list = $('#newsList');
   list.replaceChildren();
+  const more = $('#newsMoreButton');
+  more.hidden = (state.home.news?.length || 0) <= state.newsVisibleCount;
+  watchReveals();
   if (!state.home.news?.length) {
     list.append(node('div', 'empty-line', 'Новости пока не опубликованы.'));
     return;
   }
-  state.home.news.forEach((item) => {
+  state.home.news.slice(0, state.newsVisibleCount).forEach((item) => {
     const row = node('article', 'news-item');
+    row.dataset.reveal = '';
     row.tabIndex = 0;
     row.setAttribute('role', 'link');
     const date = node('time', '', formatDate(item.published_at || item.updated_at));
@@ -401,6 +406,7 @@ function renderHome() {
     row.append(date, copy, arrow);
     list.append(row);
   });
+  watchReveals();
 }
 
 async function renderNewsDetail(id) {
@@ -932,7 +938,32 @@ async function refreshContactPublic() {
   renderContact(); renderHome(); renderDiscordAvailability();
 }
 
+// Reveal elements once when they enter the viewport. Content stays visible if unsupported.
+let revealObserver;
+function watchReveals() {
+  if (!('IntersectionObserver' in window)) return;
+  if (!revealObserver) revealObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      if (!document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) entry.target.classList.add('reveal-in');
+      revealObserver.unobserve(entry.target);
+    }
+  }, { threshold: 0.08 });
+  document.querySelectorAll('[data-reveal]:not([data-observed])').forEach(element => {
+    element.dataset.observed = 'true';
+    revealObserver.observe(element);
+  });
+}
+
 // Event wiring ---------------------------------------------------------------
+$('#newsMoreButton').addEventListener('click', () => {
+  const previousCount = state.newsVisibleCount;
+  state.newsVisibleCount += 6;
+  renderHome();
+  const next = $('#newsList').children[previousCount];
+  next?.focus({ preventScroll: true });
+});
+watchReveals();
 $('#loreSearch').addEventListener('input', renderLore);
 window.addEventListener('hashchange', () => { if (location.pathname === '/lore') selectLoreFromHash(); });
 $('#playCopyIp').addEventListener('click', async () => {
