@@ -69,6 +69,7 @@ db.exec(`
     excerpt TEXT NOT NULL DEFAULT '',
     body TEXT NOT NULL DEFAULT '',
     image_url TEXT,
+    style_variant TEXT NOT NULL DEFAULT 'chronicle',
     status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','published')),
     published_at TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -118,6 +119,7 @@ db.exec(`
     subtitle TEXT NOT NULL DEFAULT '',
     image_url TEXT,
     link_url TEXT,
+    style_variant TEXT NOT NULL DEFAULT 'spotlight',
     active INTEGER NOT NULL DEFAULT 1,
     sort_order INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -144,6 +146,8 @@ ensureColumn('profiles', 'font_preset', "TEXT NOT NULL DEFAULT 'modern'");
 ensureColumn('profiles', 'acrylic_blur', 'INTEGER NOT NULL DEFAULT 22');
 ensureColumn('profiles', 'acrylic_opacity', 'INTEGER NOT NULL DEFAULT 74');
 ensureColumn('profiles', 'texture_intensity', 'INTEGER NOT NULL DEFAULT 22');
+ensureColumn('news', 'style_variant', "TEXT NOT NULL DEFAULT 'chronicle'");
+ensureColumn('banners', 'style_variant', "TEXT NOT NULL DEFAULT 'spotlight'");
 
 db.prepare(`
   INSERT OR IGNORE INTO profiles (user_id, display_name)

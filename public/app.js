@@ -118,6 +118,28 @@ function formatDate(value, options = {}) {
   });
 }
 
+const NEWS_VARIANTS = {
+  chronicle: { label: 'Хроника' },
+  spotlight: { label: 'Акцент' },
+  update: { label: 'Обновление' }
+};
+
+const BANNER_VARIANTS = {
+  spotlight: { label: 'Акцент' },
+  chronicle: { label: 'Хроника' },
+  signal: { label: 'Сигнал' },
+  update: { label: 'Обновление' }
+};
+
+function normalizeNewsVariant(value) {
+  return NEWS_VARIANTS[value] ? value : 'chronicle';
+}
+
+function normalizeBannerVariant(value) {
+  return BANNER_VARIANTS[value] ? value : 'spotlight';
+}
+
+
 function toast(message) {
   const element = $('#toast');
   element.textContent = message;
@@ -357,7 +379,9 @@ function renderHome() {
   const banner = state.home.banners?.[0];
   $('#bannerEmpty').hidden = Boolean(banner);
   if (banner) {
+    const variant = normalizeBannerVariant(banner.style_variant);
     const item = node('div', 'banner-item');
+    item.dataset.variant = variant;
     if (banner.image_url) {
       const image = node('img');
       image.src = banner.image_url;
@@ -366,14 +390,20 @@ function renderHome() {
       item.append(image);
     }
     const copy = node('div', 'banner-copy');
+    const meta = node('div', 'banner-meta');
+    meta.append(node('span', 'banner-kicker', BANNER_VARIANTS[variant].label));
+    meta.append(node('span', 'banner-index', 'Событие мира'));
+    copy.append(meta);
     copy.append(node('h3', '', banner.title));
     if (banner.subtitle) copy.append(node('p', '', banner.subtitle));
     if (banner.link_url) {
-      const link = node('a', '', 'Подробнее →');
+      const actions = node('div', 'banner-actions');
+      const link = node('a', 'banner-link', 'Подробнее');
       link.href = banner.link_url;
       if (banner.link_url.startsWith('/')) link.dataset.route = banner.link_url;
       else { link.target = '_blank'; link.rel = 'noopener'; }
-      copy.append(link);
+      actions.append(link);
+      copy.append(actions);
     }
     item.append(copy);
     bannerStrip.append(item);
@@ -386,25 +416,49 @@ function renderHome() {
   list.replaceChildren();
   const more = $('#newsMoreButton');
   more.hidden = (state.home.news?.length || 0) <= state.newsVisibleCount;
-  watchReveals();
   if (!state.home.news?.length) {
     list.append(node('div', 'empty-line', 'Новости пока не опубликованы.'));
+    watchReveals();
     return;
   }
-  state.home.news.slice(0, state.newsVisibleCount).forEach((item) => {
+  state.home.news.slice(0, state.newsVisibleCount).forEach((item, index) => {
+    const variant = normalizeNewsVariant(item.style_variant);
     const row = node('article', 'news-item');
     row.dataset.reveal = '';
+    row.dataset.variant = variant;
+    if (item.image_url) row.classList.add('has-image');
     row.tabIndex = 0;
     row.setAttribute('role', 'link');
-    const date = node('time', '', formatDate(item.published_at || item.updated_at));
-    const copy = node('div');
+
+    const dateWrap = node('div', 'news-date-block');
+    dateWrap.append(node('time', '', formatDate(item.published_at || item.updated_at)));
+    dateWrap.append(node('small', '', String(index + 1).padStart(2, '0')));
+
+    const copy = node('div', 'news-copy');
+    const topline = node('div', 'news-topline');
+    topline.append(node('span', 'news-pill', NEWS_VARIANTS[variant].label));
+    topline.append(node('span', 'news-read', 'Открыть публикацию'));
+    copy.append(topline);
     copy.append(node('h3', '', item.title));
     copy.append(node('p', '', item.excerpt || 'Открыть публикацию.'));
-    const arrow = node('span', 'news-arrow', '→');
+
     const open = () => navigate(`/news/${item.id}`);
     row.addEventListener('click', open);
     row.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
-    row.append(date, copy, arrow);
+
+    row.append(dateWrap, copy);
+
+    if (item.image_url) {
+      const thumb = node('div', 'news-thumb');
+      const image = node('img');
+      image.src = item.image_url;
+      image.alt = item.title;
+      image.loading = 'lazy';
+      thumb.append(image);
+      row.append(thumb);
+    }
+
+    row.append(node('span', 'news-arrow', '→'));
     list.append(row);
   });
   watchReveals();
@@ -413,7 +467,10 @@ function renderHome() {
 async function renderNewsDetail(id) {
   try {
     const item = await api(`/api/content/news/${id}`);
+    const variant = normalizeNewsVariant(item.style_variant);
     $('#newsDetailDate').textContent = formatDate(item.published_at || item.updated_at);
+    $('#newsDetailVariantTag').textContent = `DARK NEWS · ${NEWS_VARIANTS[variant].label}`;
+    $('#newsDetailArticle').dataset.variant = variant;
     $('#newsDetailTitle').textContent = item.title;
     $('#newsDetailExcerpt').textContent = item.excerpt || '';
     $('#newsDetailBody').textContent = item.body || '';
@@ -718,6 +775,7 @@ function selectAdminNews(id) {
   $('#newsEditorTitle').value = item?.title || '';
   $('#newsEditorExcerpt').value = item?.excerpt || '';
   $('#newsEditorBody').value = item?.body || '';
+  $('#newsEditorVariant').value = normalizeNewsVariant(item?.style_variant);
   $('#newsEditorStatus').value = item?.status || 'draft';
   $('#newsEditorImage').value = '';
   $('#newsEditorRemoveImage').checked = false;
@@ -862,6 +920,7 @@ function selectAdminBanner(id) {
   $('#bannerEditorTitle').value = banner?.title || '';
   $('#bannerEditorSubtitle').value = banner?.subtitle || '';
   $('#bannerEditorLink').value = banner?.link_url || '';
+  $('#bannerEditorVariant').value = normalizeBannerVariant(banner?.style_variant);
   $('#bannerEditorImage').value = '';
   $('#bannerEditorRemoveImage').checked = false;
   $('#bannerEditorActive').checked = banner ? Boolean(banner.active) : true;
@@ -1235,6 +1294,7 @@ $('#newsEditorForm').addEventListener('submit', async (event) => {
       title: $('#newsEditorTitle').value,
       excerpt: $('#newsEditorExcerpt').value,
       body: $('#newsEditorBody').value,
+      styleVariant: $('#newsEditorVariant').value,
       status: $('#newsEditorStatus').value,
       imageData,
       removeImage: $('#newsEditorRemoveImage').checked
@@ -1307,6 +1367,7 @@ $('#bannerEditorForm').addEventListener('submit', async (event) => {
       title: $('#bannerEditorTitle').value,
       subtitle: $('#bannerEditorSubtitle').value,
       linkUrl: $('#bannerEditorLink').value,
+      styleVariant: $('#bannerEditorVariant').value,
       imageData,
       removeImage: $('#bannerEditorRemoveImage').checked,
       active: $('#bannerEditorActive').checked

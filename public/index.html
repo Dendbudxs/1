@@ -121,9 +121,9 @@
     </section>
 
     <section class="page" data-page="news" aria-labelledby="newsDetailTitle">
-      <article class="content-width article-page">
+      <article class="content-width article-page" id="newsDetailArticle" data-variant="chronicle">
         <button class="text-back" type="button" data-route-target="/">← Назад к новостям</button>
-        <div class="article-meta"><span id="newsDetailDate"></span><span>DARK NEWS</span></div>
+        <div class="article-meta"><span id="newsDetailDate"></span><span id="newsDetailVariantTag">DARK NEWS</span></div>
         <h1 id="newsDetailTitle"></h1>
         <p class="article-lead" id="newsDetailExcerpt"></p>
         <img class="article-cover" id="newsDetailImage" alt="" hidden>
@@ -402,6 +402,7 @@
                 <label>Заголовок<input id="newsEditorTitle" maxlength="140" required></label>
                 <label>Короткое описание<textarea id="newsEditorExcerpt" maxlength="320" rows="3"></textarea></label>
                 <label>Текст новости<textarea id="newsEditorBody" rows="12"></textarea></label>
+                <label>Стиль новости<select id="newsEditorVariant"><option value="chronicle">Хроника</option><option value="spotlight">Акцент</option><option value="update">Обновление</option></select></label>
                 <label>Обложка<input id="newsEditorImage" type="file" accept="image/png,image/jpeg,image/webp"></label>
                 <label class="check-row"><input id="newsEditorRemoveImage" type="checkbox"><span>Удалить текущую обложку</span></label>
                 <label>Статус<select id="newsEditorStatus"><option value="draft">Черновик</option><option value="published">Опубликовано</option></select></label>
@@ -463,6 +464,7 @@
                 <label>Заголовок<input id="bannerEditorTitle" maxlength="120" required></label>
                 <label>Описание<textarea id="bannerEditorSubtitle" maxlength="280" rows="3"></textarea></label>
                 <label>Ссылка<input id="bannerEditorLink" maxlength="500" placeholder="https://… или /lore"></label>
+                <label>Стиль баннера<select id="bannerEditorVariant"><option value="spotlight">Акцент</option><option value="chronicle">Хроника</option><option value="signal">Сигнал</option><option value="update">Обновление</option></select></label>
                 <label>Изображение<input id="bannerEditorImage" type="file" accept="image/png,image/jpeg,image/webp"></label>
                 <label class="check-row"><input id="bannerEditorRemoveImage" type="checkbox"><span>Удалить текущее изображение</span></label>
                 <label class="check-row"><input id="bannerEditorActive" type="checkbox" checked><span>Показывать на главной</span></label>

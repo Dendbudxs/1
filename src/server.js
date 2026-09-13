@@ -132,6 +132,14 @@ function safeLink(value) {
   }
 }
 
+function normalizeNewsVariant(value) {
+  return ['chronicle', 'spotlight', 'update'].includes(value) ? value : 'chronicle';
+}
+
+function normalizeBannerVariant(value) {
+  return ['spotlight', 'chronicle', 'signal', 'update'].includes(value) ? value : 'spotlight';
+}
+
 function userRow(id) {
   return db.prepare(`
     SELECT
@@ -263,14 +271,14 @@ app.get('/api/server/status', (_req, res) => {
 
 app.get('/api/content/home', (_req, res) => {
   const news = db.prepare(`
-    SELECT id, title, excerpt, image_url, published_at, updated_at
+    SELECT id, title, excerpt, image_url, style_variant, published_at, updated_at
     FROM news
     WHERE status = 'published'
     ORDER BY datetime(COALESCE(published_at, updated_at)) DESC, id DESC
     LIMIT 30
   `).all();
   const banners = db.prepare(`
-    SELECT id, title, subtitle, image_url, link_url
+    SELECT id, title, subtitle, image_url, link_url, style_variant
     FROM banners
     WHERE active = 1
     ORDER BY sort_order ASC, id ASC
@@ -282,7 +290,7 @@ app.get('/api/content/home', (_req, res) => {
 app.get('/api/content/news/:id', (req, res) => {
   const id = Number(req.params.id);
   const row = db.prepare(`
-    SELECT id, title, excerpt, body, image_url, published_at, updated_at
+    SELECT id, title, excerpt, body, image_url, style_variant, published_at, updated_at
     FROM news
     WHERE id = ? AND status = 'published'
   `).get(id);
@@ -592,14 +600,15 @@ app.post('/api/admin/news', requireAdmin, async (req, res) => {
     const title = cleanText(req.body?.title, 140);
     const excerpt = cleanText(req.body?.excerpt, 320);
     const body = cleanText(req.body?.body, 50000);
+    const styleVariant = normalizeNewsVariant(req.body?.styleVariant);
     const status = req.body?.status === 'published' ? 'published' : 'draft';
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
     let imageUrl = null;
     if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, 'news', 4 * 1024 * 1024);
     const info = db.prepare(`
-      INSERT INTO news (title, excerpt, body, image_url, status, published_at, updated_by)
-      VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN datetime('now') ELSE NULL END, ?)
-    `).run(title, excerpt, body, imageUrl, status, status, req.user.id);
+      INSERT INTO news (title, excerpt, body, image_url, style_variant, status, published_at, updated_by)
+      VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN datetime('now') ELSE NULL END, ?)
+    `).run(title, excerpt, body, imageUrl, styleVariant, status, status, req.user.id);
     res.status(201).json(db.prepare('SELECT * FROM news WHERE id = ?').get(info.lastInsertRowid));
   } catch (error) {
     res.status(400).json({ error: error.message.startsWith('IMAGE_') ? error.message : 'NEWS_SAVE_FAILED' });
@@ -614,6 +623,7 @@ app.put('/api/admin/news/:id', requireAdmin, async (req, res) => {
     const title = cleanText(req.body?.title, 140);
     const excerpt = cleanText(req.body?.excerpt, 320);
     const body = cleanText(req.body?.body, 50000);
+    const styleVariant = normalizeNewsVariant(req.body?.styleVariant);
     const status = req.body?.status === 'published' ? 'published' : 'draft';
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
     let imageUrl = current.image_url;
@@ -621,11 +631,11 @@ app.put('/api/admin/news/:id', requireAdmin, async (req, res) => {
     if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, `news-${id}`, 4 * 1024 * 1024);
     db.prepare(`
       UPDATE news SET
-        title = ?, excerpt = ?, body = ?, image_url = ?, status = ?,
+        title = ?, excerpt = ?, body = ?, image_url = ?, style_variant = ?, status = ?,
         published_at = CASE WHEN ? = 'published' THEN COALESCE(published_at, datetime('now')) ELSE published_at END,
         updated_at = datetime('now'), updated_by = ?
       WHERE id = ?
-    `).run(title, excerpt, body, imageUrl, status, status, req.user.id, id);
+    `).run(title, excerpt, body, imageUrl, styleVariant, status, status, req.user.id, id);
     if (current.image_url && current.image_url !== imageUrl) deleteLocalUpload(current.image_url);
     res.json(db.prepare('SELECT * FROM news WHERE id = ?').get(id));
   } catch (error) {
@@ -769,14 +779,15 @@ app.post('/api/admin/banners', requireAdmin, async (req, res) => {
     const title = cleanText(req.body?.title, 120);
     const subtitle = cleanText(req.body?.subtitle, 280);
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
+    const styleVariant = normalizeBannerVariant(req.body?.styleVariant);
     const linkUrl = safeLink(req.body?.linkUrl);
     let imageUrl = null;
     if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, 'banner', 4 * 1024 * 1024);
     const max = db.prepare('SELECT COALESCE(MAX(sort_order), 0) AS value FROM banners').get().value;
     const info = db.prepare(`
-      INSERT INTO banners (title, subtitle, image_url, link_url, active, sort_order, updated_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(title, subtitle, imageUrl, linkUrl || null, boolInt(req.body?.active), Number(max) + 10, req.user.id);
+      INSERT INTO banners (title, subtitle, image_url, link_url, style_variant, active, sort_order, updated_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(title, subtitle, imageUrl, linkUrl || null, styleVariant, boolInt(req.body?.active), Number(max) + 10, req.user.id);
     res.status(201).json(db.prepare('SELECT * FROM banners WHERE id = ?').get(info.lastInsertRowid));
   } catch (error) {
     res.status(400).json({ error: error.message.startsWith('IMAGE_') ? error.message : 'BANNER_SAVE_FAILED' });
@@ -791,14 +802,15 @@ app.put('/api/admin/banners/:id', requireAdmin, async (req, res) => {
     const title = cleanText(req.body?.title, 120);
     const subtitle = cleanText(req.body?.subtitle, 280);
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
+    const styleVariant = normalizeBannerVariant(req.body?.styleVariant);
     let imageUrl = current.image_url;
     if (req.body?.removeImage) imageUrl = null;
     if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, `banner-${id}`, 4 * 1024 * 1024);
     const linkUrl = safeLink(req.body?.linkUrl);
     db.prepare(`
-      UPDATE banners SET title = ?, subtitle = ?, image_url = ?, link_url = ?, active = ?, updated_at = datetime('now'), updated_by = ?
+      UPDATE banners SET title = ?, subtitle = ?, image_url = ?, link_url = ?, style_variant = ?, active = ?, updated_at = datetime('now'), updated_by = ?
       WHERE id = ?
-    `).run(title, subtitle, imageUrl, linkUrl || null, boolInt(req.body?.active), req.user.id, id);
+    `).run(title, subtitle, imageUrl, linkUrl || null, styleVariant, boolInt(req.body?.active), req.user.id, id);
     if (current.image_url && current.image_url !== imageUrl) deleteLocalUpload(current.image_url);
     res.json(db.prepare('SELECT * FROM banners WHERE id = ?').get(id));
   } catch (error) {
