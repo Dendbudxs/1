@@ -11,6 +11,7 @@
 </head>
 <body>
   <div class="page-texture" aria-hidden="true"></div>
+  <div class="route-veil" id="routeVeil" aria-hidden="true"><span></span></div>
 
   <header class="site-header">
     <div class="header-shell">
@@ -27,10 +28,10 @@
       </nav>
 
       <div class="header-actions">
-        <button class="server-mini" id="headerServerStatus" type="button" data-route-target="/">
+        <div class="server-mini" id="headerServerStatus" role="status" aria-live="polite" title="Статус игрового сервера">
           <span class="status-dot" aria-hidden="true"></span>
           <span id="headerStatusText">Проверяем…</span>
-        </button>
+        </div>
         <div class="header-clock" id="headerClock" aria-label="Локальное время" title="Локальное время на устройстве">
           <span id="headerClockTime">--:--</span>
           <small id="headerClockDate">—</small>

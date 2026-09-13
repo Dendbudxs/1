@@ -303,43 +303,85 @@ async function animateRouteSwitch(path, direction = 'forward') {
     return;
   }
 
+  const appMain = $('#appMain');
+  const veil = $('#routeVeil');
+  const streak = veil?.querySelector('span');
   const sign = direction === 'back' ? -1 : 1;
+  const currentHeight = Math.max(current.offsetHeight, window.innerHeight - 90);
+
+  // Keep the document from changing height while the old/new pages cross over.
+  // This removes the visible twitch near the bottom/footer on short pages.
+  appMain.style.minHeight = `${currentHeight}px`;
   document.documentElement.classList.add('route-switching');
   current.style.pointerEvents = 'none';
 
   try {
-    const out = current.animate([
-      { opacity: 1, transform: 'translate3d(0,0,0)' },
-      { opacity: .72, transform: `translate3d(${sign * -4}px,0,0)`, offset: .52 },
-      { opacity: 0, transform: `translate3d(${sign * -10}px,0,0)` }
+    const veilAnimation = veil?.animate([
+      { opacity: 0 },
+      { opacity: .42, offset: .34 },
+      { opacity: .34, offset: .58 },
+      { opacity: 0 }
     ], {
-      duration: 300,
+      duration: 980,
+      easing: 'cubic-bezier(.22,1,.36,1)',
+      fill: 'both'
+    });
+
+    const streakAnimation = streak?.animate([
+      { transform: `translate3d(${sign * -125}vw,0,0)`, opacity: 0 },
+      { opacity: .75, offset: .28 },
+      { opacity: .68, offset: .62 },
+      { transform: `translate3d(${sign * 125}vw,0,0)`, opacity: 0 }
+    ], {
+      duration: 980,
+      easing: 'cubic-bezier(.22,1,.36,1)',
+      fill: 'both'
+    });
+
+    const outgoing = current.animate([
+      { opacity: 1, transform: 'translate3d(0,0,0)' },
+      { opacity: .82, transform: `translate3d(0,${sign * -3}px,0)`, offset: .55 },
+      { opacity: .42, transform: `translate3d(0,${sign * -7}px,0)` }
+    ], {
+      duration: 390,
       easing: 'cubic-bezier(.4,0,.2,1)',
       fill: 'forwards'
     });
-    await out.finished.catch(() => {});
-    out.cancel();
 
+    await new Promise(resolve => setTimeout(resolve, 315));
     performPageSwitch(path);
+
     const next = document.querySelector('.page.active');
     if (!next) return;
-
+    const targetHeight = Math.max(next.offsetHeight, window.innerHeight - 90);
+    appMain.style.minHeight = `${Math.max(currentHeight, targetHeight)}px`;
     next.style.pointerEvents = 'none';
+
     const incoming = next.animate([
-      { opacity: 0, transform: `translate3d(${sign * 12}px,0,0)` },
-      { opacity: .30, transform: `translate3d(${sign * 8}px,0,0)`, offset: .20 },
-      { opacity: .78, transform: `translate3d(${sign * 2}px,0,0)`, offset: .64 },
+      { opacity: .34, transform: `translate3d(0,${sign * 10}px,0)` },
+      { opacity: .68, transform: `translate3d(0,${sign * 4}px,0)`, offset: .42 },
       { opacity: 1, transform: 'translate3d(0,0,0)' }
     ], {
-      duration: 620,
+      duration: 720,
       easing: 'cubic-bezier(.16,1,.3,1)',
       fill: 'both'
     });
-    await incoming.finished.catch(() => {});
+
+    await Promise.allSettled([
+      outgoing.finished,
+      incoming.finished,
+      veilAnimation?.finished || Promise.resolve(),
+      streakAnimation?.finished || Promise.resolve()
+    ]);
+
+    outgoing.cancel();
     incoming.cancel();
+    veilAnimation?.cancel();
+    streakAnimation?.cancel();
     next.style.pointerEvents = '';
   } finally {
     current.style.pointerEvents = '';
+    appMain.style.minHeight = '';
     document.documentElement.classList.remove('route-switching');
   }
 }
@@ -571,11 +613,29 @@ function selectLoreFromHash(hash = location.hash) {
   renderLore();
 }
 
+function normalizeLoreSearch(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('ru')
+    .replace(/ё/g, 'е')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
 function filteredLoreChapters() {
-  const query = $('#loreSearch').value.trim().toLocaleLowerCase('ru');
-  return (state.lore.chapters || []).filter((chapter) =>
-    (state.loreCategory === 'all' || chapter.category === state.loreCategory) &&
-    (!query || `${chapter.title} ${chapter.body}`.toLocaleLowerCase('ru').includes(query)));
+  const query = normalizeLoreSearch($('#loreSearch').value);
+  const terms = query.split(/\s+/).filter(Boolean);
+
+  return (state.lore.chapters || []).filter((chapter) => {
+    // Search is intentionally global across all lore categories. Category filters
+    // continue to work when the search field is empty.
+    if (!terms.length && state.loreCategory !== 'all' && chapter.category !== state.loreCategory) return false;
+
+    const category = loreCategoryNames[chapter.category] || chapter.category || '';
+    const haystack = normalizeLoreSearch(`${chapter.title || ''} ${chapter.body || ''} ${category}`);
+    return !terms.length || terms.every(term => haystack.includes(term));
+  });
 }
 
 function renderLore() {
@@ -1220,7 +1280,10 @@ $('#newsMoreButton').addEventListener('click', () => {
   next?.focus({ preventScroll: true });
 });
 watchReveals();
-$('#loreSearch').addEventListener('input', renderLore);
+$('#loreSearch').addEventListener('input', () => {
+  if ($('#loreSearch').value.trim()) state.loreCategory = 'all';
+  renderLore();
+});
 window.addEventListener('hashchange', () => { if (location.pathname === '/lore') selectLoreFromHash(); });
 $('#playCopyIp').addEventListener('click', async () => {
   if (!state.config?.serverIp) return toast('Адрес не загрузился. Обнови страницу.');

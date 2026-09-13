@@ -5444,3 +5444,104 @@ html.route-switching .page.active {
   .site-header { transition: none !important; }
 }
 html.motion-off .site-header { transition: none !important; }
+
+/* v5.6.0 — seamless backdrop, aurora veil transition, lore search fix ------ */
+
+/* Keep the scenic layer inside the normal stacking context. Negative z-index
+   could fall behind the body/html background at the bottom of short pages,
+   which looked like a leftover violet strip. */
+html,
+body {
+  background: #070b10 !important;
+}
+.page-texture {
+  z-index: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(5,9,14,.36) 0%, rgba(5,9,14,.46) 44%, rgba(5,9,14,.63) 100%),
+    radial-gradient(circle at 82% 16%, rgba(140,255,59,.028), transparent 24%),
+    url('/home-bg.png') center center / cover no-repeat !important;
+}
+.app-main,
+.site-footer {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+.site-footer {
+  isolation: isolate;
+}
+.footer-line {
+  background: transparent !important;
+}
+
+/* Header server state is information, not navigation. */
+.server-mini {
+  cursor: default !important;
+  user-select: none;
+}
+.server-mini:hover {
+  transform: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* New route transition: a very light aurora/glass veil sweeps over a completely
+   static scenic background. No blur, backdrop-filter or full-page scale is animated. */
+.route-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  pointer-events: none;
+  opacity: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(4,9,14,.08), rgba(4,9,14,.16));
+  will-change: opacity;
+}
+.route-veil > span {
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 50%;
+  width: min(52vw, 760px);
+  transform: translate3d(-125vw,0,0);
+  opacity: 0;
+  background:
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(115,223,255,.035) 18%,
+      rgba(115,223,255,.12) 43%,
+      rgba(140,255,59,.075) 58%,
+      rgba(196,186,255,.06) 72%,
+      transparent 100%);
+  border-left: 1px solid rgba(160,229,238,.06);
+  border-right: 1px solid rgba(160,229,238,.05);
+  will-change: transform, opacity;
+}
+html.route-switching {
+  scroll-behavior: auto;
+}
+html.route-switching .site-footer {
+  pointer-events: none;
+}
+
+/* Do not let old per-page fills peek through during route changes. */
+.page:not([data-page="admin"]),
+.page:not([data-page="admin"])::before {
+  background-color: transparent !important;
+}
+
+/* Lore search gets a clearer focus state so it is obvious that it is live. */
+[data-page="lore"] .lore-search input {
+  border-color: rgba(185,222,228,.16);
+  background: rgba(6,13,20,.58);
+}
+[data-page="lore"] .lore-search input:focus {
+  border-color: rgba(140,255,59,.30);
+  box-shadow: 0 0 0 3px rgba(140,255,59,.055), 0 0 18px rgba(115,223,255,.055);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-veil { display: none !important; }
+}
+html.motion-off .route-veil { display: none !important; }
