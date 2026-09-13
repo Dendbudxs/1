@@ -1108,12 +1108,18 @@ window.addEventListener('focus', showSiteHeader);
 
 // Event wiring ---------------------------------------------------------------
 let homeStageTransitioning = false;
+let pendingHomeStage = null;
 
 async function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
   const panels = $$('.home-stage');
   const current = panels.find(panel => !panel.hidden);
-  if (!next || !panels.includes(next) || !current || current === next || homeStageTransitioning) return;
+  if (!next || !panels.includes(next) || !current) return;
+  if (homeStageTransitioning) {
+    pendingHomeStage = { name, focusPanel };
+    return;
+  }
+  if (current === next) return;
   let viewport = document.getElementById('homeStageViewport');
   if (!viewport) {
     viewport = node('div', 'home-stage-viewport');
@@ -1125,7 +1131,7 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
   const animations = [];
   homeStageTransitioning = true;
   viewport.classList.add('is-sliding');
-  const oldHeight = Math.max(viewport.getBoundingClientRect().height, current.offsetHeight);
+  const oldHeight = Math.max(viewport.getBoundingClientRect().height, current.offsetHeight, Number.parseFloat(viewport.style.minHeight) || 0);
   viewport.style.minHeight = oldHeight + 'px';
   $$('[data-home-stage]').forEach(tab => {
     const selected = tab.dataset.homeStage === name;
@@ -1140,6 +1146,19 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     next.inert = false;
     next.removeAttribute('aria-hidden');
     viewport.style.minHeight = Math.max(oldHeight, next.offsetHeight) + 'px';
+    if (routeMotionEnabled() && current.animate && next.animate) {
+      // Only translation: changing ancestor opacity breaks the glass backdrop.
+      const timing = { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' };
+      animations.push(current.animate([
+        { transform: 'translate3d(0,0,0)' },
+        { transform: `translate3d(${direction * -100}%,0,0)` }
+      ], timing));
+      animations.push(next.animate([
+        { transform: `translate3d(${direction * 100}%,0,0)` },
+        { transform: 'translate3d(0,0,0)' }
+      ], timing));
+      await Promise.allSettled(animations.map(animation => animation.finished));
+    }
   } finally {
     panels.forEach(panel => {
       panel.hidden = panel !== next;
@@ -1152,6 +1171,9 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
   }
   if (focusPanel) next.focus({ preventScroll: true });
   watchReveals();
+  const pending = pendingHomeStage;
+  pendingHomeStage = null;
+  if (pending) await selectHomeStage(pending.name, { focusPanel: pending.focusPanel });
 }
 $$('[data-home-stage]').forEach((tab, index, tabs) => {
   tab.addEventListener('click', () => selectHomeStage(tab.dataset.homeStage));

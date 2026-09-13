@@ -5559,7 +5559,7 @@ html, body { overflow-anchor:none; }
 .app-main { overflow-x:clip; }
 .home-stage-viewport { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; overflow:clip; }
 .home-stage-viewport > .home-stage { grid-area:1 / 1; width:100%; min-width:0; align-self:start; }
-.home-stage-viewport.is-sliding > .home-stage { will-change:transform,opacity; pointer-events:none; }
+.home-stage-viewport.is-sliding > .home-stage { will-change:transform; pointer-events:none; }
 .home-stage-viewport.is-sliding .reveal-in { animation:none !important; }
 [data-page="home"] .home-stage-nav { background:rgba(12,18,24,.28) !important; }
 [data-page="home"] .home-stage-nav button { background:transparent !important; }
@@ -5568,6 +5568,10 @@ html, body { overflow-anchor:none; }
   .page-texture { background-position:34% center !important; }
 }
 
-/* Preserve glass appearance: do not fade or transform its ancestor panels. */
-.page.active, .home-stage { opacity:1 !important; transform:none !important; animation:none !important; will-change:auto !important; }
+/* Pages remain stable. Tabs slide without fading their glass backdrop. */
+.page.active { opacity:1 !important; transform:none !important; animation:none !important; will-change:auto !important; }
+.home-stage { opacity:1 !important; transform:translate3d(0,0,0); animation:none !important; }
+.home-stage-viewport { isolation:isolate; }
+.home-stage-viewport > .home-stage { margin-inline:0; }
+.home-stage-viewport.is-sliding > .home-stage { transition:none !important; }
 [data-page="home"] .reveal-in { animation:none !important; }
