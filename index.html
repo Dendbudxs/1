@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="description" content="DARK Games — Minecraft SMP, лор мира, новости и сообщество.">
+  <title>DARK Games</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="page-texture" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-shell">
+      <a class="brand" href="/" data-route="/" aria-label="DARK — главная">
+        <span class="brand-mark">D</span>
+        <span class="brand-name">DARK</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Основная навигация">
+        <a href="/" data-route="/">Главная</a>
+        <a href="/lore" data-route="/lore">Лор</a>
+        <a href="/rules" data-route="/rules">Правила</a>
+        <a href="/contact" data-route="/contact">Связь</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="server-mini" id="headerServerStatus" type="button" data-route-target="/">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="headerStatusText">Проверяем…</span>
+        </button>
+        <button class="account-chip" id="accountButton" type="button" aria-label="Аккаунт">
+          <span class="avatar avatar-small" id="headerAvatar"><span>D</span></span>
+          <span id="accountLabel">Войти</span>
+        </button>
+        <button class="menu-button" id="menuButton" type="button" aria-label="Открыть меню" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" hidden></div>
+  <aside class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <div class="mobile-menu-head">
+      <span>DARK</span>
+      <button type="button" id="closeMobileMenu" aria-label="Закрыть меню">×</button>
+    </div>
+    <nav>
+      <a href="/" data-route="/">Главная</a>
+      <a href="/lore" data-route="/lore">Лор</a>
+      <a href="/contact" data-route="/contact">Связь</a>
+      <a href="/rules" data-route="/rules">Правила</a>
+      <a href="/clans" data-route="/clans">Кланы</a>
+      <a href="/account" data-route="/account">Личный кабинет</a>
+      <a class="mobile-admin-link" id="mobileAdminLink" href="/admin" data-route="/admin" hidden>Панель администратора</a>
+    </nav>
+    <div class="mobile-menu-foot">
+      <span>darkgamespro.falix.pro</span>
+      <small>Игровой портал DARK</small>
+    </div>
+  </aside>
+
+  <main id="appMain" class="app-main">
+    <section class="page active" data-page="home" aria-labelledby="homeTitle">
+      <div class="content-width home-stage-nav" role="tablist" aria-label="Разделы главной">
+        <button id="stage-tab-welcome" role="tab" aria-selected="true" aria-controls="stage-welcome" data-home-stage="welcome" type="button"><small>01</small> Начало</button>
+        <button id="stage-tab-banner" role="tab" aria-selected="false" aria-controls="stage-banner" data-home-stage="banner" tabindex="-1" type="button"><small>02</small> Событие</button>
+        <button id="stage-tab-news" role="tab" aria-selected="false" aria-controls="stage-news" data-home-stage="news" tabindex="-1" type="button"><small>03</small> Новости</button>
+      </div>
+      <div class="home-stage" id="stage-welcome" role="tabpanel" aria-labelledby="stage-tab-welcome" tabindex="0">
+      <div class="content-width home-intro">
+        <div class="intro-copy">
+          <p class="kicker">DARK GAMES · MINECRAFT SMP</p>
+          <h1 id="homeTitle">Твоя история.<br>Мир DARK.</h1>
+          <p class="intro-text">Выживай, строй и оставляй свой след в мире, который создают игроки.</p>
+          <div class="hero-actions"><a class="primary-button" href="/play" data-route="/play">Как начать играть →</a><a class="subtle-button" href="/lore" data-route="/lore">Открыть книгу мира</a></div>
+          <div class="intro-meta">
+            <button class="status-line" id="heroStatus" type="button">
+              <span class="status-dot"></span>
+              <span id="heroStatusText">Проверяем статус…</span>
+            </button>
+            <span class="meta-divider"></span>
+            <button class="copy-ip" id="copyIpButton" type="button">
+              <span id="serverIpText">darkgamespro.falix.pro</span>
+              <small>скопировать IP</small>
+            </button>
+          </div>
+        </div>
+        <div class="intro-aside" aria-label="Информация о сервере">
+          <div><span>Версия</span><strong id="versionText">1.21.1</strong></div>
+          <div><span>Режим</span><strong>Hardcore SMP</strong></div>
+          <div><span>Мир</span><strong>Создаётся игроками</strong></div>
+        </div>
+      </div>
+
+      <div class="content-width stage-footer"><span>Мир начинается с тебя.</span><button class="subtle-button" type="button" data-stage-next="banner">Дальше: событие <span aria-hidden="true">→</span></button></div>
+      </div>
+      <div class="home-stage" id="stage-banner" role="tabpanel" aria-labelledby="stage-tab-banner" tabindex="0" hidden>
+        <div class="content-width stage-heading"><p class="kicker">В ЦЕНТРЕ ВНИМАНИЯ</p><h2>Сейчас в DARK</h2></div>
+        <div class="content-width banner-strip" id="bannerStrip" hidden></div>
+        <div class="content-width banner-empty" id="bannerEmpty"><p>Здесь появится следующее событие мира.</p><a class="subtle-button" href="/lore" data-route="/lore">Пока загляни в книгу мира →</a></div>
+        <div class="content-width stage-footer"><button class="text-back" type="button" data-stage-next="welcome">← К началу</button><button class="subtle-button" type="button" data-stage-next="news">Дальше: новости →</button></div>
+      </div>
+      <div class="home-stage" id="stage-news" role="tabpanel" aria-labelledby="stage-tab-news" tabindex="0" hidden>
+      <div class="content-width section-heading home-news-heading">
+        <div>
+          <p class="kicker">ЖУРНАЛ ПРОЕКТА</p>
+          <h2>Новости сервера</h2>
+        </div>
+        <span class="heading-note">Обновления, события и объявления команды</span>
+      </div>
+      <div class="content-width news-list" id="newsList">
+        <div class="empty-line">Загрузка новостей…</div>
+      </div>
+      <div class="content-width news-more-wrap"><button class="subtle-button" id="newsMoreButton" type="button" aria-controls="newsList" hidden>Показать ещё новости</button></div>
+      <div class="content-width stage-footer"><button class="text-back" type="button" data-stage-next="banner">← К событию</button><button class="subtle-button" type="button" data-stage-next="welcome">К началу ↑</button></div>
+      </div>
+    </section>
+
+    <section class="page" data-page="news" aria-labelledby="newsDetailTitle">
+      <article class="content-width article-page">
+        <button class="text-back" type="button" data-route-target="/">← Назад к новостям</button>
+        <div class="article-meta"><span id="newsDetailDate"></span><span>DARK NEWS</span></div>
+        <h1 id="newsDetailTitle"></h1>
+        <p class="article-lead" id="newsDetailExcerpt"></p>
+        <img class="article-cover" id="newsDetailImage" alt="" hidden>
+        <div class="article-body" id="newsDetailBody"></div>
+      </article>
+    </section>
+
+    <section class="page" data-page="lore" aria-labelledby="loreBookTitle">
+      <div class="content-width lore-header">
+        <p class="kicker">АРХИВ МИРА</p>
+        <h1 id="loreBookTitle">Книга мира</h1>
+        <p id="loreBookSubtitle">История, регионы, города, персонажи и механики DARK.</p>
+      </div>
+
+      <div class="content-width lore-search"><label for="loreSearch">Поиск по книге мира</label><input id="loreSearch" type="search" placeholder="Название главы или слово из текста…" maxlength="120"></div>
+      <div class="content-width lore-categories" id="loreCategories" role="tablist" aria-label="Разделы лора">
+        <button type="button" data-lore-category="all" class="active">Все главы</button>
+        <button type="button" data-lore-category="history">История</button>
+        <button type="button" data-lore-category="regions">Регионы</button>
+        <button type="button" data-lore-category="cities">Города</button>
+        <button type="button" data-lore-category="characters">Персонажи</button>
+        <button type="button" data-lore-category="mechanics">Механики</button>
+      </div>
+
+      <div class="content-width lore-layout">
+        <aside class="lore-toc" aria-label="Оглавление">
+          <button class="chapter-mobile-select" id="chapterMobileSelect" type="button">Выбрать главу <span>⌄</span></button>
+          <div class="lore-toc-list" id="loreToc"></div>
+        </aside>
+        <article class="book-sheet" id="loreReader">
+          <div class="book-empty">
+            <span>ARCHIVE</span>
+            <h2>Книга пока закрыта.</h2>
+            <p>Когда администратор опубликует первую главу, она появится здесь.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" data-page="contact" aria-labelledby="contactTitle">
+      <div class="content-width simple-page">
+        <div class="simple-head">
+          <p class="kicker">КОНТАКТ</p>
+          <h1 id="contactTitle">Помощь и связь</h1>
+          <p>Вопросы о подключении и правилах адресуй администрации сервера. Если заметил ошибку сайта, укажи страницу, что произошло и что ты ожидал увидеть — и отправь разработчику через контакт ниже.</p>
+        </div>
+        <div class="contact-line">
+          <div>
+            <span>Discord</span>
+            <strong id="developerDiscordHandle">@developer</strong>
+          </div>
+          <a class="subtle-button" id="developerDiscordLink" href="#" target="_blank" rel="noopener" hidden>Открыть Discord</a>
+        </div>
+        <div class="contact-line">
+          <div>
+            <span>Аккаунт DARK</span>
+            <strong>Discord можно привязать к профилю</strong>
+          </div>
+          <button class="subtle-button" id="contactDiscordAuth" type="button">Подключить Discord</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" data-page="rules" aria-labelledby="rulesTitle">
+      <div class="content-width simple-page">
+        <div class="simple-head">
+          <p class="kicker">DARK / RULES</p>
+          <h1 id="rulesTitle">Правила</h1>
+          <p>Актуальные правила публикуются администрацией через панель управления.</p>
+        </div>
+        <div class="rules-list" id="rulesList"><div class="empty-line">Загрузка правил…</div></div>
+      </div>
+    </section>
+
+    <section class="page" data-page="clans" aria-labelledby="clansTitle">
+      <div class="content-width simple-page">
+        <div class="simple-head">
+          <p class="kicker">DARK / CLANS</p>
+          <h1 id="clansTitle">Кланы</h1>
+          <p>Объединения игроков и их истории в мире DARK.</p>
+        </div>
+        <div class="placeholder-section">
+          <span>CLAN ARCHIVE</span>
+          <strong>Кланы появятся позже.</strong>
+          <p>Раздел готовится. Новости о кланах появятся в журнале проекта.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" data-page="account" aria-labelledby="accountTitle">
+      <div class="content-width account-page" id="accountGuest">
+        <div class="simple-head">
+          <p class="kicker">ЛИЧНЫЙ КАБИНЕТ</p>
+          <h1 id="accountTitle">Твой профиль DARK</h1>
+          <p>Войди, чтобы настроить имя, аватар и привязать Discord.</p>
+        </div>
+        <button class="primary-button" id="accountGuestLogin" type="button">Войти или зарегистрироваться</button>
+      </div>
+
+      <div class="content-width account-page" id="accountUser" hidden>
+        <div class="profile-hero">
+          <div class="avatar avatar-large" id="profileAvatar"><span>D</span></div>
+          <div>
+            <p class="kicker">ЛИЧНЫЙ КАБИНЕТ</p>
+            <h1 id="profileDisplayName">Игрок</h1>
+            <p><span id="profileUsername">username</span> · <span id="profileRole">user</span></p>
+          </div>
+          <button class="logout-link" id="logoutAllButton" type="button">Выйти на всех устройствах</button>
+          <button class="logout-link" id="logoutButton" type="button">Выйти</button>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title"><h2>Профиль</h2><p>То, как твой аккаунт выглядит на сайте.</p></div>
+          <form class="settings-form" id="profileForm">
+            <label>Отображаемое имя<input name="displayName" id="displayNameInput" maxlength="48" required></label>
+            <button class="subtle-button" type="submit">Сохранить профиль</button>
+          </form>
+        </div>
+
+        <div class="settings-section personalization-section">
+          <div class="settings-title">
+            <h2>Персонализация</h2>
+            <p>Оформление сохраняется в аккаунте и применяется на всех страницах.</p>
+          </div>
+          <form class="settings-form personalization-form" id="personalizationForm">
+            <div class="theme-preview" id="themePreview" aria-hidden="true">
+              <span class="theme-preview-mark">D</span>
+              <div><strong>DARK</strong><small>Предпросмотр интерфейса</small></div>
+              <i></i>
+            </div>
+
+            <div class="personalization-grid">
+              <label>Основа интерфейса
+                <select id="themePresetInput" name="themePreset">
+                  <option value="graphite">Графит</option>
+                  <option value="obsidian">Обсидиан</option>
+                  <option value="steel">Холодная сталь</option>
+                  <option value="warm">Тёплый графит</option>
+                </select>
+              </label>
+              <label>Шрифт интерфейса
+                <select id="fontPresetInput" name="fontPreset">
+                  <option value="modern">Modern</option>
+                  <option value="clean">Clean</option>
+                  <option value="technical">Technical</option>
+                </select>
+              </label>
+              <label>Плотность
+                <select id="uiDensityInput" name="uiDensity">
+                  <option value="compact">Компактно</option>
+                  <option value="normal">Стандартно</option>
+                  <option value="relaxed">Свободно</option>
+                </select>
+              </label>
+              <label>Скругления
+                <select id="cornerStyleInput" name="cornerStyle">
+                  <option value="sharp">Строго</option>
+                  <option value="soft">Мягко</option>
+                  <option value="round">Округло</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="accent-setting">
+              <div class="setting-caption"><span>Акцентный цвет</span><small>Ссылки, активные вкладки и детали.</small></div>
+              <div class="accent-picker">
+                <input type="color" id="accentColorInput" name="accentColor" value="#7b98a3" aria-label="Выбрать акцентный цвет">
+                <button type="button" class="accent-swatch" data-accent="#7b98a3" aria-label="Серо-синий"></button>
+                <button type="button" class="accent-swatch" data-accent="#7087b5" aria-label="Синий"></button>
+                <button type="button" class="accent-swatch" data-accent="#8b8fa8" aria-label="Лавандовый"></button>
+                <button type="button" class="accent-swatch" data-accent="#8e9b78" aria-label="Оливковый"></button>
+                <button type="button" class="accent-swatch" data-accent="#a18477" aria-label="Тёплый"></button>
+              </div>
+            </div>
+
+            <label class="range-setting">
+              <span><strong>Размытие акрила</strong><small>Насколько фон просвечивает сквозь панели.</small></span>
+              <div><input type="range" id="acrylicBlurInput" min="0" max="32" step="1"><output id="acrylicBlurValue">22 px</output></div>
+            </label>
+            <label class="range-setting">
+              <span><strong>Плотность акрила</strong><small>Прозрачность шапки и окон интерфейса.</small></span>
+              <div><input type="range" id="acrylicOpacityInput" min="45" max="92" step="1"><output id="acrylicOpacityValue">74%</output></div>
+            </label>
+            <label class="range-setting">
+              <span><strong>Текстура фона</strong><small>От полностью чистого фона до заметной зернистости.</small></span>
+              <div><input type="range" id="textureIntensityInput" min="0" max="100" step="1"><output id="textureIntensityValue">22%</output></div>
+            </label>
+
+            <label class="switch-row"><span><strong>Анимации интерфейса</strong><small>Плавные переходы между вкладками и состояниями.</small></span><input type="checkbox" id="animationsInput" name="animationsEnabled"><i></i></label>
+
+            <div class="personalization-actions">
+              <button class="subtle-button" type="submit">Сохранить оформление</button>
+              <button class="text-button" id="resetPersonalizationButton" type="button">Сбросить</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title"><h2>Аватар</h2><p>PNG, JPG или WebP до 2 МБ.</p></div>
+          <div class="avatar-settings">
+            <input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp">
+            <button class="subtle-button" id="uploadAvatarButton" type="button">Загрузить</button>
+            <button class="text-button danger-text" id="removeAvatarButton" type="button">Удалить аватар</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title"><h2>Discord</h2><p>Вход через Discord и связь аккаунтов.</p></div>
+          <div class="discord-settings">
+            <div><span>Состояние</span><strong id="discordConnectionText">Не привязан</strong></div>
+            <a class="subtle-button" id="discordConnectButton" href="/auth/discord">Привязать Discord</a>
+            <button class="text-button danger-text" id="discordDisconnectButton" type="button" hidden>Отключить</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title"><h2 id="passwordSectionTitle">Пароль</h2><p>Локальный вход без Discord.</p></div>
+          <form class="settings-form" id="passwordForm">
+            <label id="currentPasswordLabel">Текущий пароль<input name="currentPassword" type="password" autocomplete="current-password"></label>
+            <label>Новый пароль<input name="newPassword" type="password" minlength="8" autocomplete="new-password" required></label>
+            <button class="subtle-button" type="submit">Обновить пароль</button>
+          </form>
+        </div>
+
+        <div class="settings-section admin-account-row" id="adminAccountRow" hidden>
+          <div class="settings-title"><h2>Администрирование</h2><p>У аккаунта есть права администратора.</p></div>
+          <a class="primary-button compact" href="/admin" data-route="/admin">Открыть DARK Control</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="page admin-page" data-page="admin" aria-labelledby="adminTitle">
+      <div class="admin-shell">
+        <aside class="admin-sidebar">
+          <div class="admin-brand"><span>D</span><div><strong>DARK Control</strong><small>Content Management</small></div></div>
+          <nav id="adminNav">
+            <button class="active" type="button" data-admin-tab="overview">Обзор</button>
+            <span>Контент</span>
+            <button type="button" data-admin-tab="news">Новости</button>
+            <button type="button" data-admin-tab="lore">Лор</button>
+            <button type="button" data-admin-tab="rules">Правила</button>
+            <button type="button" data-admin-tab="banners">Баннеры</button>
+            <span>Система</span>
+            <button type="button" data-admin-tab="users">Пользователи</button>
+            <button type="button" data-admin-tab="settings">Настройки</button>
+          </nav>
+          <a href="/" data-route="/" class="admin-back">← Вернуться на сайт</a>
+        </aside>
+
+        <div class="admin-workspace">
+          <header class="admin-topbar">
+            <div><p>DARK / ADMIN</p><h1 id="adminTitle">Панель управления</h1></div>
+            <div class="admin-identity"><span class="status-dot"></span><span id="adminIdentity">admin</span></div>
+          </header>
+
+          <section class="admin-tab active" data-admin-panel="overview">
+            <div class="admin-section-head"><div><h2>Обзор</h2><p>Состояние проекта и быстрые показатели.</p></div></div>
+            <div class="metric-lines">
+              <div><span>Пользователи</span><strong id="metricUsers">0</strong></div>
+              <div><span>Администраторы</span><strong id="metricAdmins">0</strong></div>
+              <div><span>Новости</span><strong id="metricNews">0</strong></div>
+              <div><span>Главы лора</span><strong id="metricChapters">0</strong></div>
+            </div>
+            <div class="overview-row">
+              <div><span>Состояние сервера</span><strong id="metricServerState">Офлайн</strong></div>
+              <div><span>Последнее изменение</span><strong id="metricLatestNews">Нет данных</strong></div>
+            </div>
+          </section>
+
+          <section class="admin-tab" data-admin-panel="news">
+            <div class="admin-section-head"><div><h2>Новости</h2><p>Публикации главной страницы.</p></div><button class="subtle-button" id="newNewsButton" type="button">+ Новая новость</button></div>
+            <div class="cms-split">
+              <div class="cms-list" id="adminNewsList"></div>
+              <form class="cms-editor" id="newsEditorForm">
+                <input type="hidden" id="newsEditorId">
+                <label>Заголовок<input id="newsEditorTitle" maxlength="140" required></label>
+                <label>Короткое описание<textarea id="newsEditorExcerpt" maxlength="320" rows="3"></textarea></label>
+                <label>Текст новости<textarea id="newsEditorBody" rows="12"></textarea></label>
+                <label>Обложка<input id="newsEditorImage" type="file" accept="image/png,image/jpeg,image/webp"></label>
+                <label class="check-row"><input id="newsEditorRemoveImage" type="checkbox"><span>Удалить текущую обложку</span></label>
+                <label>Статус<select id="newsEditorStatus"><option value="draft">Черновик</option><option value="published">Опубликовано</option></select></label>
+                <div class="editor-buttons"><button class="primary-button compact" type="submit">Сохранить</button><button class="text-button danger-text" id="deleteNewsButton" type="button">Удалить</button></div>
+              </form>
+            </div>
+          </section>
+
+          <section class="admin-tab" data-admin-panel="lore">
+            <div class="admin-section-head"><div><h2>Лор</h2><p>Книга мира и её главы. Главы можно перетаскивать.</p></div><button class="subtle-button" id="newChapterButton" type="button">+ Новая глава</button></div>
+            <form class="book-settings-line" id="bookSettingsForm">
+              <label>Название книги<input id="adminBookTitle" maxlength="120"></label>
+              <label>Подзаголовок<input id="adminBookSubtitle" maxlength="280"></label>
+              <button class="text-button" type="submit">Сохранить книгу</button>
+            </form>
+            <div class="cms-split lore-admin-split">
+              <div class="cms-list sortable-list" id="adminChapterList"></div>
+              <form class="cms-editor" id="chapterEditorForm">
+                <input type="hidden" id="chapterEditorId">
+                <label>Название главы<input id="chapterEditorTitle" maxlength="140" required></label>
+                <fieldset class="category-field">
+                  <legend>Раздел</legend>
+                  <input type="hidden" id="chapterEditorCategory" value="history">
+                  <div class="chapter-category-picker" id="chapterCategoryPicker" role="radiogroup" aria-label="Раздел лора">
+                    <button class="category-choice active" type="button" data-chapter-category="history" role="radio" aria-checked="true"><small>01</small><span>История</span></button>
+                    <button class="category-choice" type="button" data-chapter-category="regions" role="radio" aria-checked="false"><small>02</small><span>Регионы</span></button>
+                    <button class="category-choice" type="button" data-chapter-category="cities" role="radio" aria-checked="false"><small>03</small><span>Города</span></button>
+                    <button class="category-choice" type="button" data-chapter-category="characters" role="radio" aria-checked="false"><small>04</small><span>Персонажи</span></button>
+                    <button class="category-choice" type="button" data-chapter-category="mechanics" role="radio" aria-checked="false"><small>05</small><span>Механики</span></button>
+                  </div>
+                </fieldset>
+                <label>Текст главы<textarea id="chapterEditorBody" rows="18"></textarea></label>
+                <label class="check-row"><input id="chapterEditorPublished" type="checkbox" checked><span>Опубликовано</span></label>
+                <div class="editor-buttons"><button class="primary-button compact" type="submit">Сохранить</button><button class="text-button danger-text" id="deleteChapterButton" type="button">Удалить</button></div>
+              </form>
+            </div>
+          </section>
+
+          <section class="admin-tab" data-admin-panel="rules">
+            <div class="admin-section-head"><div><h2>Правила</h2><p>Разделы правил проекта.</p></div><button class="subtle-button" id="newRuleButton" type="button">+ Добавить правило</button></div>
+            <div class="cms-split">
+              <div class="cms-list" id="adminRulesList"></div>
+              <form class="cms-editor" id="ruleEditorForm">
+                <input type="hidden" id="ruleEditorId">
+                <label>Заголовок<input id="ruleEditorTitle" maxlength="140" required></label>
+                <label>Текст<textarea id="ruleEditorBody" rows="16"></textarea></label>
+                <label class="check-row"><input id="ruleEditorPublished" type="checkbox" checked><span>Опубликовано</span></label>
+                <div class="editor-buttons"><button class="primary-button compact" type="submit">Сохранить</button><button class="text-button danger-text" id="deleteRuleButton" type="button">Удалить</button></div>
+              </form>
+            </div>
+          </section>
+
+          <section class="admin-tab" data-admin-panel="banners">
+            <div class="admin-section-head"><div><h2>Баннеры</h2><p>Широкие акценты на главной. Используй их редко.</p></div><button class="subtle-button" id="newBannerButton" type="button">+ Новый баннер</button></div>
+            <div class="cms-split">
+              <div class="cms-list" id="adminBannersList"></div>
+              <form class="cms-editor" id="bannerEditorForm">
+                <input type="hidden" id="bannerEditorId">
+                <label>Заголовок<input id="bannerEditorTitle" maxlength="120" required></label>
+                <label>Описание<textarea id="bannerEditorSubtitle" maxlength="280" rows="3"></textarea></label>
+                <label>Ссылка<input id="bannerEditorLink" maxlength="500" placeholder="https://… или /lore"></label>
+                <label>Изображение<input id="bannerEditorImage" type="file" accept="image/png,image/jpeg,image/webp"></label>
+                <label class="check-row"><input id="bannerEditorRemoveImage" type="checkbox"><span>Удалить текущее изображение</span></label>
+                <label class="check-row"><input id="bannerEditorActive" type="checkbox" checked><span>Показывать на главной</span></label>
+                <div class="editor-buttons"><button class="primary-button compact" type="submit">Сохранить</button><button class="text-button danger-text" id="deleteBannerButton" type="button">Удалить</button></div>
+              </form>
+            </div>
+          </section>
+
+          <section class="admin-tab" data-admin-panel="users">
+            <div class="admin-section-head"><div><h2>Пользователи</h2><p>Пока доступны две роли: user и admin.</p></div></div>
+            <div class="users-table" id="adminUsersList"></div>
+          </section>
+
+          <section class="admin-tab" data-admin-panel="settings">
+            <div class="admin-section-head"><div><h2>Настройки</h2><p>Статус сервера и публичные данные проекта.</p></div></div>
+            <form class="settings-admin-form" id="adminSettingsForm">
+              <label>Статус сервера<select id="adminServerState"><option value="offline">Офлайн</option><option value="online">Онлайн</option><option value="maintenance">Технические работы</option></select></label>
+              <label>IP сервера<input id="adminServerIp" maxlength="120"></label>
+              <label>Версия Minecraft<input id="adminMinecraftVersion" maxlength="40"></label>
+              <label>Discord разработчика<input id="adminDiscordHandle" maxlength="100"></label>
+              <label>Ссылка Discord<input id="adminDiscordUrl" maxlength="500" placeholder="https://discord.com/…"></label>
+              <button class="primary-button compact" type="submit">Сохранить настройки</button>
+            </form>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" data-page="play" aria-labelledby="playTitle">
+      <div class="content-width simple-page">
+        <div class="simple-head"><p class="kicker">ТВОЙ ПЕРВЫЙ ШАГ</p><h1 id="playTitle">Начни свою историю в DARK.</h1><p>Перед подключением проверь условия доступа и подготовь игру.</p></div>
+        <ol class="play-steps">
+          <li><h2>Прочитай правила</h2><p>Узнай, как устроена игра на сервере и какие правила действуют для участников.</p><a class="subtle-button" href="/rules" data-route="/rules">Открыть правила →</a></li>
+          <li><h2>Уточни условия подключения</h2><p>Рекомендуемая версия: <strong id="playVersion">—</strong>. Редакцию игры, необходимость модов, заявки и особенности Hardcore уточни у администрации до входа.</p><a class="subtle-button" href="/contact" data-route="/contact">Помощь и связь →</a></li>
+          <li><h2>Добавь сервер в игре</h2><p>После подтверждения условий скопируй адрес и добавь его в список серверов своей игры.</p><button class="primary-button" id="playCopyIp" type="button">Скопировать IP</button><p id="playIp" class="server-address"></p></li>
+        </ol>
+      </div>
+    </section>
+    <section class="page" data-page="notfound" aria-labelledby="notFoundTitle"><div class="content-width simple-page"><p class="kicker">404</p><h1 id="notFoundTitle">Страница не найдена</h1><p>Проверь адрес или вернись к новостям DARK.</p><a class="primary-button" href="/" data-route="/">На главную</a></div></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="content-width footer-line">
+      <div><strong>DARK Games</strong><span>Minecraft SMP</span></div>
+      <nav><a href="/rules" data-route="/rules">Правила</a><a href="/clans" data-route="/clans">Кланы</a><a href="/contact" data-route="/contact">Связь</a><a href="/account" data-route="/account">Аккаунт</a></nav>
+    </div>
+  </footer>
+
+  <dialog class="auth-dialog" id="authDialog">
+    <div class="dialog-head"><div><p>DARK ACCOUNT</p><h2 id="authDialogTitle">Вход</h2></div><button id="closeAuthDialog" type="button" aria-label="Закрыть">×</button></div>
+    <div class="auth-tabs"><button type="button" class="active" data-auth-tab="login">Войти</button><button type="button" data-auth-tab="register">Регистрация</button></div>
+    <form class="auth-form" id="loginForm">
+      <label>Логин<input name="username" autocomplete="username" maxlength="24" required></label>
+      <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary-button" type="submit">Войти</button>
+    </form>
+    <form class="auth-form" id="registerForm" hidden>
+      <label>Логин<input name="username" autocomplete="username" maxlength="24" required></label>
+      <label>Пароль<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+      <button class="primary-button" type="submit">Создать аккаунт</button>
+    </form>
+    <p class="form-message" id="authMessage"></p>
+    <div class="oauth-divider"><span>или</span></div>
+    <a class="discord-button" id="discordLoginButton" href="/auth/discord">Продолжить через Discord</a>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
