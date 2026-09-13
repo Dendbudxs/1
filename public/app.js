@@ -298,90 +298,63 @@ async function animateRouteSwitch(path, direction = 'forward') {
   const targetName = pageForPath(path);
   const target = document.querySelector(`.page[data-page="${targetName}"]`);
 
-  if (!current || !target || current === target || !routeMotionEnabled() || !current.animate || !target.animate) {
+  if (!current || !target || current === target || !routeMotionEnabled()) {
     performPageSwitch(path);
     return;
   }
 
   const appMain = $('#appMain');
-  const veil = $('#routeVeil');
-  const streak = veil?.querySelector('span');
   const sign = direction === 'back' ? -1 : 1;
-  const currentHeight = Math.max(current.offsetHeight, window.innerHeight - 90);
 
-  // Keep the document from changing height while the old/new pages cross over.
-  // This removes the visible twitch near the bottom/footer on short pages.
-  appMain.style.minHeight = `${currentHeight}px`;
+  // Animate the stable app container instead of two full pages or a fullscreen
+  // veil. The actual DOM/layout switch happens while the container is invisible,
+  // so there is no overlap, fill flash or expensive snapshot rendering.
   document.documentElement.classList.add('route-switching');
-  current.style.pointerEvents = 'none';
+  appMain.style.pointerEvents = 'none';
+  appMain.style.willChange = 'transform, opacity';
 
   try {
-    const veilAnimation = veil?.animate([
-      { opacity: 0 },
-      { opacity: .42, offset: .34 },
-      { opacity: .34, offset: .58 },
-      { opacity: 0 }
-    ], {
-      duration: 980,
-      easing: 'cubic-bezier(.22,1,.36,1)',
-      fill: 'both'
-    });
+    if (appMain.animate) {
+      const out = appMain.animate([
+        { opacity: 1, transform: 'translate3d(0,0,0)' },
+        { opacity: .7, transform: `translate3d(${sign * -4}px,0,0)`, offset: .55 },
+        { opacity: 0, transform: `translate3d(${sign * -10}px,0,0)` }
+      ], {
+        duration: 180,
+        easing: 'cubic-bezier(.4,0,.2,1)',
+        fill: 'forwards'
+      });
+      await out.finished.catch(() => {});
+      out.cancel();
+    } else {
+      appMain.style.opacity = '0';
+    }
 
-    const streakAnimation = streak?.animate([
-      { transform: `translate3d(${sign * -125}vw,0,0)`, opacity: 0 },
-      { opacity: .75, offset: .28 },
-      { opacity: .68, offset: .62 },
-      { transform: `translate3d(${sign * 125}vw,0,0)`, opacity: 0 }
-    ], {
-      duration: 980,
-      easing: 'cubic-bezier(.22,1,.36,1)',
-      fill: 'both'
-    });
-
-    const outgoing = current.animate([
-      { opacity: 1, transform: 'translate3d(0,0,0)' },
-      { opacity: .82, transform: `translate3d(0,${sign * -3}px,0)`, offset: .55 },
-      { opacity: .42, transform: `translate3d(0,${sign * -7}px,0)` }
-    ], {
-      duration: 390,
-      easing: 'cubic-bezier(.4,0,.2,1)',
-      fill: 'forwards'
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 315));
     performPageSwitch(path);
 
-    const next = document.querySelector('.page.active');
-    if (!next) return;
-    const targetHeight = Math.max(next.offsetHeight, window.innerHeight - 90);
-    appMain.style.minHeight = `${Math.max(currentHeight, targetHeight)}px`;
-    next.style.pointerEvents = 'none';
+    // Give the browser two paints to settle the new layout while invisible.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-    const incoming = next.animate([
-      { opacity: .34, transform: `translate3d(0,${sign * 10}px,0)` },
-      { opacity: .68, transform: `translate3d(0,${sign * 4}px,0)`, offset: .42 },
-      { opacity: 1, transform: 'translate3d(0,0,0)' }
-    ], {
-      duration: 720,
-      easing: 'cubic-bezier(.16,1,.3,1)',
-      fill: 'both'
-    });
-
-    await Promise.allSettled([
-      outgoing.finished,
-      incoming.finished,
-      veilAnimation?.finished || Promise.resolve(),
-      streakAnimation?.finished || Promise.resolve()
-    ]);
-
-    outgoing.cancel();
-    incoming.cancel();
-    veilAnimation?.cancel();
-    streakAnimation?.cancel();
-    next.style.pointerEvents = '';
+    if (appMain.animate) {
+      const incoming = appMain.animate([
+        { opacity: 0, transform: `translate3d(${sign * 10}px,0,0)` },
+        { opacity: .72, transform: `translate3d(${sign * 3}px,0,0)`, offset: .44 },
+        { opacity: 1, transform: 'translate3d(0,0,0)' }
+      ], {
+        duration: 360,
+        easing: 'cubic-bezier(.16,1,.3,1)',
+        fill: 'both'
+      });
+      await incoming.finished.catch(() => {});
+      incoming.cancel();
+    } else {
+      appMain.style.opacity = '';
+    }
   } finally {
-    current.style.pointerEvents = '';
-    appMain.style.minHeight = '';
+    appMain.style.pointerEvents = '';
+    appMain.style.willChange = '';
+    appMain.style.opacity = '';
+    appMain.style.transform = '';
     document.documentElement.classList.remove('route-switching');
   }
 }
@@ -1223,10 +1196,9 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     if (motionEnabled && current.animate) {
       const out = current.animate([
         { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: .74, transform: `translate3d(${direction * -4}px,0,0)`, offset: .58 },
-        { opacity: 0, transform: `translate3d(${direction * -9}px,0,0)` }
+        { opacity: 0, transform: `translate3d(${direction * -8}px,0,0)` }
       ], {
-        duration: 300,
+        duration: 150,
         easing: 'cubic-bezier(.4,0,.2,1)',
         fill: 'forwards'
       });
@@ -1235,15 +1207,14 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     }
 
     panels.forEach(panel => { panel.hidden = panel !== next; });
+    await new Promise(resolve => requestAnimationFrame(resolve));
 
     if (motionEnabled && next.animate) {
       const incoming = next.animate([
-        { opacity: 0, transform: `translate3d(${direction * 11}px,0,0)` },
-        { opacity: .34, transform: `translate3d(${direction * 7}px,0,0)`, offset: .22 },
-        { opacity: .82, transform: `translate3d(${direction * 2}px,0,0)`, offset: .66 },
+        { opacity: 0, transform: `translate3d(${direction * 8}px,0,0)` },
         { opacity: 1, transform: 'translate3d(0,0,0)' }
       ], {
-        duration: 600,
+        duration: 300,
         easing: 'cubic-bezier(.16,1,.3,1)',
         fill: 'both'
       });

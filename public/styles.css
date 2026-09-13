@@ -5545,3 +5545,95 @@ html.route-switching .site-footer {
   .route-veil { display: none !important; }
 }
 html.motion-off .route-veil { display: none !important; }
+
+/* v5.6.1 — stable tab surfaces + smoother compositor transitions ---------- */
+
+/* The old route veil briefly changed the visual fill of the whole viewport and
+   made the route change feel heavier than it was. Routes now animate only the
+   stable app container, so keep the veil completely out of the pipeline. */
+.route-veil {
+  display: none !important;
+}
+
+/* Keep all navigation pills on the same acrylic surface in every state.
+   Active state is communicated with text/border/marker only — there is no
+   transparent -> filled switch anymore. */
+.desktop-nav a,
+.desktop-nav a:hover,
+.desktop-nav a.active,
+.desktop-nav a:nth-child(1).active,
+.desktop-nav a:nth-child(2).active,
+.desktop-nav a:nth-child(3).active,
+.desktop-nav a:nth-child(4).active {
+  background: rgba(18, 18, 36, .48) !important;
+  border-color: rgba(196, 186, 255, .11) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+}
+.desktop-nav a:hover {
+  color: #ffffff;
+  border-color: rgba(196,186,255,.17) !important;
+}
+.desktop-nav a.active,
+.desktop-nav a:nth-child(1).active,
+.desktop-nav a:nth-child(2).active,
+.desktop-nav a:nth-child(3).active,
+.desktop-nav a:nth-child(4).active {
+  color: #ffffff;
+  border-color: rgba(216,209,255,.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 0 14px rgba(143,109,255,.045) !important;
+}
+
+[data-page="home"] .home-stage-nav button,
+[data-page="home"] .home-stage-nav button:hover,
+[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"],
+[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"],
+[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
+  background: rgba(24, 22, 46, .52) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.022) !important;
+  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+}
+[data-page="home"] .home-stage-nav button {
+  color: #a8a4b5;
+  border-color: rgba(196,186,255,.08);
+}
+[data-page="home"] .home-stage-nav button:hover {
+  color: #f7f5ff;
+  border-color: rgba(196,186,255,.15);
+  transform: none !important;
+}
+[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"],
+[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"],
+[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
+  color: #ffffff;
+  border-color: rgba(216,209,255,.22);
+}
+
+/* Route motion only touches compositor-friendly properties. No background,
+   blur, shadow or backdrop-filter is animated during the actual switch. */
+.app-main {
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
+html.route-switching .app-main {
+  will-change: transform, opacity;
+  contain: layout paint style;
+}
+html.route-switching .site-footer {
+  pointer-events: none;
+}
+.home-stage {
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-nav a,
+  [data-page="home"] .home-stage-nav button {
+    transition: none !important;
+  }
+}
+html.motion-off .desktop-nav a,
+html.motion-off [data-page="home"] .home-stage-nav button {
+  transition: none !important;
+}
