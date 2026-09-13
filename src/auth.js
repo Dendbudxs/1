@@ -11,7 +11,7 @@ function getSecret() {
 
 function signUser(user) {
   return jwt.sign(
-    { sub: String(user.id) },
+    { sub: String(user.id), sv: getUserById(user.id).session_version },
     getSecret(),
     { expiresIn: '7d', issuer: 'dark-games' }
   );
@@ -43,7 +43,7 @@ function clearAuthCookie(res) {
 
 function getUserById(id) {
   return db.prepare(`
-    SELECT id, username, role, local_login_enabled, created_at
+    SELECT id, username, role, local_login_enabled, session_version, created_at
     FROM users
     WHERE id = ?
   `).get(id);
@@ -55,7 +55,7 @@ function authOptional(req, _res, next) {
   try {
     const payload = jwt.verify(token, getSecret(), { issuer: 'dark-games' });
     const user = getUserById(Number(payload.sub));
-    if (user) {
+    if (user && payload.sv === user.session_version) {
       req.auth = payload;
       req.user = user;
     }

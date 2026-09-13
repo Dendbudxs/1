@@ -134,6 +134,7 @@ db.exec(`
 `);
 
 // Migrations from earlier DARK versions.
+ensureColumn('users', 'session_version', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'local_login_enabled', 'INTEGER NOT NULL DEFAULT 1');
 ensureColumn('profiles', 'theme_preset', "TEXT NOT NULL DEFAULT 'graphite'");
 ensureColumn('profiles', 'accent_color', "TEXT NOT NULL DEFAULT '#7b98a3'");

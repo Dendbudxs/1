@@ -22,13 +22,14 @@
       <nav class="desktop-nav" aria-label="Основная навигация">
         <a href="/" data-route="/">Главная</a>
         <a href="/lore" data-route="/lore">Лор</a>
+        <a href="/rules" data-route="/rules">Правила</a>
         <a href="/contact" data-route="/contact">Связь</a>
       </nav>
 
       <div class="header-actions">
         <button class="server-mini" id="headerServerStatus" type="button" data-route-target="/">
           <span class="status-dot" aria-hidden="true"></span>
-          <span id="headerStatusText">Офлайн</span>
+          <span id="headerStatusText">Проверяем…</span>
         </button>
         <button class="account-chip" id="accountButton" type="button" aria-label="Аккаунт">
           <span class="avatar avatar-small" id="headerAvatar"><span>D</span></span>
@@ -69,10 +70,11 @@
           <p class="kicker">DARK GAMES · MINECRAFT SMP</p>
           <h1 id="homeTitle">Добро пожаловать в DARK.</h1>
           <p class="intro-text">Мир, который создают сами игроки. История сервера, важные события и новости проекта собраны в одном месте.</p>
+          <div class="hero-actions"><a class="primary-button" href="/play" data-route="/play">Как начать играть →</a><a class="subtle-button" href="/lore" data-route="/lore">Открыть книгу мира</a></div>
           <div class="intro-meta">
             <button class="status-line" id="heroStatus" type="button">
               <span class="status-dot"></span>
-              <span id="heroStatusText">Сервер офлайн</span>
+              <span id="heroStatusText">Проверяем статус…</span>
             </button>
             <span class="meta-divider"></span>
             <button class="copy-ip" id="copyIpButton" type="button">
@@ -88,6 +90,7 @@
         </div>
       </div>
 
+      <p class="content-width status-source">Статус обновляет администрация; это не автоматическая проверка сервера.</p>
       <div class="content-width banner-strip" id="bannerStrip" hidden></div>
 
       <div class="content-width section-heading">
@@ -120,6 +123,7 @@
         <p id="loreBookSubtitle">История, регионы, города, персонажи и механики DARK.</p>
       </div>
 
+      <div class="content-width lore-search"><label for="loreSearch">Поиск по книге мира</label><input id="loreSearch" type="search" placeholder="Название главы или слово из текста…" maxlength="120"></div>
       <div class="content-width lore-categories" id="loreCategories" role="tablist" aria-label="Разделы лора">
         <button type="button" data-lore-category="all" class="active">Все главы</button>
         <button type="button" data-lore-category="history">История</button>
@@ -148,8 +152,8 @@
       <div class="content-width simple-page">
         <div class="simple-head">
           <p class="kicker">КОНТАКТ</p>
-          <h1 id="contactTitle">Связь с разработчиком</h1>
-          <p>Вопросы по сайту, ошибки, предложения и технические замечания можно отправить напрямую разработчику проекта.</p>
+          <h1 id="contactTitle">Помощь и связь</h1>
+          <p>Вопросы о подключении и правилах адресуй администрации сервера. Если заметил ошибку сайта, укажи страницу, что произошло и что ты ожидал увидеть — и отправь разработчику через контакт ниже.</p>
         </div>
         <div class="contact-line">
           <div>
@@ -184,12 +188,12 @@
         <div class="simple-head">
           <p class="kicker">DARK / CLANS</p>
           <h1 id="clansTitle">Кланы</h1>
-          <p>Раздел подготовлен под кланы игроков. Пока это информационная страница без рейтингов, заявок и автоматического управления составом.</p>
+          <p>Объединения игроков и их истории в мире DARK.</p>
         </div>
         <div class="placeholder-section">
           <span>CLAN ARCHIVE</span>
           <strong>Кланы появятся позже.</strong>
-          <p>Когда структура кланов будет определена, здесь можно разместить список объединений, их историю, лидеров и связи с миром DARK — без перегруженной сетки карточек.</p>
+          <p>Раздел готовится. Новости о кланах появятся в журнале проекта.</p>
         </div>
       </div>
     </section>
@@ -212,6 +216,7 @@
             <h1 id="profileDisplayName">Игрок</h1>
             <p><span id="profileUsername">username</span> · <span id="profileRole">user</span></p>
           </div>
+          <button class="logout-link" id="logoutAllButton" type="button">Выйти на всех устройствах</button>
           <button class="logout-link" id="logoutButton" type="button">Выйти</button>
         </div>
 
@@ -271,11 +276,11 @@
               <div class="setting-caption"><span>Акцентный цвет</span><small>Ссылки, активные вкладки и детали.</small></div>
               <div class="accent-picker">
                 <input type="color" id="accentColorInput" name="accentColor" value="#7b98a3" aria-label="Выбрать акцентный цвет">
-                <button type="button" class="accent-swatch" data-accent="#7b98a3" style="--swatch:#7b98a3" aria-label="Серо-синий"></button>
-                <button type="button" class="accent-swatch" data-accent="#7087b5" style="--swatch:#7087b5" aria-label="Синий"></button>
-                <button type="button" class="accent-swatch" data-accent="#8b8fa8" style="--swatch:#8b8fa8" aria-label="Лавандовый"></button>
-                <button type="button" class="accent-swatch" data-accent="#8e9b78" style="--swatch:#8e9b78" aria-label="Оливковый"></button>
-                <button type="button" class="accent-swatch" data-accent="#a18477" style="--swatch:#a18477" aria-label="Тёплый"></button>
+                <button type="button" class="accent-swatch" data-accent="#7b98a3" aria-label="Серо-синий"></button>
+                <button type="button" class="accent-swatch" data-accent="#7087b5" aria-label="Синий"></button>
+                <button type="button" class="accent-swatch" data-accent="#8b8fa8" aria-label="Лавандовый"></button>
+                <button type="button" class="accent-swatch" data-accent="#8e9b78" aria-label="Оливковый"></button>
+                <button type="button" class="accent-swatch" data-accent="#a18477" aria-label="Тёплый"></button>
               </div>
             </div>
 
@@ -470,6 +475,18 @@
         </div>
       </div>
     </section>
+
+    <section class="page" data-page="play" aria-labelledby="playTitle">
+      <div class="content-width simple-page">
+        <div class="simple-head"><p class="kicker">ТВОЙ ПЕРВЫЙ ШАГ</p><h1 id="playTitle">Начни свою историю в DARK.</h1><p>Перед подключением проверь условия доступа и подготовь игру.</p></div>
+        <ol class="play-steps">
+          <li><h2>Прочитай правила</h2><p>Узнай, как устроена игра на сервере и какие правила действуют для участников.</p><a class="subtle-button" href="/rules" data-route="/rules">Открыть правила →</a></li>
+          <li><h2>Уточни условия подключения</h2><p>Рекомендуемая версия: <strong id="playVersion">—</strong>. Редакцию игры, необходимость модов, заявки и особенности Hardcore уточни у администрации до входа.</p><a class="subtle-button" href="/contact" data-route="/contact">Помощь и связь →</a></li>
+          <li><h2>Добавь сервер в игре</h2><p>После подтверждения условий скопируй адрес и добавь его в список серверов своей игры.</p><button class="primary-button" id="playCopyIp" type="button">Скопировать IP</button><p id="playIp" class="server-address"></p></li>
+        </ol>
+      </div>
+    </section>
+    <section class="page" data-page="notfound" aria-labelledby="notFoundTitle"><div class="content-width simple-page"><p class="kicker">404</p><h1 id="notFoundTitle">Страница не найдена</h1><p>Проверь адрес или вернись к новостям DARK.</p><a class="primary-button" href="/" data-route="/">На главную</a></div></section>
   </main>
 
   <footer class="site-footer">

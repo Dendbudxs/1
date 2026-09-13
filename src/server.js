@@ -122,7 +122,7 @@ function colorValue(value, fallback = '#7b98a3') {
 function safeLink(value) {
   const link = cleanText(value, 500);
   if (!link) return '';
-  if (link.startsWith('/')) return link;
+  if (link.startsWith('/') && !link.startsWith('//') && !link.includes('\\')) return link;
   try {
     const url = new URL(link);
     if (!['http:', 'https:'].includes(url.protocol)) return '';
@@ -258,7 +258,7 @@ app.get('/api/config', (_req, res) => {
 });
 
 app.get('/api/server/status', (_req, res) => {
-  res.json({ state: getSetting('server_state', 'offline') });
+  res.json({ state: getSetting('server_state', 'offline'), source: 'manual' });
 });
 
 app.get('/api/content/home', (_req, res) => {
@@ -355,6 +355,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 });
 
 app.post('/api/auth/logout', (_req, res) => {
+  clearAuthCookie(res);
+  res.json({ ok: true });
+});
+
+app.post('/api/auth/logout-all', requireAuth, (req, res) => {
+  db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(req.user.id);
   clearAuthCookie(res);
   res.json({ ok: true });
 });
@@ -507,10 +513,10 @@ app.patch('/api/profile/personalization', requireAuth, (req, res) => {
   res.json({ user: publicUser(userRow(req.user.id)) });
 });
 
-app.post('/api/profile/avatar', requireAuth, (req, res) => {
+app.post('/api/profile/avatar', requireAuth, rateLimit({ windowMs: 60000, limit: 10, message: { error: 'TOO_MANY_ATTEMPTS' } }), async (req, res) => {
   try {
     const current = db.prepare('SELECT avatar_url FROM profiles WHERE user_id = ?').get(req.user.id);
-    const newUrl = saveDataImage(req.body?.imageData, `avatar-${req.user.id}`, 2 * 1024 * 1024);
+    const newUrl = await saveDataImage(req.body?.imageData, `avatar-${req.user.id}`, 2 * 1024 * 1024);
     db.prepare(`
       INSERT INTO profiles (user_id, display_name, avatar_url, updated_at)
       VALUES (?, ?, ?, datetime('now'))
@@ -547,7 +553,8 @@ app.post('/api/profile/password', requireAuth, authLimiter, async (req, res) => 
   }
 
   const hash = await bcrypt.hash(newPassword, 12);
-  db.prepare('UPDATE users SET password_hash = ?, local_login_enabled = 1 WHERE id = ?').run(hash, user.id);
+  db.prepare('UPDATE users SET password_hash = ?, local_login_enabled = 1, session_version = session_version + 1 WHERE id = ?').run(hash, user.id);
+  setAuthCookie(res, signUser(user));
   res.json({ user: publicUser(userRow(user.id)) });
 });
 
@@ -580,7 +587,7 @@ app.get('/api/admin/news', requireAdmin, (_req, res) => {
   res.json({ news: db.prepare('SELECT * FROM news ORDER BY datetime(updated_at) DESC, id DESC').all() });
 });
 
-app.post('/api/admin/news', requireAdmin, (req, res) => {
+app.post('/api/admin/news', requireAdmin, async (req, res) => {
   try {
     const title = cleanText(req.body?.title, 140);
     const excerpt = cleanText(req.body?.excerpt, 320);
@@ -588,7 +595,7 @@ app.post('/api/admin/news', requireAdmin, (req, res) => {
     const status = req.body?.status === 'published' ? 'published' : 'draft';
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
     let imageUrl = null;
-    if (req.body?.imageData) imageUrl = saveDataImage(req.body.imageData, 'news', 4 * 1024 * 1024);
+    if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, 'news', 4 * 1024 * 1024);
     const info = db.prepare(`
       INSERT INTO news (title, excerpt, body, image_url, status, published_at, updated_by)
       VALUES (?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN datetime('now') ELSE NULL END, ?)
@@ -599,7 +606,7 @@ app.post('/api/admin/news', requireAdmin, (req, res) => {
   }
 });
 
-app.put('/api/admin/news/:id', requireAdmin, (req, res) => {
+app.put('/api/admin/news/:id', requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
   const current = db.prepare('SELECT * FROM news WHERE id = ?').get(id);
   if (!current) return res.status(404).json({ error: 'NEWS_NOT_FOUND' });
@@ -611,7 +618,7 @@ app.put('/api/admin/news/:id', requireAdmin, (req, res) => {
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
     let imageUrl = current.image_url;
     if (req.body?.removeImage) imageUrl = null;
-    if (req.body?.imageData) imageUrl = saveDataImage(req.body.imageData, `news-${id}`, 4 * 1024 * 1024);
+    if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, `news-${id}`, 4 * 1024 * 1024);
     db.prepare(`
       UPDATE news SET
         title = ?, excerpt = ?, body = ?, image_url = ?, status = ?,
@@ -757,14 +764,14 @@ app.get('/api/admin/banners', requireAdmin, (_req, res) => {
   res.json({ banners: db.prepare('SELECT * FROM banners ORDER BY sort_order ASC, id ASC').all() });
 });
 
-app.post('/api/admin/banners', requireAdmin, (req, res) => {
+app.post('/api/admin/banners', requireAdmin, async (req, res) => {
   try {
     const title = cleanText(req.body?.title, 120);
     const subtitle = cleanText(req.body?.subtitle, 280);
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
     const linkUrl = safeLink(req.body?.linkUrl);
     let imageUrl = null;
-    if (req.body?.imageData) imageUrl = saveDataImage(req.body.imageData, 'banner', 4 * 1024 * 1024);
+    if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, 'banner', 4 * 1024 * 1024);
     const max = db.prepare('SELECT COALESCE(MAX(sort_order), 0) AS value FROM banners').get().value;
     const info = db.prepare(`
       INSERT INTO banners (title, subtitle, image_url, link_url, active, sort_order, updated_by)
@@ -776,7 +783,7 @@ app.post('/api/admin/banners', requireAdmin, (req, res) => {
   }
 });
 
-app.put('/api/admin/banners/:id', requireAdmin, (req, res) => {
+app.put('/api/admin/banners/:id', requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
   const current = db.prepare('SELECT * FROM banners WHERE id = ?').get(id);
   if (!current) return res.status(404).json({ error: 'BANNER_NOT_FOUND' });
@@ -786,7 +793,7 @@ app.put('/api/admin/banners/:id', requireAdmin, (req, res) => {
     if (!title) return res.status(400).json({ error: 'TITLE_INVALID' });
     let imageUrl = current.image_url;
     if (req.body?.removeImage) imageUrl = null;
-    if (req.body?.imageData) imageUrl = saveDataImage(req.body.imageData, `banner-${id}`, 4 * 1024 * 1024);
+    if (req.body?.imageData) imageUrl = await saveDataImage(req.body.imageData, `banner-${id}`, 4 * 1024 * 1024);
     const linkUrl = safeLink(req.body?.linkUrl);
     db.prepare(`
       UPDATE banners SET title = ?, subtitle = ?, image_url = ?, link_url = ?, active = ?, updated_at = datetime('now'), updated_by = ?
@@ -869,7 +876,11 @@ app.use(express.static(publicDir, {
   extensions: ['html']
 }));
 
-app.get('*', (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+app.use('/api', (_req, res) => res.status(404).json({ error: 'NOT_FOUND' }));
+app.get('*', (req, res) => {
+  const known = /^\/(?:lore|contact|rules|clans|account|admin|play)?\/?$/.test(req.path) || /^\/news\/\d+\/?$/.test(req.path);
+  res.status(known ? 200 : 404).sendFile(path.join(publicDir, 'index.html'));
+});
 
 app.use((err, _req, res, _next) => {
   console.error(err);
@@ -878,7 +889,7 @@ app.use((err, _req, res, _next) => {
 
 ensureBootstrapAdmin().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`DARK Games v5.3.1 running on http://0.0.0.0:${PORT}`);
+    console.log(`DARK Games v5.4.0 running on http://0.0.0.0:${PORT}`);
     if (!isDiscordConfigured()) console.log('Discord OAuth is disabled until DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are set.');
   });
 }).catch((error) => {

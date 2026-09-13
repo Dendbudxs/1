@@ -1,7 +1,7 @@
 const state = {
   user: null,
   config: null,
-  serverState: 'offline',
+  serverState: 'loading',
   home: { news: [], banners: [] },
   lore: { book: null, chapters: [] },
   loreCategory: 'all',
@@ -128,6 +128,7 @@ function toast(message) {
 async function api(url, options = {}) {
   const init = {
     credentials: 'same-origin',
+    signal: AbortSignal.timeout(15000),
     ...options,
     headers: { ...(options.headers || {}) }
   };
@@ -191,8 +192,10 @@ function applyMotionPreference() {
 }
 
 function setServerState(serverState) {
-  state.serverState = serverState || 'offline';
+  state.serverState = serverState || 'unknown';
   const labels = {
+    loading: ['Проверяем…', 'Проверяем статус…'],
+    unknown: ['Нет данных', 'Статус недоступен'],
     online: ['Онлайн', 'Сервер онлайн'],
     maintenance: ['Работы', 'Технические работы'],
     offline: ['Офлайн', 'Сервер офлайн']
@@ -201,7 +204,7 @@ function setServerState(serverState) {
   $('#headerStatusText').textContent = pair[0];
   $('#heroStatusText').textContent = pair[1];
   $$('.status-dot').forEach((dot) => {
-    dot.classList.remove('online', 'offline', 'maintenance');
+    dot.classList.remove('online', 'offline', 'maintenance', 'loading', 'unknown');
     dot.classList.add(state.serverState);
   });
   if ($('#metricServerState')) $('#metricServerState').textContent = pair[1];
@@ -229,7 +232,8 @@ function pageForPath(path) {
   if (path === '/clans') return 'clans';
   if (path === '/account') return 'account';
   if (path === '/admin') return 'admin';
-  return 'home';
+  if (path === '/play') return 'play';
+  return path === '/' ? 'home' : 'notfound';
 }
 
 function updateActiveNav(path) {
@@ -244,6 +248,8 @@ function performPageSwitch(path) {
   $$('.page').forEach((section) => section.classList.toggle('active', section.dataset.page === page));
   document.body.classList.toggle('admin-mode', page === 'admin');
   updateActiveNav(path);
+  const heading = document.querySelector('.page.active h1');
+  document.title = `${heading?.textContent || 'DARK'} · DARK Games`;
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
@@ -271,7 +277,9 @@ async function ensureRouteData(path) {
 }
 
 async function navigate(rawPath, { replace = false } = {}) {
-  const path = normalizePath(rawPath);
+  const destination = new URL(rawPath, location.origin);
+  const path = normalizePath(destination.pathname);
+  if (path === '/lore') selectLoreFromHash(destination.hash);
   const allowed = await ensureRouteData(path);
   if (allowed === false) return;
 
@@ -281,7 +289,8 @@ async function navigate(rawPath, { replace = false } = {}) {
   else switchPage();
 
   const current = normalizePath(location.pathname);
-  if (path !== current || replace) history[replace ? 'replaceState' : 'pushState']({}, '', path);
+  const fullPath = path + destination.search + destination.hash;
+  if (fullPath !== location.pathname + location.search + location.hash || replace) history[replace ? 'replaceState' : 'pushState']({}, '', fullPath);
   closeMobileMenu();
 }
 
@@ -338,7 +347,9 @@ function renderDiscordAvailability() {
 
 function renderHome() {
   $('#serverIpText').textContent = state.config?.serverIp || 'darkgamespro.falix.pro';
-  $('#versionText').textContent = state.config?.minecraftVersion || '1.21.1';
+  $('#versionText').textContent = state.config?.minecraftVersion || '—';
+  $('#playVersion').textContent = state.config?.minecraftVersion || '—';
+  $('#playIp').textContent = state.config?.serverIp || 'Адрес временно недоступен';
 
   const bannerStrip = $('#bannerStrip');
   bannerStrip.replaceChildren();
@@ -348,7 +359,8 @@ function renderHome() {
     if (banner.image_url) {
       const image = node('img');
       image.src = banner.image_url;
-      image.alt = '';
+      image.alt = banner.title || 'Мир DARK';
+      image.loading = 'lazy';
       item.append(image);
     }
     const copy = node('div', 'banner-copy');
@@ -419,10 +431,20 @@ const loreCategoryNames = {
   history: 'История', regions: 'Регионы', cities: 'Города', characters: 'Персонажи', mechanics: 'Механики'
 };
 
+function selectLoreFromHash(hash = location.hash) {
+  const match = /^#chapter-(\d+)$/.exec(hash);
+  if (!match) return;
+  state.loreSelectedId = Number(match[1]);
+  state.loreCategory = 'all';
+  $('#loreSearch').value = '';
+  renderLore();
+}
+
 function filteredLoreChapters() {
-  const chapters = state.lore.chapters || [];
-  if (state.loreCategory === 'all') return chapters;
-  return chapters.filter((chapter) => chapter.category === state.loreCategory);
+  const query = $('#loreSearch').value.trim().toLocaleLowerCase('ru');
+  return (state.lore.chapters || []).filter((chapter) =>
+    (state.loreCategory === 'all' || chapter.category === state.loreCategory) &&
+    (!query || `${chapter.title} ${chapter.body}`.toLocaleLowerCase('ru').includes(query)));
 }
 
 function renderLore() {
@@ -435,7 +457,7 @@ function renderLore() {
   const toc = $('#loreToc');
   toc.replaceChildren();
   if (!chapters.length) {
-    toc.append(node('div', 'empty-line', 'В этом разделе пока нет глав.'));
+    toc.append(node('div', 'empty-line', $('#loreSearch').value ? 'Ничего не найдено. Попробуй другое слово.' : 'В этом разделе пока нет глав.'));
   } else {
     chapters.forEach((chapter, index) => {
       const button = node('button', 'toc-item');
@@ -445,6 +467,7 @@ function renderLore() {
       button.append(document.createTextNode(chapter.title));
       button.addEventListener('click', () => {
         state.loreSelectedId = chapter.id;
+        history.pushState({}, '', `/lore#chapter-${chapter.id}`);
         renderLore();
         $('.lore-toc').classList.remove('open');
       });
@@ -458,8 +481,8 @@ function renderLore() {
   if (!selected) {
     const empty = node('div', 'book-empty');
     empty.append(node('span', '', 'ARCHIVE'));
-    empty.append(node('h2', '', 'Книга пока закрыта.'));
-    empty.append(node('p', '', 'Когда администратор опубликует первую главу, она появится здесь.'));
+    empty.append(node('h2', '', $('#loreSearch').value ? 'Главы не найдены' : 'Книга пока закрыта.'));
+    empty.append(node('p', '', $('#loreSearch').value ? 'Измени запрос или выбери другую категорию.' : 'Новые истории появятся здесь после публикации.'));
     reader.append(empty);
     $('#chapterMobileSelect').firstChild.textContent = 'Выбрать главу ';
     return;
@@ -467,6 +490,14 @@ function renderLore() {
   const allIndex = (state.lore.chapters || []).findIndex((chapter) => chapter.id === selected.id) + 1;
   reader.append(node('div', 'book-chapter-number', `Глава ${String(allIndex).padStart(2, '0')} · ${loreCategoryNames[selected.category] || 'Архив'}`));
   reader.append(node('h2', '', selected.title));
+  const share = node('button', 'subtle-button chapter-share', 'Скопировать ссылку на главу');
+  share.type = 'button';
+  share.addEventListener('click', async () => {
+    const url = `${location.origin}/lore#chapter-${selected.id}`;
+    try { await navigator.clipboard.writeText(url); toast('Ссылка скопирована'); }
+    catch { window.prompt('Ссылка на главу', url); }
+  });
+  reader.append(share);
   reader.append(node('div', 'book-prose', selected.body || 'Текст этой главы ещё не написан.'));
   $('#chapterMobileSelect').firstChild.textContent = `${selected.title} `;
 }
@@ -577,26 +608,36 @@ async function refreshMe() {
   renderAccount();
 }
 
+const publicSections = {
+  config: { url: '/api/config', target: '.home-intro', apply(data) { state.config = data; renderHome(); renderDiscordAvailability(); } },
+  status: { url: '/api/server/status', target: '.status-source', apply(data) { setServerState(data.state); } },
+  home: { url: '/api/content/home', target: '#newsList', apply(data) { state.home = data; renderHome(); } },
+  lore: { url: '/api/content/lore', target: '.lore-header', apply(data) { state.lore = data; renderLore(); selectLoreFromHash(); } },
+  rules: { url: '/api/content/rules', target: '#rulesList', apply(data) { state.rules = data.rules || []; renderRules(); } },
+  contact: { url: '/api/contact', target: '[data-page="contact"] .simple-head', apply(data) { state.contact = data; renderContact(); } }
+};
+async function loadPublicSection(key) {
+  const section = publicSections[key];
+  document.getElementById(`load-error-${key}`)?.remove();
+  try {
+    section.apply(await api(section.url));
+  } catch {
+    if (key === 'status') setServerState('unknown');
+    if (key === 'home' && !state.home.news.length) $('#newsList').replaceChildren();
+    if (key === 'rules' && !state.rules.length) $('#rulesList').replaceChildren();
+    const box = node('div', 'load-error');
+    box.id = `load-error-${key}`;
+    box.setAttribute('role', 'status');
+    box.append(node('span', '', 'Не удалось загрузить данные этого раздела.'));
+    const retry = node('button', 'subtle-button', 'Повторить');
+    retry.type = 'button';
+    retry.addEventListener('click', () => loadPublicSection(key));
+    box.append(retry);
+    $(section.target).after(box);
+  }
+}
 async function refreshPublic() {
-  const [config, server, home, lore, rules, contact] = await Promise.all([
-    api('/api/config'),
-    api('/api/server/status'),
-    api('/api/content/home'),
-    api('/api/content/lore'),
-    api('/api/content/rules'),
-    api('/api/contact')
-  ]);
-  state.config = config;
-  state.home = home;
-  state.lore = lore;
-  state.rules = rules.rules || [];
-  state.contact = contact;
-  setServerState(server.state);
-  renderHome();
-  renderLore();
-  renderRules();
-  renderContact();
-  renderDiscordAvailability();
+  await Promise.allSettled(Object.keys(publicSections).map(loadPublicSection));
 }
 
 async function fileToDataUrl(file, maxBytes = 4 * 1024 * 1024) {
@@ -892,6 +933,22 @@ async function refreshContactPublic() {
 }
 
 // Event wiring ---------------------------------------------------------------
+$('#loreSearch').addEventListener('input', renderLore);
+window.addEventListener('hashchange', () => { if (location.pathname === '/lore') selectLoreFromHash(); });
+$('#playCopyIp').addEventListener('click', async () => {
+  if (!state.config?.serverIp) return toast('Адрес не загрузился. Обнови страницу.');
+  try { await navigator.clipboard.writeText(state.config.serverIp); toast('IP скопирован'); }
+  catch { window.prompt('Адрес сервера', state.config.serverIp); }
+});
+$('#logoutAllButton').addEventListener('click', async () => {
+  if (!window.confirm('Выйти из аккаунта на всех устройствах, включая это?')) return;
+  try {
+    await api('/api/auth/logout-all', { method: 'POST' });
+    state.user = null;
+    renderHeaderUser(); renderAccount();
+    toast('Все сессии завершены');
+  } catch (error) { toast(humanError(error.message)); }
+});
 document.addEventListener('click', (event) => {
   const routeLink = event.target.closest('[data-route]');
   if (routeLink) {
@@ -907,6 +964,7 @@ document.addEventListener('click', (event) => {
 });
 
 window.addEventListener('popstate', async () => {
+  if (location.pathname === '/lore') selectLoreFromHash();
   const path = normalizePath(location.pathname);
   const allowed = await ensureRouteData(path);
   if (allowed !== false) performPageSwitch(path);

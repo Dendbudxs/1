@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const sharp = require('sharp');
 const { uploadsDir, migrateLegacyUploads } = require('./storage');
 
 const migratedUploads = migrateLegacyUploads();
@@ -14,7 +15,7 @@ const MIME_EXT = {
   'image/webp': 'webp'
 };
 
-function saveDataImage(dataUrl, prefix = 'image', maxBytes = 4 * 1024 * 1024) {
+async function saveDataImage(dataUrl, prefix = 'image', maxBytes = 4 * 1024 * 1024) {
   if (!dataUrl) return null;
   if (typeof dataUrl !== 'string') throw new Error('IMAGE_INVALID');
 
@@ -25,11 +26,19 @@ function saveDataImage(dataUrl, prefix = 'image', maxBytes = 4 * 1024 * 1024) {
   const buffer = Buffer.from(match[2], 'base64');
   if (!buffer.length || buffer.length > maxBytes) throw new Error('IMAGE_SIZE_INVALID');
 
-  const ext = MIME_EXT[mime];
+  let encoded;
+  try {
+    const image = sharp(buffer, { limitInputPixels: 16000000, failOn: 'warning' });
+    const metadata = await image.metadata();
+    if (!['png', 'jpeg', 'webp'].includes(metadata.format) || (metadata.pages || 1) > 1) throw new Error('Unsupported image');
+    encoded = await image.rotate().resize({ width: 2560, height: 2560, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+    if (encoded.length > maxBytes) throw new Error('Image too large');
+  } catch { throw new Error('IMAGE_INVALID'); }
+  const ext = 'webp';
   const safePrefix = String(prefix).replace(/[^a-z0-9_-]/gi, '').slice(0, 24) || 'image';
   const filename = `${safePrefix}-${crypto.randomUUID()}.${ext}`;
   const target = path.join(uploadsDir, filename);
-  fs.writeFileSync(target, buffer, { flag: 'wx' });
+  await fs.promises.writeFile(target, encoded, { flag: 'wx' });
   return `/uploads/${filename}`;
 }
 
