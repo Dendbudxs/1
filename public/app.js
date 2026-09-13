@@ -285,7 +285,7 @@ function performPageSwitch(path) {
   updateActiveNav(path);
   const heading = document.querySelector('.page.active h1');
   document.title = `${heading?.textContent || 'DARK'} · DARK Games`;
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 function routeMotionEnabled() {
@@ -293,16 +293,97 @@ function routeMotionEnabled() {
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-const ROUTE_OUT_DURATION = 170;
-const ROUTE_IN_DURATION = 390;
-const ROUTE_SLIDE_EASING_OUT = 'cubic-bezier(.4,0,.8,.2)';
-const ROUTE_SLIDE_EASING_IN = 'cubic-bezier(.16,1,.3,1)';
-let routeTransitionId = 0;
-
 async function animateRouteSwitch(path, direction = 'forward') {
-  // v5.6.4: route switching is intentionally instant. We no longer animate
-  // opacity/transform or stack route pages while navigating.
-  performPageSwitch(path);
+  const current = document.querySelector('.page.active');
+  const targetName = pageForPath(path);
+  const target = document.querySelector(`.page[data-page="${targetName}"]`);
+
+  if (!current || !target || current === target || !routeMotionEnabled() || !current.animate || !target.animate) {
+    performPageSwitch(path);
+    return;
+  }
+
+  const appMain = $('#appMain');
+  const veil = $('#routeVeil');
+  const streak = veil?.querySelector('span');
+  const sign = direction === 'back' ? -1 : 1;
+  const currentHeight = Math.max(current.offsetHeight, window.innerHeight - 90);
+
+  // Keep the document from changing height while the old/new pages cross over.
+  // This removes the visible twitch near the bottom/footer on short pages.
+  appMain.style.minHeight = `${currentHeight}px`;
+  document.documentElement.classList.add('route-switching');
+  current.style.pointerEvents = 'none';
+
+  try {
+    const veilAnimation = veil?.animate([
+      { opacity: 0 },
+      { opacity: .42, offset: .34 },
+      { opacity: .34, offset: .58 },
+      { opacity: 0 }
+    ], {
+      duration: 980,
+      easing: 'cubic-bezier(.22,1,.36,1)',
+      fill: 'both'
+    });
+
+    const streakAnimation = streak?.animate([
+      { transform: `translate3d(${sign * -125}vw,0,0)`, opacity: 0 },
+      { opacity: .75, offset: .28 },
+      { opacity: .68, offset: .62 },
+      { transform: `translate3d(${sign * 125}vw,0,0)`, opacity: 0 }
+    ], {
+      duration: 980,
+      easing: 'cubic-bezier(.22,1,.36,1)',
+      fill: 'both'
+    });
+
+    const outgoing = current.animate([
+      { opacity: 1, transform: 'translate3d(0,0,0)' },
+      { opacity: .82, transform: `translate3d(0,${sign * -3}px,0)`, offset: .55 },
+      { opacity: .42, transform: `translate3d(0,${sign * -7}px,0)` }
+    ], {
+      duration: 390,
+      easing: 'cubic-bezier(.4,0,.2,1)',
+      fill: 'forwards'
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 315));
+    performPageSwitch(path);
+
+    const next = document.querySelector('.page.active');
+    if (!next) return;
+    const targetHeight = Math.max(next.offsetHeight, window.innerHeight - 90);
+    appMain.style.minHeight = `${Math.max(currentHeight, targetHeight)}px`;
+    next.style.pointerEvents = 'none';
+
+    const incoming = next.animate([
+      { opacity: .34, transform: `translate3d(0,${sign * 10}px,0)` },
+      { opacity: .68, transform: `translate3d(0,${sign * 4}px,0)`, offset: .42 },
+      { opacity: 1, transform: 'translate3d(0,0,0)' }
+    ], {
+      duration: 720,
+      easing: 'cubic-bezier(.16,1,.3,1)',
+      fill: 'both'
+    });
+
+    await Promise.allSettled([
+      outgoing.finished,
+      incoming.finished,
+      veilAnimation?.finished || Promise.resolve(),
+      streakAnimation?.finished || Promise.resolve()
+    ]);
+
+    outgoing.cancel();
+    incoming.cancel();
+    veilAnimation?.cancel();
+    streakAnimation?.cancel();
+    next.style.pointerEvents = '';
+  } finally {
+    current.style.pointerEvents = '';
+    appMain.style.minHeight = '';
+    document.documentElement.classList.remove('route-switching');
+  }
 }
 
 async function ensureRouteData(path) {
@@ -375,22 +456,11 @@ function closeAuth() {
 }
 
 function selectAuthTab(tab) {
-  const login = $('#loginForm');
-  const register = $('#registerForm');
-  const next = tab === 'login' ? login : register;
-  const previous = !login.hidden ? login : (!register.hidden ? register : null);
   $$('[data-auth-tab]').forEach((button) => button.classList.toggle('active', button.dataset.authTab === tab));
-  login.hidden = tab !== 'login';
-  register.hidden = tab !== 'register';
+  $('#loginForm').hidden = tab !== 'login';
+  $('#registerForm').hidden = tab !== 'register';
   $('#authDialogTitle').textContent = tab === 'login' ? 'Вход' : 'Регистрация';
   $('#authMessage').textContent = '';
-  if (next && previous !== next && routeMotionEnabled() && next.animate) {
-    const direction = tab === 'register' ? 1 : -1;
-    next.animate([
-      { transform: `translate3d(${direction * 22}px,0,0)`, opacity: .18 },
-      { transform: 'translate3d(0,0,0)', opacity: 1 }
-    ], { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' });
-  }
 }
 
 function renderDiscordAvailability() {
@@ -774,17 +844,14 @@ async function fileToDataUrl(file, maxBytes = 4 * 1024 * 1024) {
 }
 
 // Admin -----------------------------------------------------------------------
-const ADMIN_TAB_ORDER = ['overview', 'news', 'lore', 'rules', 'banners', 'users', 'settings'];
-let adminTabTransitionId = 0;
-
-async function setAdminTabUI(tab) {
+function setAdminTabUI(tab) {
   state.admin.activeTab = tab;
   $$('[data-admin-tab]').forEach((button) => button.classList.toggle('active', button.dataset.adminTab === tab));
   $$('[data-admin-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.adminPanel === tab));
 }
 
 async function openAdminTab(tab) {
-  await setAdminTabUI(tab);
+  setAdminTabUI(tab);
   try {
     if (tab === 'overview') await loadAdminOverview();
     if (tab === 'news') await loadAdminNews();
@@ -1129,30 +1196,66 @@ window.addEventListener('focus', showSiteHeader);
 
 // Event wiring ---------------------------------------------------------------
 let homeStageTransitioning = false;
-let pendingHomeStage = null;
 
 async function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
-  const panels = $$('.home-stage');
-  if (!next || !panels.includes(next)) return;
+  if (!next || !next.classList.contains('home-stage')) return;
 
-  $$('[data-home-stage]').forEach(tab => {
+  const panels = $$('.home-stage');
+  const current = panels.find(panel => !panel.hidden);
+  if (!current || current === next || homeStageTransitioning) return;
+
+  const currentIndex = Math.max(0, panels.indexOf(current));
+  const nextIndex = Math.max(0, panels.indexOf(next));
+  const direction = nextIndex >= currentIndex ? 1 : -1;
+  const motionEnabled = !document.documentElement.classList.contains('motion-off')
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  homeStageTransitioning = true;
+  const tabs = $$('[data-home-stage]');
+  tabs.forEach(tab => {
     const selected = tab.dataset.homeStage === name;
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
   });
 
-  panels.forEach(panel => {
-    const active = panel === next;
-    panel.hidden = !active;
-    panel.inert = !active;
-    panel.removeAttribute('aria-hidden');
-    panel.style.removeProperty('transform');
-    panel.style.removeProperty('opacity');
-  });
+  try {
+    if (motionEnabled && current.animate) {
+      const out = current.animate([
+        { opacity: 1, transform: 'translate3d(0,0,0)' },
+        { opacity: .74, transform: `translate3d(${direction * -4}px,0,0)`, offset: .58 },
+        { opacity: 0, transform: `translate3d(${direction * -9}px,0,0)` }
+      ], {
+        duration: 300,
+        easing: 'cubic-bezier(.4,0,.2,1)',
+        fill: 'forwards'
+      });
+      await out.finished.catch(() => {});
+      out.cancel();
+    }
 
-  if (focusPanel) next.focus({ preventScroll: true });
-  watchReveals();
+    panels.forEach(panel => { panel.hidden = panel !== next; });
+
+    if (motionEnabled && next.animate) {
+      const incoming = next.animate([
+        { opacity: 0, transform: `translate3d(${direction * 11}px,0,0)` },
+        { opacity: .34, transform: `translate3d(${direction * 7}px,0,0)`, offset: .22 },
+        { opacity: .82, transform: `translate3d(${direction * 2}px,0,0)`, offset: .66 },
+        { opacity: 1, transform: 'translate3d(0,0,0)' }
+      ], {
+        duration: 600,
+        easing: 'cubic-bezier(.16,1,.3,1)',
+        fill: 'both'
+      });
+      await incoming.finished.catch(() => {});
+      incoming.cancel();
+    }
+
+    if (focusPanel) next.focus({ preventScroll: true });
+    watchReveals();
+  } finally {
+    homeStageTransitioning = false;
+  }
 }
 $$('[data-home-stage]').forEach((tab, index, tabs) => {
   tab.addEventListener('click', () => selectHomeStage(tab.dataset.homeStage));
