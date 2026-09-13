@@ -5561,8 +5561,9 @@ html, body { overflow-anchor:none; }
 .home-stage-viewport > .home-stage { grid-area:1 / 1; width:100%; min-width:0; align-self:start; }
 .home-stage-viewport.is-sliding > .home-stage { will-change:transform,opacity; pointer-events:none; }
 .home-stage-viewport.is-sliding .reveal-in { animation:none !important; }
-[data-page="home"] .home-stage-nav { background:rgba(12,18,24,.8) !important; }
-[data-page="home"] .home-stage-nav button[aria-selected="true"] { background:rgba(255,255,255,.07) !important; }
+[data-page="home"] .home-stage-nav { background:rgba(12,18,24,.28) !important; }
+[data-page="home"] .home-stage-nav button { background:transparent !important; }
+[data-page="home"] .home-stage-nav button[aria-selected="true"] { background:transparent !important; }
 @media (max-width:760px) {
   .page-texture { background-position:34% center !important; }
 }
