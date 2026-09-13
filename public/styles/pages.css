@@ -1,541 +1,653 @@
-/* Current interior pages: lore, rules, contact, news detail, account/admin surfaces. */
-/* v5.5.5 — Violet Lime Portal: Lore / Rules / Contact / News detail -------- */
+/* v5.5.6 — Scenic global background + directional transitions ------------- */
 
-/* Shared interior-page atmosphere: same family as the home portal. */
-.page[data-page="news"],
-.page[data-page="lore"],
-.page[data-page="rules"],
-.page[data-page="contact"] {
-  position: relative;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 10% 8%, rgba(143,109,255,.10), transparent 26%),
-    radial-gradient(circle at 90% 12%, rgba(140,255,59,.045), transparent 22%),
-    linear-gradient(180deg, rgba(10,11,24,.22), rgba(5,6,13,.06));
+/* One shared Minecraft background for the entire portal, not only Home. */
+html {
+  background: #070b10;
 }
-
-.page[data-page="news"]::before,
-.page[data-page="lore"]::before,
-.page[data-page="rules"]::before,
-.page[data-page="contact"]::before {
+body {
+  position: relative;
+  isolation: isolate;
+  background: #070b10;
+}
+.page-texture {
+  inset: 0;
+  opacity: 1;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+.page-texture::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(255,255,255,.008) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.006) 1px, transparent 1px);
-  background-size: 56px 56px;
-  opacity: .28;
-  mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.35) 55%, transparent 100%);
+    linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.008) 1px, transparent 1px);
+  background-size: 5px 5px, 5px 5px;
+  opacity: .15;
 }
 
-.page[data-page="news"] > *,
-.page[data-page="lore"] > *,
-.page[data-page="rules"] > *,
-.page[data-page="contact"] > * {
+/* Home used its own fixed picture before. The global layer now owns it. */
+.page[data-page="home"]::before,
+.page[data-page="home"]::after {
+  display: none !important;
+}
+
+/* Every public page now floats on top of the same scenic background. */
+.page:not([data-page="home"]):not([data-page="admin"]) {
+  min-height: calc(100vh - 80px);
   position: relative;
-  z-index: 1;
 }
-
-/* -------------------------------------------------------------------------
-   NEWS DETAIL
-   ------------------------------------------------------------------------- */
-[data-page="news"] .article-page {
-  max-width: 1040px;
-  margin-top: 34px;
-  padding: 34px 38px 44px;
-  border: 1px solid rgba(196,186,255,.15);
-  border-radius: 26px;
-  background:
-    radial-gradient(circle at 95% 2%, rgba(143,109,255,.11), transparent 26%),
-    linear-gradient(180deg, rgba(16,17,33,.78), rgba(8,9,19,.72));
+[data-page="news"] .article-page,
+[data-page="lore"] .lore-header,
+[data-page="lore"] .lore-categories,
+[data-page="lore"] .lore-toc-list,
+[data-page="lore"] .book-sheet,
+[data-page="rules"] .simple-head,
+[data-page="rules"] .rule-item,
+[data-page="contact"] .simple-head,
+[data-page="contact"] .contact-line,
+[data-page="account"] .profile-hero,
+[data-page="account"] .profile-section,
+[data-page="play"] .simple-page,
+[data-page="clans"] .simple-page,
+[data-page="notfound"] .simple-page {
+  background-color: rgba(10, 12, 25, .56) !important;
+  border-color: rgba(199, 188, 255, .15) !important;
   box-shadow:
-    0 24px 64px rgba(0,0,0,.26),
-    inset 0 1px 0 rgba(255,255,255,.035);
+    0 22px 56px rgba(0,0,0,.23),
+    inset 0 1px 0 rgba(255,255,255,.035) !important;
   -webkit-backdrop-filter: blur(18px) saturate(118%);
   backdrop-filter: blur(18px) saturate(118%);
-  overflow: hidden;
-}
-[data-page="news"] .article-page::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--portal-lime), var(--portal-violet), transparent 72%);
-  opacity: .72;
-}
-[data-page="news"] .text-back {
-  color: #c7c2d9;
-}
-[data-page="news"] .text-back:hover {
-  color: var(--portal-lime);
-}
-[data-page="news"] .article-meta {
-  margin-top: 24px;
-  gap: 12px;
-  color: #9d9aad;
-}
-[data-page="news"] #newsDetailVariantTag {
-  color: var(--portal-lime) !important;
-  background: rgba(140,255,59,.065) !important;
-  border-color: rgba(140,255,59,.14) !important;
-  text-shadow: none !important;
-}
-[data-page="news"] .article-page h1 {
-  max-width: 15ch;
-  margin: 18px 0 14px;
-  color: #ffffff;
-  background: none !important;
-  -webkit-text-fill-color: currentColor;
-  text-shadow: none;
-  font-size: clamp(38px, 5vw, 62px);
-  line-height: 1.02;
-}
-[data-page="news"] .article-lead {
-  color: #c9c6d4;
-  max-width: 720px;
-  font-size: 18px;
-}
-[data-page="news"] .article-cover {
-  margin: 28px 0 24px;
-  border: 1px solid rgba(196,186,255,.16);
-  border-radius: 20px;
-  box-shadow: 0 18px 48px rgba(0,0,0,.26);
-}
-[data-page="news"] .article-body {
-  max-width: 800px;
-  margin-top: 24px;
-  padding: 28px 30px;
-  color: #dedce6;
-  line-height: 1.9;
-  border: 1px solid rgba(196,186,255,.11);
-  border-left: 2px solid rgba(140,255,59,.55);
-  border-radius: 18px;
-  background: rgba(9,10,20,.42);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
-}
-[data-page="news"] .article-body::first-letter {
-  color: #d9ffbd;
-  text-shadow: none;
 }
 
-/* -------------------------------------------------------------------------
-   LORE
-   ------------------------------------------------------------------------- */
-[data-page="lore"] .lore-header {
-  margin-top: 28px;
-  padding: 30px 34px 28px;
-  border: 1px solid rgba(196,186,255,.14);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 92% 14%, rgba(143,109,255,.13), transparent 28%),
-    linear-gradient(180deg, rgba(16,17,33,.75), rgba(9,10,21,.67));
-  box-shadow: 0 20px 52px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
-  -webkit-backdrop-filter: blur(17px) saturate(118%);
-  backdrop-filter: blur(17px) saturate(118%);
-}
-[data-page="lore"] .lore-header .kicker {
-  color: var(--portal-lime);
-  text-shadow: none;
-}
-[data-page="lore"] .lore-header h1 {
-  color: #ffffff;
-  background: none !important;
-  -webkit-text-fill-color: currentColor;
-  text-shadow: none;
-  margin: 10px 0 8px;
-}
-[data-page="lore"] .lore-header p:last-child {
-  color: #bdbaca;
+/* Interior sections get a little more shade so the bright landscape does not
+   compete with long-form reading. */
+[data-page="news"],
+[data-page="lore"],
+[data-page="rules"],
+[data-page="contact"],
+[data-page="account"],
+[data-page="play"],
+[data-page="clans"],
+[data-page="notfound"] {
+  background: linear-gradient(180deg, rgba(6,7,16,.18), rgba(6,7,16,.34));
 }
 
-[data-page="lore"] .lore-search {
-  margin-top: 18px;
-  padding: 16px 18px;
-  border: 1px solid rgba(196,186,255,.11);
-  border-radius: 16px;
-  background: rgba(12,13,27,.50);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-}
-[data-page="lore"] .lore-search label {
-  color: #9f9cad;
-}
-[data-page="lore"] #loreSearch {
-  border-color: rgba(196,186,255,.13);
-  background: rgba(7,8,18,.62);
-  color: #f7f6ff;
-}
-[data-page="lore"] #loreSearch:focus {
-  border-color: rgba(140,255,59,.25);
-  box-shadow: 0 0 0 3px rgba(140,255,59,.055), 0 0 18px rgba(143,109,255,.06);
+/* Keep the Portal palette present over the scenic world. */
+[data-page="news"] .article-page::before,
+[data-page="lore"] .book-sheet::before,
+[data-page="rules"] .simple-head::before,
+[data-page="contact"] .simple-head::before {
+  opacity: .80;
 }
 
-[data-page="lore"] .lore-categories {
-  margin-top: 16px;
-  padding: 7px;
-  gap: 6px;
-  border: 1px solid rgba(196,186,255,.12);
-  border-radius: 16px;
-  background: rgba(13,14,28,.62);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+
+
+
+/* View Transitions: page content slides with depth while header remains calm. */
+
+
+
+::view-transition-group(portal-header) {
+  animation-duration: 1ms;
+  z-index: 50;
 }
-[data-page="lore"] .lore-categories button {
-  position: relative;
-  min-height: 40px;
-  padding: 8px 14px;
-  border-radius: 11px;
-  color: #aaa7b7;
-  background: transparent;
-  border: 1px solid transparent;
-}
-[data-page="lore"] .lore-categories button:hover {
-  color: #ffffff;
-  background: rgba(143,109,255,.065);
-  border-color: rgba(196,186,255,.09);
-}
-[data-page="lore"] .lore-categories button.active {
-  color: #ffffff;
-  background: linear-gradient(180deg, rgba(143,109,255,.18), rgba(98,78,156,.14));
-  border-color: rgba(196,186,255,.16);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
-}
-[data-page="lore"] .lore-categories button.active::after {
-  content: "";
-  position: absolute;
-  left: 26%;
-  right: 26%;
-  bottom: 5px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--portal-lime);
-  box-shadow: 0 0 10px rgba(140,255,59,.22);
+::view-transition-old(portal-header),
+::view-transition-new(portal-header) {
+  animation: none;
 }
 
-[data-page="lore"] .lore-layout {
-  margin-top: 18px;
-  gap: 18px;
+
+@keyframes portal-out-forward {
+  from { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+  to { opacity: 0; transform: translateX(-54px) scale(.992); filter: blur(4px); }
 }
-[data-page="lore"] .lore-toc-list {
-  padding: 9px;
-  border: 1px solid rgba(196,186,255,.12);
-  border-radius: 18px;
-  background: rgba(12,13,27,.62);
-  box-shadow: 0 18px 42px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.025);
-  -webkit-backdrop-filter: blur(15px) saturate(116%);
-  backdrop-filter: blur(15px) saturate(116%);
+@keyframes portal-in-forward {
+  from { opacity: 0; transform: translateX(72px) scale(.988); filter: blur(6px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
 }
-[data-page="lore"] .toc-item {
-  position: relative;
-  padding: 14px 14px 14px 16px;
-  border-radius: 12px;
-  color: #d3d0dc;
-  border: 1px solid transparent;
-  transition: background .2s ease, border-color .2s ease, transform .2s ease, color .2s ease;
+@keyframes portal-out-back {
+  from { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+  to { opacity: 0; transform: translateX(54px) scale(.992); filter: blur(4px); }
 }
-[data-page="lore"] .toc-item small {
-  color: #8f8c9e;
-}
-[data-page="lore"] .toc-item:hover {
-  transform: translateX(2px);
-  background: rgba(143,109,255,.07);
-  border-color: rgba(196,186,255,.08);
-  color: #ffffff;
-}
-[data-page="lore"] .toc-item.active {
-  color: #ffffff;
-  background: linear-gradient(90deg, rgba(140,255,59,.08), rgba(143,109,255,.12));
-  border-color: rgba(196,186,255,.14);
-  box-shadow: none;
-}
-[data-page="lore"] .toc-item.active::before {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 11px;
-  bottom: 11px;
-  width: 2px;
-  border-radius: 999px;
-  background: var(--portal-lime);
-  box-shadow: 0 0 10px rgba(140,255,59,.18);
-}
-[data-page="lore"] .toc-item.active small {
-  color: #c8bcff;
-}
-[data-page="lore"] .chapter-mobile-select {
-  border: 1px solid rgba(196,186,255,.13);
-  background: rgba(13,14,28,.72);
-  color: #f4f2fb;
+@keyframes portal-in-back {
+  from { opacity: 0; transform: translateX(-72px) scale(.988); filter: blur(6px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
 }
 
-[data-page="lore"] .book-sheet {
-  position: relative;
-  min-height: 520px;
-  padding: 34px 38px 42px;
-  border: 1px solid rgba(196,186,255,.15);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 94% 5%, rgba(143,109,255,.12), transparent 28%),
-    linear-gradient(180deg, rgba(16,17,33,.78), rgba(8,9,19,.70));
-  box-shadow: 0 22px 54px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.035);
-  -webkit-backdrop-filter: blur(17px) saturate(118%);
-  backdrop-filter: blur(17px) saturate(118%);
-  overflow: hidden;
-}
-[data-page="lore"] .book-sheet::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--portal-lime), var(--portal-violet), transparent 76%);
-  opacity: .72;
-}
-[data-page="lore"] .book-chapter-number {
-  color: var(--portal-lime);
-  text-shadow: none;
-  letter-spacing: .12em;
-}
-[data-page="lore"] .book-sheet h2 {
-  color: #ffffff;
-  background: none !important;
-  -webkit-text-fill-color: currentColor;
-  text-shadow: none;
-  margin-top: 14px;
-}
-[data-page="lore"] .chapter-share {
-  color: #eef9e8;
-  border-color: rgba(140,255,59,.17);
-  background: rgba(11,13,24,.62) !important;
-}
-[data-page="lore"] .chapter-share:hover {
-  border-color: rgba(140,255,59,.31);
-  box-shadow: 0 0 16px rgba(140,255,59,.07);
-}
-[data-page="lore"] .book-prose {
-  margin-top: 26px;
-  color: #dedce5;
-  font-size: 18px;
-  line-height: 1.9;
-  text-shadow: none;
-}
-[data-page="lore"] .book-prose::first-letter {
-  color: #d9ffbd;
-  text-shadow: none;
-}
-[data-page="lore"] .book-empty span {
-  color: var(--portal-lime);
-}
-[data-page="lore"] .book-empty h2 {
-  color: #ffffff;
-}
-[data-page="lore"] .book-empty p {
-  color: #aaa7b7;
+
+
+
+
+
+/* Browsers without View Transitions still get a subtle entrance shift. */
+@supports not (view-transition-name: portal-page) {
+  .page.active {
+    animation: portal-fallback-in 420ms cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes portal-fallback-in {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 }
 
-/* -------------------------------------------------------------------------
-   RULES
-   ------------------------------------------------------------------------- */
-[data-page="rules"] .simple-page,
-[data-page="contact"] .simple-page {
-  margin-top: 30px;
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(portal-page),
+  ::view-transition-new(portal-page) { animation: none !important; }
 }
-[data-page="rules"] .simple-head,
-[data-page="contact"] .simple-head {
-  padding: 30px 34px 28px;
-  border: 1px solid rgba(196,186,255,.14);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 93% 12%, rgba(143,109,255,.12), transparent 28%),
-    linear-gradient(180deg, rgba(16,17,33,.75), rgba(9,10,21,.67));
-  box-shadow: 0 20px 52px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
-  -webkit-backdrop-filter: blur(17px) saturate(118%);
-  backdrop-filter: blur(17px) saturate(118%);
-}
-[data-page="rules"] .simple-head .kicker,
-[data-page="contact"] .simple-head .kicker {
-  color: var(--portal-lime);
-  text-shadow: none;
-}
-[data-page="rules"] .simple-head h1,
-[data-page="contact"] .simple-head h1 {
-  color: #ffffff;
-  background: none !important;
-  -webkit-text-fill-color: currentColor;
-  text-shadow: none;
-  margin: 10px 0 10px;
-}
-[data-page="rules"] .simple-head p,
-[data-page="contact"] .simple-head p {
-  color: #bdbaca;
-  max-width: 760px;
-}
+html.motion-off ::view-transition-old(portal-page),
+html.motion-off ::view-transition-new(portal-page) { animation: none !important; }
 
-[data-page="rules"] .rules-list {
-  display: grid;
-  gap: 14px;
-  margin-top: 18px;
-}
-[data-page="rules"] .rule-item {
-  position: relative;
-  grid-template-columns: 54px minmax(0,1fr);
-  gap: 18px;
-  padding: 22px 24px;
-  border: 1px solid rgba(196,186,255,.13);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(15,16,31,.70), rgba(8,9,19,.64));
-  box-shadow: 0 16px 40px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.025);
-  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
-}
-[data-page="rules"] .rule-item::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 16px;
-  bottom: 16px;
-  width: 2px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--portal-lime), var(--portal-violet));
-  opacity: .8;
-}
-[data-page="rules"] .rule-item:hover {
-  transform: translateY(-2px);
-  border-color: rgba(196,186,255,.23);
-  background: linear-gradient(180deg, rgba(21,20,40,.78), rgba(10,11,23,.70));
-  box-shadow: 0 20px 48px rgba(0,0,0,.22), 0 0 18px rgba(143,109,255,.05);
-}
-[data-page="rules"] .rule-index {
-  color: var(--portal-lime);
-  text-shadow: none;
-  font-weight: 760;
-  letter-spacing: .10em;
-}
-[data-page="rules"] .rule-item h3 {
-  color: #ffffff;
-  margin: 0 0 7px;
-}
-[data-page="rules"] .rule-item p {
-  color: #c8c5d2;
-  line-height: 1.7;
-}
-
-/* -------------------------------------------------------------------------
-   CONTACT
-   ------------------------------------------------------------------------- */
-[data-page="contact"] .contact-line {
-  position: relative;
-  margin-top: 14px;
-  padding: 20px 22px;
-  border: 1px solid rgba(196,186,255,.13);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(15,16,31,.70), rgba(8,9,19,.64));
-  box-shadow: 0 16px 40px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.025);
-  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
-}
-[data-page="contact"] .contact-line::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 14px;
-  bottom: 14px;
-  width: 2px;
-  border-radius: 999px;
-  background: var(--portal-lime);
-  opacity: .78;
-}
-[data-page="contact"] .contact-line:hover {
-  transform: translateY(-2px);
-  border-color: rgba(196,186,255,.23);
-  background: linear-gradient(180deg, rgba(21,20,40,.78), rgba(10,11,23,.70));
-  box-shadow: 0 20px 48px rgba(0,0,0,.22), 0 0 18px rgba(143,109,255,.05);
-}
-[data-page="contact"] .contact-line span {
-  color: var(--portal-lime);
-  text-shadow: none;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-[data-page="contact"] .contact-line strong {
-  color: #f7f6ff;
-}
-[data-page="contact"] .contact-line .subtle-button {
-  color: #f2fbea;
-  border-color: rgba(140,255,59,.17);
-  background: rgba(11,13,24,.62) !important;
-}
-[data-page="contact"] .contact-line .subtle-button:hover {
-  border-color: rgba(140,255,59,.30);
-  box-shadow: 0 0 16px rgba(140,255,59,.07);
-}
-
-/* Responsive tuning for interior pages. */
-@media (max-width: 900px) {
+@media (max-width: 760px) {
+  .page-texture {
+    background:
+      linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
+      radial-gradient(circle at 18% 12%, rgba(143,109,255,.08), transparent 24%),
+      url("/home-bg.png") 34% center / cover no-repeat fixed;
+  }
   [data-page="news"] .article-page,
   [data-page="lore"] .lore-header,
+  [data-page="lore"] .lore-categories,
+  [data-page="lore"] .lore-toc-list,
+  [data-page="lore"] .book-sheet,
   [data-page="rules"] .simple-head,
-  [data-page="contact"] .simple-head {
-    padding-left: 26px;
-    padding-right: 26px;
+  [data-page="rules"] .rule-item,
+  [data-page="contact"] .simple-head,
+  [data-page="contact"] .contact-line {
+    -webkit-backdrop-filter: blur(14px) saturate(112%);
+    backdrop-filter: blur(14px) saturate(112%);
   }
-  [data-page="lore"] .book-sheet {
-    padding: 30px 28px 36px;
+}
+
+/* v5.5.7 — Stable scenic background + smooth transitions + simple pages --- */
+
+/* Keep the viewport width identical when tall panels (News, Lore) add a
+   scrollbar. This prevents background-size: cover from visibly recalculating. */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+/* page-texture is already position:fixed, so background-attachment:fixed is
+   redundant and can stutter during view-transition snapshots in Chromium. */
+.page-texture {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: paint;
+}
+
+/* v5.4.x left a second transition group on app-main and the base .page
+   animation was also running under the newer transition. Disable both so one
+   compositor-only animation controls the route change. */
+.app-main {
+  view-transition-name: none !important;
+}
+@supports (view-transition-name: portal-page) {
+  .page.active { animation: none !important; }
+}
+
+.site-header {
+  view-transition-name: portal-header;
+}
+.page.active {
+  view-transition-name: portal-page;
+}
+
+
+::view-transition-image-pair(portal-page) {
+  isolation: isolate;
+}
+
+
+@keyframes portal-smooth-out-forward {
+  from { opacity: 1; transform: translate3d(0,0,0); }
+  to   { opacity: .08; transform: translate3d(-30px,0,0); }
+}
+@keyframes portal-smooth-in-forward {
+  from { opacity: .08; transform: translate3d(38px,0,0); }
+  to   { opacity: 1; transform: translate3d(0,0,0); }
+}
+@keyframes portal-smooth-out-back {
+  from { opacity: 1; transform: translate3d(0,0,0); }
+  to   { opacity: .08; transform: translate3d(30px,0,0); }
+}
+@keyframes portal-smooth-in-back {
+  from { opacity: .08; transform: translate3d(-38px,0,0); }
+  to   { opacity: 1; transform: translate3d(0,0,0); }
+}
+
+
+
+
+
+
+/* Fix Play / Clans: in v5.5.6 the whole simple-page became one giant dark
+   rectangle. The page wrapper is transparent again; content gets intentional
+   glass surfaces instead. */
+[data-page="play"] .simple-page,
+[data-page="clans"] .simple-page,
+[data-page="notfound"] .simple-page {
+  max-width: 1080px;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+[data-page="play"] .simple-head,
+[data-page="clans"] .simple-head,
+[data-page="notfound"] .simple-head {
+  max-width: none;
+  margin-bottom: 24px;
+  padding: 28px 30px;
+  border: 1px solid rgba(199, 188, 255, .16);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(140,255,59,.055), transparent 26%),
+    linear-gradient(135deg, rgba(14, 15, 31, .68), rgba(8, 9, 20, .56));
+  box-shadow: 0 18px 46px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035);
+  -webkit-backdrop-filter: blur(18px) saturate(118%);
+  backdrop-filter: blur(18px) saturate(118%);
+}
+[data-page="play"] .simple-head h1,
+[data-page="clans"] .simple-head h1,
+[data-page="notfound"] .simple-head h1 {
+  max-width: 760px;
+  margin: 14px 0 12px;
+  font-size: clamp(30px, 4vw, 44px);
+}
+[data-page="play"] .simple-head > p:last-child,
+[data-page="clans"] .simple-head > p:last-child,
+[data-page="notfound"] .simple-head > p:last-child {
+  max-width: 720px;
+}
+
+/* Play becomes a compact three-step board instead of oversized stacked slabs. */
+[data-page="play"] .play-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+[data-page="play"] .play-steps li {
+  position: relative;
+  min-width: 0;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  overflow: hidden;
+  border: 1px solid rgba(199,188,255,.14);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(143,109,255,.09), transparent 30%),
+    linear-gradient(180deg, rgba(13,14,29,.66), rgba(8,9,19,.57));
+  box-shadow: 0 18px 42px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.03);
+  -webkit-backdrop-filter: blur(17px) saturate(116%);
+  backdrop-filter: blur(17px) saturate(116%);
+}
+[data-page="play"] .play-steps li::after {
+  content: "";
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(140,255,59,.72), rgba(143,109,255,.38), transparent);
+  opacity: .72;
+}
+[data-page="play"] .play-steps li::before {
+  color: #b7ff72;
+  text-shadow: 0 0 12px rgba(140,255,59,.12);
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+[data-page="play"] .play-steps h2 {
+  margin: 16px 0 12px;
+  font-size: 20px;
+  line-height: 1.2;
+}
+[data-page="play"] .play-steps p {
+  margin: 0 0 20px;
+  color: #bec4cf;
+  line-height: 1.7;
+}
+[data-page="play"] .play-steps .subtle-button,
+[data-page="play"] .play-steps .primary-button {
+  margin-top: auto;
+  align-self: flex-start;
+}
+[data-page="play"] .server-address {
+  margin-top: 12px !important;
+  margin-bottom: 0 !important;
+  word-break: break-word;
+}
+
+/* Clans placeholder is now one compact archive panel, not an opaque page-sized
+   block. */
+[data-page="clans"] .placeholder-section {
+  max-width: 760px;
+  padding: 30px 32px;
+  border: 1px solid rgba(199,188,255,.14);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(140,255,59,.05), transparent 28%),
+    linear-gradient(180deg, rgba(13,14,29,.64), rgba(8,9,19,.54));
+  box-shadow: 0 18px 42px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.03);
+  -webkit-backdrop-filter: blur(17px) saturate(116%);
+  backdrop-filter: blur(17px) saturate(116%);
+}
+[data-page="clans"] .placeholder-section > span {
+  color: #b7ff72;
+}
+[data-page="clans"] .placeholder-section strong {
+  font-size: 20px;
+}
+
+/* Home stage panels: no blur/filter animation (which caused paint jank).
+   Only opacity + translate3d are animated from JS. */
+.home-stage {
+  will-change: auto;
+}
+
+@media (max-width: 900px) {
+  [data-page="play"] .play-steps {
+    grid-template-columns: 1fr;
+  }
+  [data-page="play"] .play-steps li {
+    min-height: 0;
   }
 }
 
 @media (max-width: 760px) {
-  [data-page="news"] .article-page {
-    margin-top: 18px;
-    padding: 24px 18px 30px;
-    border-radius: 20px;
+  .page-texture {
+    background:
+      linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
+      radial-gradient(circle at 18% 12%, rgba(143,109,255,.08), transparent 24%),
+      url("/home-bg.png") 34% center / cover no-repeat !important;
+    background-attachment: scroll !important;
   }
-  [data-page="news"] .article-page h1 {
-    font-size: clamp(32px, 10vw, 46px);
+  [data-page="play"] .simple-head,
+  [data-page="clans"] .simple-head,
+  [data-page="notfound"] .simple-head,
+  [data-page="clans"] .placeholder-section {
+    padding: 22px 20px;
+    border-radius: 17px;
   }
-  [data-page="news"] .article-body {
-    padding: 22px 18px;
-    font-size: 16px;
-  }
-
-  [data-page="lore"] .lore-header,
-  [data-page="rules"] .simple-head,
-  [data-page="contact"] .simple-head {
-    margin-top: 18px;
-    padding: 24px 20px;
-    border-radius: 20px;
-  }
-  [data-page="lore"] .lore-search {
-    padding: 14px;
-  }
-  [data-page="lore"] .lore-categories {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    scrollbar-width: none;
-  }
-  [data-page="lore"] .lore-categories::-webkit-scrollbar { display: none; }
-  [data-page="lore"] .lore-categories button {
-    flex: 0 0 auto;
-  }
-  [data-page="lore"] .book-sheet {
-    min-height: 0;
-    padding: 26px 20px 30px;
-    border-radius: 18px;
-  }
-  [data-page="lore"] .book-prose {
-    font-size: 16px;
-    line-height: 1.82;
-  }
-  [data-page="rules"] .rule-item {
-    grid-template-columns: 42px minmax(0,1fr);
-    gap: 12px;
-    padding: 18px 16px;
-  }
-  [data-page="contact"] .contact-line {
-    gap: 14px;
-    padding: 18px 16px;
+  [data-page="play"] .play-steps li {
+    padding: 22px 20px;
+    border-radius: 17px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .page.active { animation: none !important; }
+}
+html.motion-off .page.active {
+  animation: none !important;
+}
+
+/* v5.5.8 — seamless scenic pages, clock, and silk transitions ------------- */
+
+/* One neutral background treatment everywhere. The previous violet page-wide
+   tint is intentionally removed: internal pages now see the same landscape as Home. */
+.page-texture {
+  background-attachment: scroll !important;
+}
+.page:not([data-page="admin"]) {
+  background: transparent !important;
+}
+
+/* Remove the violet cast from interior glass panels. */
+[data-page="news"] .article-page,
+[data-page="lore"] .lore-header,
+[data-page="lore"] .lore-categories,
+[data-page="lore"] .lore-toc-list,
+[data-page="lore"] .book-sheet,
+[data-page="rules"] .simple-head,
+[data-page="rules"] .rule-item,
+[data-page="contact"] .simple-head,
+[data-page="contact"] .contact-line,
+[data-page="account"] .profile-hero,
+[data-page="account"] .settings-section,
+[data-page="play"] .simple-head,
+[data-page="play"] .play-steps li,
+[data-page="clans"] .simple-head,
+[data-page="clans"] .placeholder-section,
+[data-page="notfound"] .simple-head {
+  background:
+    radial-gradient(circle at 94% 8%, rgba(140,255,59,.028), transparent 28%),
+    linear-gradient(180deg, rgba(7, 14, 21, .67), rgba(5, 11, 18, .57)) !important;
+  border-color: rgba(185, 222, 228, .14) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+[data-page="news"] .article-body {
+  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
+  border-color: rgba(185,222,228,.12) !important;
+}
+[data-page="rules"] .rule-item,
+[data-page="contact"] .contact-line {
+  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
+}
+[data-page="lore"] .book-sheet {
+  background: radial-gradient(circle at 96% 6%, rgba(184,255,114,.035), transparent 28%),
+    linear-gradient(180deg, rgba(7,14,21,.66), rgba(5,11,18,.56)) !important;
+}
+
+/* Contact header no longer reads as a purple rectangle. */
+[data-page="contact"] .simple-head,
+[data-page="rules"] .simple-head,
+[data-page="lore"] .lore-header {
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(17px) saturate(114%);
+  backdrop-filter: blur(17px) saturate(114%);
+}
+
+/* Account screenshot fix: four children now have four intended columns, so the
+   second logout button no longer wraps underneath the avatar. */
+[data-page="account"] .account-page { max-width: 1080px; }
+[data-page="account"] .profile-hero {
+  grid-template-columns: auto minmax(0,1fr) auto auto;
+  gap: 18px;
+  padding: 24px 26px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(17px) saturate(114%);
+  backdrop-filter: blur(17px) saturate(114%);
+}
+[data-page="account"] .profile-hero .logout-link {
+  align-self: center;
+  margin: 0;
+  white-space: nowrap;
+}
+[data-page="account"] .settings-section {
+  padding: 24px 26px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(185,222,228,.12);
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(16px) saturate(112%);
+  backdrop-filter: blur(16px) saturate(112%);
+}
+
+/* Header clock: compact enough to live next to server status. */
+.header-clock {
+  min-width: 78px;
+  min-height: 40px;
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 1px;
+  padding: 5px 10px;
+  border: 1px solid rgba(185,222,228,.10);
+  border-radius: 12px;
+  background: rgba(7, 14, 22, .46);
+  color: #eef8fa;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+  backdrop-filter: blur(14px) saturate(112%);
+}
+.header-clock span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .045em;
+}
+.header-clock small {
+  color: #90a7ae;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Silk route transitions: the old and new page overlap gently for the whole
+   animation instead of snapping at the midpoint. */
+::view-transition-group(portal-page) {
+  overflow: clip;
+  animation-duration: 900ms !important;
+  animation-timing-function: cubic-bezier(.22,1,.36,1) !important;
+}
+::view-transition-old(portal-page),
+::view-transition-new(portal-page) {
+  mix-blend-mode: normal;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+@keyframes portal-silk-out-forward {
+  0%   { opacity: 1; transform: translate3d(0,0,0); }
+  55%  { opacity: .58; transform: translate3d(-12px,0,0); }
+  100% { opacity: 0; transform: translate3d(-22px,0,0); }
+}
+@keyframes portal-silk-in-forward {
+  0%   { opacity: 0; transform: translate3d(24px,0,0); }
+  45%  { opacity: .70; transform: translate3d(8px,0,0); }
+  100% { opacity: 1; transform: translate3d(0,0,0); }
+}
+@keyframes portal-silk-out-back {
+  0%   { opacity: 1; transform: translate3d(0,0,0); }
+  55%  { opacity: .58; transform: translate3d(12px,0,0); }
+  100% { opacity: 0; transform: translate3d(22px,0,0); }
+}
+@keyframes portal-silk-in-back {
+  0%   { opacity: 0; transform: translate3d(-24px,0,0); }
+  45%  { opacity: .70; transform: translate3d(-8px,0,0); }
+  100% { opacity: 1; transform: translate3d(0,0,0); }
+}
+html[data-route-direction="forward"]::view-transition-old(portal-page) {
+  animation: portal-silk-out-forward 760ms cubic-bezier(.22,1,.36,1) both !important;
+}
+html[data-route-direction="forward"]::view-transition-new(portal-page) {
+  animation: portal-silk-in-forward 900ms cubic-bezier(.16,1,.3,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-old(portal-page) {
+  animation: portal-silk-out-back 760ms cubic-bezier(.22,1,.36,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-new(portal-page) {
+  animation: portal-silk-in-back 900ms cubic-bezier(.16,1,.3,1) both !important;
+}
+
+/* Home tabs stay compositor-only. */
+.home-stage {
+  contain: layout style;
+}
+
+@media (max-width: 980px) {
+  .header-clock small { display: none; }
+  .header-clock { min-width: 58px; }
+  [data-page="account"] .profile-hero {
+    grid-template-columns: auto minmax(0,1fr) auto;
+  }
+  [data-page="account"] .profile-hero .logout-link:last-child {
+    grid-column: 3;
+  }
+}
+@media (max-width: 760px) {
+  .page-texture {
+    background:
+      linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
+      url("/home-bg.png") 34% center / cover no-repeat !important;
+  }
+  .header-clock { display: none; }
+  [data-page="account"] .profile-hero {
+    grid-template-columns: auto 1fr;
+    padding: 20px;
+  }
+  [data-page="account"] .profile-hero .logout-link {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  [data-page="account"] .settings-section { padding: 20px; }
+}
+
+/* v5.5.9 — auto-hide header + compositor-only transitions ------------------ */
+
+/* View Transition snapshots were the main source of visible hitching on pages
+   with a large scenic image + many backdrop-filter panels. The route animation
+   is now performed directly on the page elements with opacity/translate only. */
+.app-main,
+.site-header,
+.page,
+.page.active {
+  view-transition-name: none !important;
+}
+.page.active {
+  animation: none !important;
+}
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(portal-page),
+::view-transition-new(portal-page),
+::view-transition-old(portal-header),
+::view-transition-new(portal-header) {
+  animation: none !important;
+}
+
+/* GPU-friendly route motion. Never animate blur/backdrop-filter/background. */
+.page.active,
+.home-stage {
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
+html.route-switching .page.active {
+  will-change: transform, opacity;
+}
+
+/* Header gently leaves the viewport while scrolling down and returns as soon
+   as the user scrolls upward. Sticky layout remains intact, so content never jumps. */
+.site-header {
+  transform: translate3d(0,0,0);
+  opacity: 1;
+  transition: transform 520ms cubic-bezier(.16,1,.3,1),
+    opacity 360ms ease;
+  will-change: transform, opacity;
+}
+.site-header.header-hidden {
+  transform: translate3d(0, calc(-100% - 18px), 0);
+  opacity: .06;
+  pointer-events: none;
+}
+.site-header.header-hidden .header-shell {
+  pointer-events: none;
+}
+
+/* A tiny edge marker makes the reveal feel intentional rather than abrupt. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: min(220px, 36vw);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(140,255,59,.24), transparent);
+  opacity: .55;
+  transition: opacity 320ms ease;
+}
+.site-header.header-hidden::after { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none !important; }
+}
+html.motion-off .site-header { transition: none !important; }
 
