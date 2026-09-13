@@ -1,628 +1,779 @@
-/* v5.5.1 — Curated Neon Palette ------------------------------------------- */
+/* v5.4.8 — Neon Contrast --------------------------------------------------- */
 :root {
-  --neon-cyan: #59e7ff;
-  --neon-blue: #6b8cff;
-  --neon-violet: #9b7cff;
-  --neon-pink: #ff5cab;
-  --neon-lime: #7dffb8;
-  --neon-amber: #ffc96b;
-  --neon-coral: #ff7b87;
-  --neon-panel: rgba(10, 14, 25, .76);
+  --bg: #090c14;
+  --bg-2: #10162a;
+  --bg-top: #0f1430;
+  --bg-bottom: #070a12;
+  --surface-rgb: 14 18 31;
+  --surface-opacity: .74;
+  --surface: rgb(var(--surface-rgb) / var(--surface-opacity));
+  --surface-strong: rgb(18 24 40 / .88);
+  --surface-soft: rgba(255,255,255,.035);
+  --line: rgba(143, 200, 255, .14);
+  --line-strong: rgba(143, 200, 255, .32);
+  --text: #f4f8ff;
+  --muted: #b4bfd1;
+  --muted-2: #7f89a1;
+  --accent: #64d7ff;
+  --accent-soft: rgba(100, 215, 255, .16);
+  --accent-focus: rgba(100, 215, 255, .42);
+  --good: #6effbf;
+  --warn: #ffc56d;
+  --bad: #ff7ea8;
 }
 
-
-
-/* Kill the rainbow animation from v5.5.0. We keep neon, not RGB cycling. */
-.desktop-nav a,
-.desktop-nav a.active,
-[data-page="home"] .home-stage-nav button,
-[data-page="home"] .home-stage-nav button[aria-selected="true"],
-.primary-button,
-[data-page="home"] .hero-actions .primary-button,
-.banner-link,
-.subtle-button,
-.copy-chapter,
-.text-button,
-.copy-ip,
-.stage-footer .subtle-button {
-  animation: none !important;
-  background-size: auto !important;
-}
-.desktop-nav a::before,
-[data-page="home"] .home-stage-nav button::before,
-.subtle-button::before,
-.copy-chapter::before,
-.text-button::before,
-.banner-link::before,
-.copy-ip::before,
-.stage-footer .subtle-button::before {
-  animation: none !important;
+body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(94, 91, 255, .22), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(100, 215, 255, .16), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(255, 84, 154, .10), transparent 28%),
+    linear-gradient(160deg, #0d1230 0%, #090d1d 42%, #060910 100%);
+  background-attachment: fixed;
 }
 
-/* Top navigation: one neon identity per section. */
-
-.desktop-nav a::before {
-  display: none !important;
-}
-.desktop-nav a:hover {
-  box-shadow: none;
-}
-.desktop-nav a:nth-child(1).active {
-  background: linear-gradient(135deg, #59e7ff, #77c9ff);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 10px 26px rgba(89,231,255,.24), 0 0 22px rgba(89,231,255,.12);
-}
-.desktop-nav a:nth-child(2).active {
-  background: linear-gradient(135deg, #ffc96b, #ff9f62);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 10px 26px rgba(255,201,107,.22), 0 0 22px rgba(255,169,91,.11);
-}
-.desktop-nav a:nth-child(3).active {
-  background: linear-gradient(135deg, #ff5cab, #ff7b87);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 10px 26px rgba(255,92,171,.22), 0 0 22px rgba(255,123,135,.10);
-}
-.desktop-nav a:nth-child(4).active {
-  background: linear-gradient(135deg, #7dffb8, #5de5c8);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 10px 26px rgba(125,255,184,.20), 0 0 22px rgba(93,229,200,.10);
+.page-texture {
+  opacity: .13;
+  background-image:
+    linear-gradient(rgba(100,215,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.006) 1px, transparent 1px);
 }
 
-/* Home tabs: three strong, static neon colors. */
+.header-shell {
+  background: linear-gradient(180deg, rgba(10, 14, 27, .74), rgba(8, 11, 20, .78));
+  border: 1px solid rgba(100,215,255,.14);
+  box-shadow:
+    0 18px 48px rgba(3, 6, 14, .34),
+    0 0 0 1px rgba(255,255,255,.02) inset,
+    0 0 24px rgba(100,215,255,.06);
+}
+.brand-mark {
+  border-color: rgba(100,215,255,.28);
+  background: linear-gradient(145deg, rgba(100,215,255,.14), rgba(255,255,255,.03));
+  box-shadow: 0 0 18px rgba(100,215,255,.12);
+}
+.desktop-nav a { color: #b6c0d4; }
+.desktop-nav a:hover, .desktop-nav a.active { color: #ffffff; }
+.desktop-nav a.active::after {
+  background: linear-gradient(90deg, #64d7ff, #8f7cff);
+  box-shadow: 0 0 14px rgba(100,215,255,.34);
+}
+.server-mini { color: #cfd8ea; }
+.server-mini .dot { box-shadow: 0 0 10px currentColor; }
+.account-chip, .menu-button {
+  border-color: rgba(100,215,255,.16);
+  background: rgba(13, 18, 33, .58);
+  color: #ecf4ff;
+}
+.account-chip:hover, .menu-button:hover {
+  border-color: rgba(100,215,255,.32);
+  box-shadow: 0 0 0 1px rgba(100,215,255,.10) inset, 0 0 18px rgba(100,215,255,.10);
+}
+.menu-button span { background: #d4e8ff; }
 
-
-[data-page="home"] .home-stage-nav button::before {
-  display: none !important;
+.primary-button, .subtle-button, .discord-button, .text-button, .copy-chapter, .home-stage-nav button {
+  position: relative;
 }
-
-[data-page="home"] .home-stage-nav button:nth-child(1):hover {
-  background: rgba(89,231,255,.08);
-  border-color: rgba(89,231,255,.18);
-  box-shadow: 0 0 18px rgba(89,231,255,.08);
+.primary-button {
+  background: linear-gradient(135deg, #64d7ff 0%, #7b87ff 55%, #ff6ea6 100%);
+  color: #06101a;
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 12px 30px rgba(100,215,255,.22), 0 0 26px rgba(123,135,255,.16);
 }
-[data-page="home"] .home-stage-nav button:nth-child(2):hover {
-  background: rgba(255,92,171,.08);
-  border-color: rgba(255,92,171,.18);
-  box-shadow: 0 0 18px rgba(255,92,171,.08);
-}
-[data-page="home"] .home-stage-nav button:nth-child(3):hover {
-  background: rgba(155,124,255,.08);
-  border-color: rgba(155,124,255,.18);
-  box-shadow: 0 0 18px rgba(155,124,255,.08);
-}
-[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"] {
-  color: #061217;
-  background: linear-gradient(135deg, #59e7ff, #77c9ff);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 12px 28px rgba(89,231,255,.24), 0 0 24px rgba(89,231,255,.12);
-}
-[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"] {
-  color: #1a0712;
-  background: linear-gradient(135deg, #ff5cab, #ff7b87);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 12px 28px rgba(255,92,171,.23), 0 0 24px rgba(255,92,171,.11);
-}
-[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
-  color: #0e091b;
-  background: linear-gradient(135deg, #9b7cff, #6b8cff);
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 12px 28px rgba(155,124,255,.23), 0 0 24px rgba(107,140,255,.11);
-}
-
-
-/* Buttons: cyan is the global CTA color. Secondary stays dark with neon edge. */
-
-.primary-button:hover,
-[data-page="home"] .hero-actions .primary-button:hover {
+.primary-button:hover {
   transform: translateY(-2px);
-  filter: brightness(1.04);
+  filter: brightness(1.03);
+  box-shadow: 0 16px 36px rgba(100,215,255,.28), 0 0 32px rgba(255,110,166,.14);
 }
-.subtle-button,
-.copy-chapter,
-.text-button,
-.banner-link,
-.copy-ip,
-.stage-footer .subtle-button {
-  border: 1px solid rgba(155,124,255,.24);
-  box-shadow: 0 0 0 rgba(0,0,0,0);
+.subtle-button, .copy-chapter, .text-button {
+  background: rgba(15, 21, 37, .70);
+  border: 1px solid rgba(100,215,255,.18);
+  color: #dcecff;
 }
-.subtle-button::before,
-.copy-chapter::before,
-.text-button::before,
-.banner-link::before,
-.copy-ip::before,
-.stage-footer .subtle-button::before {
-  display: none !important;
+.subtle-button:hover, .copy-chapter:hover, .text-button:hover {
+  background: rgba(18, 25, 46, .86);
+  border-color: rgba(100,215,255,.34);
+  box-shadow: 0 0 18px rgba(100,215,255,.10);
 }
+.discord-button {
+  border-color: rgba(127, 151, 255, .34);
+  background: linear-gradient(135deg, rgba(92,107,255,.22), rgba(138,120,255,.18));
+  color: #edf0ff;
+  box-shadow: 0 10px 26px rgba(98,95,255,.14);
+}
+.discord-button:hover { background: linear-gradient(135deg, rgba(92,107,255,.32), rgba(138,120,255,.26)); }
 
-
-/* Cards stay dark, but each section gets a precise neon edge. */
-.news-item {
-  border-color: rgba(89,231,255,.10);
-  background: linear-gradient(180deg, rgba(11, 17, 29, .84), rgba(7, 11, 20, .76));
-  box-shadow: 0 16px 36px rgba(2,5,12,.24), 0 0 18px rgba(89,231,255,.035);
-}
-.news-item::before {
-  background: var(--neon-cyan);
-  box-shadow: 0 0 14px rgba(89,231,255,.22);
-}
-.news-item:hover {
-  border-color: rgba(89,231,255,.20);
-  box-shadow: 0 18px 42px rgba(2,5,12,.28), 0 0 24px rgba(89,231,255,.08);
-}
-.news-arrow {
-  color: var(--neon-cyan);
+.glass, .dialog-card, .auth-panel, .settings-panel, .cms-layout, .dashboard-panel, .book-sheet, .card, .panel,
+.news-item, .banner-item, .rule-item, .contact-line, .lore-categories, .lore-toc-list,
+.profile-card, .profile-section, .overview-card, .server-control-card, .home-status, .stage-shell {
+  background: linear-gradient(180deg, rgba(14, 19, 34, .78), rgba(10, 14, 24, .68));
+  border: 1px solid rgba(100,215,255,.10);
+  box-shadow:
+    0 16px 42px rgba(2, 6, 12, .24),
+    0 0 0 1px rgba(255,255,255,.018) inset,
+    0 0 20px rgba(100,215,255,.05);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  backdrop-filter: blur(20px) saturate(130%);
 }
 
-[data-page="lore"] .book-sheet,
-[data-page="lore"] .lore-toc-list,
-[data-page="lore"] .lore-categories {
-  border-color: rgba(255,201,107,.12);
-  box-shadow: 0 16px 38px rgba(2,5,12,.22), 0 0 18px rgba(255,201,107,.04);
+.home-stage-nav {
+  background: rgba(10, 14, 24, .46);
+  border: 1px solid rgba(100,215,255,.10);
+}
+.home-stage-nav button {
+  color: #aebada;
+  border: 1px solid transparent;
+}
+.home-stage-nav button:hover {
+  color: #f7fbff;
+  background: rgba(100,215,255,.08);
+}
+.home-stage-nav button.active {
+  background: linear-gradient(135deg, rgba(100,215,255,.16), rgba(127,124,255,.14));
+  color: #ffffff;
+  border-color: rgba(100,215,255,.20);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 0 24px rgba(100,215,255,.12);
 }
 
-[data-page="lore"] .book-prose::first-letter,
-[data-page="lore"] .book-chapter-number { color: var(--neon-amber); }
-
-[data-page="rules"] .rule-item {
-  border-color: rgba(255,92,171,.10);
+.banner-item {
+  border-radius: 24px;
+  overflow: hidden;
 }
-
-
-
-[data-page="contact"] .contact-line {
-  border-color: rgba(125,255,184,.10);
+.banner-item::before {
+  background: radial-gradient(circle at 80% 18%, rgba(100,215,255,.20), transparent 26%), linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,0) 38%);
 }
-
-
-
-/* Banner variants become neon families, not a rainbow blend. */
+.banner-item::after {
+  background: linear-gradient(90deg, rgba(7,10,18,.70), rgba(8,12,21,.34) 48%, rgba(14,20,36,.16) 78%, rgba(7,10,18,.22));
+}
+.banner-item img { opacity: .70; filter: saturate(1.08) contrast(1.05) brightness(.93); }
+.banner-copy h3 {
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(100,215,255,.08);
+}
+.banner-copy p { color: #d5e0f1; }
+.banner-kicker, .news-pill, #newsDetailVariantTag {
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+}
+.banner-link {
+  background: rgba(11, 16, 29, .68);
+  border-color: rgba(100,215,255,.18);
+  color: #eff7ff;
+}
+.banner-link:hover {
+  background: rgba(14, 21, 39, .84);
+  border-color: rgba(100,215,255,.36);
+  box-shadow: 0 0 18px rgba(100,215,255,.12);
+}
 .banner-item[data-variant="spotlight"] {
-  border-color: rgba(89,231,255,.16);
-  box-shadow: 0 20px 50px rgba(2,5,12,.28), 0 0 26px rgba(89,231,255,.06);
-}
-.banner-item[data-variant="spotlight"] .banner-kicker {
-  color: #dff9ff;
-  background: rgba(89,231,255,.12);
-  border-color: rgba(89,231,255,.20);
+  background:
+    radial-gradient(circle at 80% 18%, rgba(100,215,255,.22), transparent 25%),
+    linear-gradient(180deg, rgba(15, 28, 42, .82), rgba(8, 15, 27, .72));
 }
 .banner-item[data-variant="chronicle"] {
-  border-color: rgba(255,201,107,.16);
-  box-shadow: 0 20px 50px rgba(2,5,12,.28), 0 0 26px rgba(255,201,107,.05);
-}
-.banner-item[data-variant="chronicle"] .banner-kicker {
-  color: #fff0d5;
-  background: rgba(255,201,107,.12);
-  border-color: rgba(255,201,107,.20);
+  background:
+    radial-gradient(circle at 80% 18%, rgba(255,197,109,.20), transparent 24%),
+    linear-gradient(180deg, rgba(35, 25, 16, .82), rgba(18, 14, 13, .72));
 }
 .banner-item[data-variant="signal"] {
-  border-color: rgba(125,255,184,.16);
-  box-shadow: 0 20px 50px rgba(2,5,12,.28), 0 0 26px rgba(125,255,184,.05);
-}
-.banner-item[data-variant="signal"] .banner-kicker {
-  background: rgba(125,255,184,.12);
-  border-color: rgba(125,255,184,.20);
+  background:
+    radial-gradient(circle at 80% 18%, rgba(110,255,191,.20), transparent 24%),
+    linear-gradient(180deg, rgba(15, 35, 30, .82), rgba(9, 18, 18, .72));
 }
 .banner-item[data-variant="update"] {
-  border-color: rgba(155,124,255,.16);
-  box-shadow: 0 20px 50px rgba(2,5,12,.28), 0 0 26px rgba(155,124,255,.06);
+  background:
+    radial-gradient(circle at 80% 18%, rgba(143,124,255,.22), transparent 24%),
+    linear-gradient(180deg, rgba(22, 18, 41, .82), rgba(13, 11, 24, .72));
 }
-.banner-item[data-variant="update"] .banner-kicker {
-  color: #ece7ff;
-  background: rgba(155,124,255,.12);
-  border-color: rgba(155,124,255,.20);
+.banner-item[data-variant="spotlight"] .banner-kicker { color: #d8f4ff; background: rgba(100,215,255,.14); border-color: rgba(100,215,255,.20); }
+.banner-item[data-variant="chronicle"] .banner-kicker { color: #ffe3bc; background: rgba(255,197,109,.14); border-color: rgba(255,197,109,.18); }
+.banner-item[data-variant="signal"] .banner-kicker { color: #d5fff0; background: rgba(110,255,191,.12); border-color: rgba(110,255,191,.18); }
+.banner-item[data-variant="update"] .banner-kicker { color: #e4ddff; background: rgba(143,124,255,.14); border-color: rgba(143,124,255,.20); }
+
+.news-list { border-top-color: rgba(100,215,255,.12); }
+.news-item {
+  border-radius: 22px;
+  padding-left: 18px;
+  padding-right: 18px;
+  background: linear-gradient(180deg, rgba(14, 19, 35, .80), rgba(9, 13, 24, .72));
+}
+.news-item::before {
+  left: 10px;
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(100,215,255,.16), rgba(123,135,255,.48), rgba(255,110,166,.24));
+  box-shadow: 0 0 16px rgba(100,215,255,.14);
+}
+.news-item:hover {
+  background: linear-gradient(180deg, rgba(18, 24, 42, .88), rgba(11, 15, 28, .78));
+  border-color: rgba(100,215,255,.18);
+  box-shadow: 0 18px 46px rgba(4, 9, 18, .28), 0 0 24px rgba(100,215,255,.08);
+}
+.news-item h3 {
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(123,135,255,.06);
+}
+.news-item p { color: #d6e0ef; }
+.news-date-block time { color: #d5f0ff; }
+.news-date-block small, .news-read, .article-meta { color: #8f9bb4; }
+.news-arrow { color: #9ee6ff; }
+.news-thumb {
+  border-color: rgba(100,215,255,.14);
+  background: rgba(8, 12, 22, .62);
+}
+.news-thumb::after { background: linear-gradient(180deg, rgba(100,215,255,.04), transparent); }
+.news-item[data-variant="chronicle"] .news-pill { color: #ffe0b2; background: rgba(255,197,109,.12); border-color: rgba(255,197,109,.18); }
+.news-item[data-variant="spotlight"] .news-pill { color: #d7f5ff; background: rgba(100,215,255,.12); border-color: rgba(100,215,255,.18); }
+.news-item[data-variant="update"] .news-pill { color: #e3ddff; background: rgba(143,124,255,.14); border-color: rgba(143,124,255,.18); }
+
+.article-page h1 { color: #ffffff; }
+.article-lead { color: #dce7f5; }
+.article-body {
+  background: linear-gradient(180deg, rgba(15, 20, 35, .76), rgba(9, 14, 25, .62));
+  border-color: rgba(100,215,255,.10);
+  border-left: 2px solid rgba(100,215,255,.34);
+  color: #dbe5f0;
+}
+.article-body::first-letter { color: #8fe4ff; }
+
+[data-page="lore"] .lore-categories { background: rgba(12, 18, 31, .58); border-color: rgba(255,197,109,.12); }
+[data-page="lore"] .lore-categories button:hover,
+[data-page="lore"] .lore-categories button.active {
+  color: #fff5e5;
+  background: rgba(255,197,109,.14);
+  box-shadow: 0 0 18px rgba(255,197,109,.10);
+}
+[data-page="lore"] .lore-toc-list {
+  background: linear-gradient(180deg, rgba(19, 17, 20, .76), rgba(13, 12, 16, .62));
+  border-color: rgba(255,197,109,.10);
+}
+[data-page="lore"] .toc-item.active {
+  background: linear-gradient(90deg, rgba(255,197,109,.16), rgba(255,255,255,.03));
+  color: #fff3df;
+}
+[data-page="lore"] .book-sheet {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,197,109,.10), transparent 28%),
+    linear-gradient(180deg, rgba(26, 22, 19, .82), rgba(14, 12, 13, .70));
+  border-color: rgba(255,197,109,.12);
+  box-shadow: 0 18px 44px rgba(6, 8, 14, .24), 0 0 22px rgba(255,197,109,.05);
+}
+[data-page="lore"] .book-sheet h2 { color: #fff4e4; }
+[data-page="lore"] .book-chapter-number { color: #ffd08a; }
+[data-page="lore"] .book-prose { color: #eadfce; }
+[data-page="lore"] .book-prose::first-letter { color: #ffcf86; }
+
+[data-page="rules"] .rule-item {
+  border-color: rgba(255,126,168,.10);
+  background: linear-gradient(180deg, rgba(29, 16, 26, .76), rgba(16, 10, 18, .64));
+}
+[data-page="rules"] .rule-item:hover {
+  background: linear-gradient(180deg, rgba(37, 18, 31, .84), rgba(20, 11, 21, .70));
+  border-color: rgba(255,126,168,.18);
+  box-shadow: 0 0 22px rgba(255,126,168,.08);
+}
+[data-page="contact"] .contact-line {
+  border-color: rgba(124,255,201,.10);
+  background: linear-gradient(180deg, rgba(13, 25, 24, .76), rgba(9, 15, 15, .64));
+}
+[data-page="contact"] .contact-line:hover {
+  border-color: rgba(124,255,201,.18);
+  box-shadow: 0 0 22px rgba(124,255,201,.08);
 }
 
+input, textarea, select {
+  background: rgba(9, 14, 26, .74);
+  border-color: rgba(100,215,255,.14);
+  color: #f5fbff;
+}
+input::placeholder, textarea::placeholder { color: #8290a6; }
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(100,215,255,.34);
+  box-shadow: 0 0 0 3px rgba(100,215,255,.10), 0 0 20px rgba(100,215,255,.10);
+}
+
+.footer-line {
+  border-top-color: rgba(100,215,255,.10);
+  color: #8f99ab;
+}
+.footer-line strong { color: #c9d4e7; }
+
 @media (max-width: 760px) {
-  .desktop-nav a.active,
-  [data-page="home"] .home-stage-nav button[aria-selected="true"] {
-    box-shadow: 0 8px 20px rgba(0,0,0,.18);
+  body {
+    background:
+      radial-gradient(circle at 24% 10%, rgba(94, 91, 255, .18), transparent 24%),
+      radial-gradient(circle at 82% 14%, rgba(100, 215, 255, .14), transparent 20%),
+      linear-gradient(160deg, #0d1230 0%, #090d1d 48%, #060910 100%);
+  }
+  .news-item, .news-item.has-image { padding: 18px 14px; }
+}
+
+
+/* v5.4.9 — Cyber Neon + cinematic home background -------------------------- */
+:root {
+  --neon-cyan: #57e8ff;
+  --neon-violet: #8f7cff;
+  --neon-pink: #ff5ca8;
+  --neon-lime: #72ffb3;
+  --neon-amber: #ffc968;
+  --neon-blue: #5aa9ff;
+}
+
+/* HOME BACKGROUND: use the supplied Minecraft render as the real stage. */
+.page[data-page="home"] {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+}
+.page[data-page="home"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-image: url('/home-bg.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  filter: saturate(1.06) contrast(1.02) brightness(.74);
+  transform: scale(1.015);
+}
+.page[data-page="home"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(87,232,255,.15), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(255,92,168,.11), transparent 26%),
+    linear-gradient(180deg, rgba(4,7,14,.28) 0%, rgba(5,8,16,.54) 42%, rgba(4,7,14,.78) 100%);
+}
+.page[data-page="home"] .home-stage-nav,
+.page[data-page="home"] .home-intro,
+.page[data-page="home"] .stage-heading,
+.page[data-page="home"] .section-heading,
+.page[data-page="home"] .stage-footer,
+.page[data-page="home"] .banner-strip,
+.page[data-page="home"] .news-list,
+.page[data-page="home"] .news-more-wrap,
+.page[data-page="home"] .banner-empty {
+  position: relative;
+  z-index: 1;
+}
+
+/* Make the first screen feel like a glass HUD instead of text floating on art. */
+[data-page="home"] .home-intro {
+  margin-top: 26px;
+  padding: 42px 44px;
+  border: 1px solid rgba(188,225,255,.13);
+  border-radius: 28px;
+  background:
+    linear-gradient(135deg, rgba(7,11,22,.74), rgba(8,14,25,.48)),
+    radial-gradient(circle at 88% 18%, rgba(87,232,255,.09), transparent 30%);
+  box-shadow:
+    0 28px 80px rgba(3,6,12,.38),
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 0 34px rgba(87,232,255,.05);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+}
+[data-page="home"] .intro-copy h1 {
+  color: #fff;
+  text-shadow: 0 6px 30px rgba(0,0,0,.36), 0 0 18px rgba(87,232,255,.06);
+}
+[data-page="home"] .intro-text { color: #dce8f2; }
+[data-page="home"] .intro-aside {
+  border: 1px solid rgba(190,225,255,.12);
+  background: rgba(7,11,20,.44);
+  border-radius: 20px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+  backdrop-filter: blur(14px) saturate(125%);
+}
+[data-page="home"] .intro-aside span { color: #92a1b5; }
+[data-page="home"] .intro-aside strong { color: #eef7ff; }
+
+/* TOP NAV: active tabs become small neon pills. */
+.desktop-nav a {
+  border-radius: 12px;
+  transition: color .22s ease, background .22s ease, box-shadow .22s ease, transform .22s ease;
+}
+.desktop-nav a::after { display: none; }
+.desktop-nav a:hover {
+  color: #fff;
+  background: rgba(87,232,255,.07);
+  box-shadow: inset 0 0 0 1px rgba(87,232,255,.10);
+}
+.desktop-nav a.active {
+  color: #071019;
+  background: linear-gradient(135deg, rgba(87,232,255,.98), rgba(102,178,255,.92));
+  box-shadow: 0 8px 22px rgba(87,232,255,.18), 0 0 22px rgba(87,232,255,.12);
+  transform: translateY(-1px);
+}
+
+/* HOME TABS: each tab gets its own neon identity. */
+.home-stage-nav {
+  padding: 7px;
+  gap: 8px;
+  background: rgba(7,10,18,.64);
+  border-color: rgba(180,220,245,.13);
+  box-shadow: 0 14px 36px rgba(2,5,12,.28), inset 0 1px 0 rgba(255,255,255,.035);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
+}
+.home-stage-nav button {
+  min-height: 54px;
+  border: 1px solid rgba(255,255,255,.055);
+  background: rgba(255,255,255,.022);
+  color: #aab8cb;
+  font-weight: 700;
+  letter-spacing: .01em;
+  transition: transform .2s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease, color .25s ease;
+}
+.home-stage-nav button small { color: currentColor; opacity: .72; }
+.home-stage-nav button:hover { transform: translateY(-1px); color: #fff; }
+.home-stage-nav button:nth-child(1):hover {
+  background: rgba(87,232,255,.09);
+  border-color: rgba(87,232,255,.20);
+  box-shadow: 0 0 22px rgba(87,232,255,.09);
+}
+.home-stage-nav button:nth-child(2):hover {
+  background: rgba(255,92,168,.09);
+  border-color: rgba(255,92,168,.20);
+  box-shadow: 0 0 22px rgba(255,92,168,.09);
+}
+.home-stage-nav button:nth-child(3):hover {
+  background: rgba(143,124,255,.10);
+  border-color: rgba(143,124,255,.22);
+  box-shadow: 0 0 22px rgba(143,124,255,.09);
+}
+.home-stage-nav button:nth-child(1)[aria-selected="true"] {
+  color: #061117;
+  background: linear-gradient(135deg, #57e8ff 0%, #69c6ff 100%);
+  border-color: rgba(255,255,255,.25);
+  box-shadow: 0 12px 28px rgba(87,232,255,.23), 0 0 28px rgba(87,232,255,.18);
+}
+.home-stage-nav button:nth-child(2)[aria-selected="true"] {
+  color: #1a0812;
+  background: linear-gradient(135deg, #ff5ca8 0%, #ff7b87 100%);
+  border-color: rgba(255,255,255,.24);
+  box-shadow: 0 12px 28px rgba(255,92,168,.22), 0 0 28px rgba(255,92,168,.16);
+}
+.home-stage-nav button:nth-child(3)[aria-selected="true"] {
+  color: #0c091d;
+  background: linear-gradient(135deg, #8f7cff 0%, #b26cff 100%);
+  border-color: rgba(255,255,255,.24);
+  box-shadow: 0 12px 28px rgba(143,124,255,.22), 0 0 28px rgba(143,124,255,.16);
+}
+
+/* HERO buttons: deliberately much brighter than the background. */
+[data-page="home"] .hero-actions .primary-button {
+  background: linear-gradient(135deg, #57e8ff 0%, #7a9cff 55%, #ff62aa 100%);
+  color: #071018;
+  border: 1px solid rgba(255,255,255,.28);
+  box-shadow: 0 14px 32px rgba(87,232,255,.24), 0 0 28px rgba(143,124,255,.16);
+}
+[data-page="home"] .hero-actions .primary-button:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 18px 38px rgba(87,232,255,.30), 0 0 34px rgba(255,92,168,.13);
+}
+[data-page="home"] .hero-actions .subtle-button {
+  background: rgba(7,12,24,.66);
+  border-color: rgba(143,124,255,.28);
+  color: #efeaff;
+  box-shadow: 0 0 20px rgba(143,124,255,.08);
+}
+[data-page="home"] .hero-actions .subtle-button:hover {
+  border-color: rgba(143,124,255,.46);
+  background: rgba(19,17,39,.76);
+  box-shadow: 0 0 28px rgba(143,124,255,.14);
+}
+
+/* Status and IP buttons also become HUD-like. */
+[data-page="home"] .status-line,
+[data-page="home"] .copy-ip {
+  border: 1px solid rgba(183,217,239,.10);
+  border-radius: 14px;
+  background: rgba(7,11,20,.42);
+  padding: 10px 12px;
+  color: #d9e5ef;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+[data-page="home"] .status-line:hover,
+[data-page="home"] .copy-ip:hover {
+  border-color: rgba(87,232,255,.22);
+  background: rgba(10,16,29,.62);
+}
+
+/* Stage surfaces on top of the image: clearly separated, semi-transparent. */
+[data-page="home"] .stage-heading,
+[data-page="home"] .section-heading.home-news-heading,
+[data-page="home"] .stage-footer,
+[data-page="home"] .banner-empty {
+  padding: 20px 22px;
+  border: 1px solid rgba(182,218,241,.10);
+  border-radius: 20px;
+  background: rgba(7,11,20,.58);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 14px 36px rgba(2,5,12,.20);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(16px) saturate(130%);
+}
+[data-page="home"] .stage-heading .kicker,
+[data-page="home"] .section-heading .kicker { color: var(--neon-cyan); }
+[data-page="home"] .stage-heading h2,
+[data-page="home"] .section-heading h2 { color: #fff; }
+
+/* News rows: more cyber, less generic dark card. */
+[data-page="home"] .news-item {
+  background: linear-gradient(135deg, rgba(8,13,25,.78), rgba(10,16,30,.64));
+  border-color: rgba(87,232,255,.10);
+  box-shadow: 0 14px 34px rgba(2,5,12,.24), inset 0 1px 0 rgba(255,255,255,.025);
+}
+[data-page="home"] .news-item:hover {
+  border-color: rgba(87,232,255,.24);
+  box-shadow: 0 18px 40px rgba(2,5,12,.28), 0 0 26px rgba(87,232,255,.08);
+}
+[data-page="home"] .news-item::before {
+  background: linear-gradient(180deg, #57e8ff, #8f7cff 52%, #ff5ca8);
+  box-shadow: 0 0 16px rgba(87,232,255,.18);
+}
+[data-page="home"] .news-arrow { color: #7beeff; }
+
+/* Banner becomes brighter and more cinematic over the same background. */
+[data-page="home"] .banner-item {
+  border-color: rgba(87,232,255,.14);
+  background: rgba(5,9,17,.58);
+  box-shadow: 0 26px 70px rgba(2,5,12,.34), 0 0 28px rgba(87,232,255,.06);
+}
+[data-page="home"] .banner-item img { opacity: .78; }
+[data-page="home"] .banner-item::after {
+  background: linear-gradient(90deg, rgba(4,7,13,.74), rgba(4,7,13,.34) 50%, rgba(4,7,13,.12) 76%, rgba(4,7,13,.26));
+}
+
+/* Stage navigation buttons at the bottom: brighter too. */
+[data-page="home"] .stage-footer .subtle-button {
+  border-color: rgba(87,232,255,.20);
+  color: #dff7ff;
+  background: rgba(6,12,24,.62);
+}
+[data-page="home"] .stage-footer .subtle-button:hover {
+  border-color: rgba(87,232,255,.40);
+  box-shadow: 0 0 22px rgba(87,232,255,.12);
+}
+[data-page="home"] .text-back:hover { color: #8feeff; }
+
+@media (max-width: 900px) {
+  [data-page="home"] .home-intro {
+    padding: 30px 28px;
+    border-radius: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .page[data-page="home"]::before {
+    background-position: 58% center;
+    filter: saturate(1.03) contrast(1.02) brightness(.62);
+  }
+  .page[data-page="home"]::after {
+    background:
+      radial-gradient(circle at 20% 12%, rgba(87,232,255,.13), transparent 24%),
+      linear-gradient(180deg, rgba(4,7,14,.36) 0%, rgba(4,7,14,.66) 50%, rgba(4,7,14,.84) 100%);
+  }
+  [data-page="home"] .home-intro {
+    margin-top: 16px;
+    padding: 24px 20px;
+  }
+  .home-stage-nav {
+    gap: 5px;
+    padding: 5px;
+  }
+  .home-stage-nav button {
+    min-height: 50px;
+    font-size: 11px;
   }
 }
 
 
-/* v5.5.2 — Neon Typography ------------------------------------------------ */
-:root {
-  --text-cyan: #69e8ff;
-  --text-blue: #7aa0ff;
-  --text-violet: #b58cff;
-  --text-pink: #ff78bd;
-  --text-amber: #ffd27a;
-  --text-mint: #86ffd0;
+/* v5.5.0 — RGB buttons and animated tab gradients ------------------------- */
+@keyframes rgbFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes rgbPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(87,232,255,0), 0 10px 28px rgba(87,232,255,.12); }
+  33% { box-shadow: 0 0 18px rgba(87,232,255,.18), 0 12px 30px rgba(143,124,255,.14); }
+  66% { box-shadow: 0 0 22px rgba(255,92,168,.18), 0 14px 34px rgba(255,203,92,.10); }
 }
 
-/* The idea: no bright fills. Dark glass surfaces + luminous text. */
-.desktop-nav a,
-[data-page="home"] .home-stage-nav button,
+:root {
+  --rgb-gradient: linear-gradient(120deg, #57e8ff 0%, #7d7cff 25%, #ff5ca8 52%, #ffd45f 77%, #57e8ff 100%);
+  --rgb-gradient-soft: linear-gradient(120deg, rgba(87,232,255,.18) 0%, rgba(125,124,255,.18) 25%, rgba(255,92,168,.16) 52%, rgba(255,212,95,.16) 77%, rgba(87,232,255,.18) 100%);
+}
+
+.desktop-nav a {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  isolation: isolate;
+}
+.desktop-nav a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--rgb-gradient-soft);
+  background-size: 240% 240%;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity .24s ease;
+}
+.desktop-nav a:hover::before { opacity: 1; animation: rgbFlow 6s linear infinite; }
+.desktop-nav a:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,.12);
+  box-shadow: 0 0 16px rgba(87,232,255,.10);
+}
+.desktop-nav a.active {
+  color: #071019;
+  border-color: rgba(255,255,255,.30);
+  background: var(--rgb-gradient);
+  background-size: 240% 240%;
+  animation: rgbFlow 8s linear infinite, rgbPulse 5s ease infinite;
+  box-shadow: 0 12px 30px rgba(87,232,255,.22), 0 0 30px rgba(125,124,255,.16);
+}
+.desktop-nav a.active::before { display: none; }
+
+[data-page="home"] .home-stage-nav {
+  background: rgba(7, 10, 18, .58);
+  border-color: rgba(255,255,255,.10);
+  box-shadow: 0 14px 40px rgba(2, 5, 12, .30), inset 0 1px 0 rgba(255,255,255,.035);
+}
+[data-page="home"] .home-stage-nav button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.02);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, color .22s ease;
+}
+[data-page="home"] .home-stage-nav button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--rgb-gradient-soft);
+  background-size: 240% 240%;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity .22s ease;
+}
+[data-page="home"] .home-stage-nav button:hover::before {
+  opacity: 1;
+  animation: rgbFlow 4s linear infinite;
+}
+[data-page="home"] .home-stage-nav button:hover {
+  color: #ffffff;
+  border-color: rgba(255,255,255,.14);
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(87,232,255,.10);
+}
+[data-page="home"] .home-stage-nav button[aria-selected="true"] {
+  color: #061019;
+  border-color: rgba(255,255,255,.30);
+  background: var(--rgb-gradient);
+  background-size: 260% 260%;
+  animation: rgbFlow 7s linear infinite, rgbPulse 5s ease infinite;
+  box-shadow: 0 14px 34px rgba(87,232,255,.22), 0 0 36px rgba(255,92,168,.12);
+}
+[data-page="home"] .home-stage-nav button[aria-selected="true"] small {
+  color: rgba(6, 16, 25, .76);
+  opacity: 1;
+}
+
 .primary-button,
 [data-page="home"] .hero-actions .primary-button,
+.banner-link:hover,
+.copy-ip:hover,
+.stage-footer .subtle-button:hover {
+  background: var(--rgb-gradient);
+  background-size: 240% 240%;
+  animation: rgbFlow 8s linear infinite;
+}
+.primary-button,
+[data-page="home"] .hero-actions .primary-button {
+  color: #071019;
+  border-color: rgba(255,255,255,.26);
+  box-shadow: 0 14px 34px rgba(87,232,255,.22), 0 0 26px rgba(125,124,255,.14);
+}
+.primary-button:hover,
+[data-page="home"] .hero-actions .primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(87,232,255,.28), 0 0 30px rgba(255,92,168,.16);
+}
+
 .subtle-button,
 .copy-chapter,
 .text-button,
 .banner-link,
 .copy-ip,
 .stage-footer .subtle-button {
-  background: rgba(9, 13, 23, .62) !important;
-  color: #dce6f3;
-  animation: none !important;
-  filter: none;
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(125,124,255,.26);
 }
-
-/* Top navigation: glowing words, almost no fill. */
-.desktop-nav a {
-  border-color: transparent;
+.subtle-button::before,
+.copy-chapter::before,
+.text-button::before,
+.banner-link::before,
+.copy-ip::before,
+.stage-footer .subtle-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--rgb-gradient-soft);
+  background-size: 240% 240%;
+  opacity: 0;
+  transition: opacity .22s ease;
+  z-index: 0;
 }
-
-.desktop-nav a.active {
-  transform: none;
+.subtle-button > *,
+.copy-chapter > *,
+.text-button > *,
+.banner-link > *,
+.copy-ip > *,
+.stage-footer .subtle-button > * { position: relative; z-index: 1; }
+.subtle-button:hover::before,
+.copy-chapter:hover::before,
+.text-button:hover::before,
+.banner-link:hover::before,
+.copy-ip:hover::before,
+.stage-footer .subtle-button:hover::before {
+  opacity: 1;
+  animation: rgbFlow 5s linear infinite;
 }
-
-
-
-
-
-/* Home tabs: the label itself is the accent. */
-[data-page="home"] .home-stage-nav {
-  border-color: rgba(255,255,255,.07);
-}
-
-
-
-
-
-
-
-/* Main CTA: dark button, neon words and edge instead of a bright slab. */
-
-.primary-button:hover,
-[data-page="home"] .hero-actions .primary-button:hover {
-  text-shadow: 0 0 12px rgba(105,232,255,.62), 0 0 28px rgba(105,232,255,.22);
-}
-
-
 .subtle-button:hover,
 .copy-chapter:hover,
 .text-button:hover,
 .banner-link:hover,
 .copy-ip:hover,
 .stage-footer .subtle-button:hover {
-  text-shadow: 0 0 10px rgba(181,140,255,.54);
-}
-
-/* Colorful typography on page headings, not body copy. */
-[data-page="home"] .section-heading h2,
-[data-page="home"] .stage-heading h2,
-[data-page="home"] .hero-copy h1 {
-  background: linear-gradient(90deg, #f6fbff 0%, var(--text-cyan) 42%, var(--text-blue) 82%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(105,232,255,.10));
-}
-[data-page="lore"] .lore-header h1,
-[data-page="lore"] .book-sheet h2 {
-  background: linear-gradient(90deg, #fff7e9 0%, var(--text-amber) 56%, #ff9c7c 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 9px rgba(255,210,122,.10));
-}
-[data-page="rules"] .simple-head h1 {
-  background: linear-gradient(90deg, #fff3f8 0%, var(--text-pink) 52%, var(--text-violet) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 9px rgba(255,120,189,.12));
-}
-[data-page="contact"] .simple-head h1 {
-  background: linear-gradient(90deg, #f2fff9 0%, var(--text-mint) 50%, var(--text-cyan) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 9px rgba(134,255,208,.12));
-}
-
-/* Smaller labels get clean neon colors with glow. */
-[data-page="home"] .kicker,
-[data-page="news"] .kicker,
-.news-date-block time,
-.news-arrow {
-  color: var(--text-cyan);
-  text-shadow: 0 0 8px rgba(105,232,255,.34);
-}
-[data-page="lore"] .kicker,
-[data-page="lore"] .book-chapter-number,
-[data-page="lore"] .book-prose::first-letter {
-  color: var(--text-amber);
-  text-shadow: 0 0 8px rgba(255,210,122,.28);
-}
-[data-page="rules"] .kicker,
-[data-page="rules"] .rule-index {
-  color: var(--text-pink);
-  text-shadow: 0 0 8px rgba(255,120,189,.28);
-}
-[data-page="contact"] .kicker,
-[data-page="contact"] .contact-line span {
-  color: var(--text-mint);
-  text-shadow: 0 0 8px rgba(134,255,208,.24);
-}
-
-/* News type labels use colored text, not colored pills. */
-.news-pill,
-.banner-kicker,
-#newsDetailVariantTag {
-  background: rgba(8, 12, 21, .52) !important;
-  border-color: rgba(255,255,255,.08) !important;
-}
-.news-item[data-variant="chronicle"] .news-pill,
-.banner-item[data-variant="chronicle"] .banner-kicker,
-.article-page[data-variant="chronicle"] #newsDetailVariantTag {
-  color: var(--text-amber);
-  text-shadow: 0 0 8px rgba(255,210,122,.32);
-}
-.news-item[data-variant="spotlight"] .news-pill,
-.banner-item[data-variant="spotlight"] .banner-kicker,
-.article-page[data-variant="spotlight"] #newsDetailVariantTag {
-  color: var(--text-cyan);
-  text-shadow: 0 0 8px rgba(105,232,255,.34);
-}
-.news-item[data-variant="update"] .news-pill,
-.banner-item[data-variant="update"] .banner-kicker,
-.article-page[data-variant="update"] #newsDetailVariantTag {
-  color: var(--text-violet);
-  text-shadow: 0 0 8px rgba(181,140,255,.34);
-}
-.banner-item[data-variant="signal"] .banner-kicker {
-  color: var(--text-mint);
-  text-shadow: 0 0 8px rgba(134,255,208,.30);
-}
-
-/* Preserve readability: paragraphs remain neutral, only emphasis glows. */
-.news-item p,
-.article-body,
-[data-page="lore"] .book-prose,
-[data-page="rules"] .rule-item p,
-[data-page="contact"] .contact-line strong {
-  text-shadow: none;
+  color: #fff;
+  border-color: rgba(255,255,255,.18);
+  box-shadow: 0 0 20px rgba(87,232,255,.10);
 }
 
 @media (max-width: 760px) {
-  [data-page="home"] .hero-copy h1,
-  [data-page="lore"] .lore-header h1,
-  [data-page="rules"] .simple-head h1,
-  [data-page="contact"] .simple-head h1 {
-    filter: none;
+  .desktop-nav a.active {
+    box-shadow: 0 10px 22px rgba(87,232,255,.18), 0 0 22px rgba(255,92,168,.10);
+  }
+  [data-page="home"] .home-stage-nav button[aria-selected="true"] {
+    box-shadow: 0 10px 22px rgba(87,232,255,.16), 0 0 18px rgba(255,92,168,.10);
   }
 }
 
-/* v5.5.3 — Calm aqua scenic home ------------------------------------------ */
-:root {
-  --aqua-100: #e9fbff;
-  --aqua-200: #d4f5fb;
-  --aqua-300: #b9edf6;
-  --aqua-400: #96e2ee;
-  --aqua-500: #72d3e5;
-  --mint-400: #8de2c6;
-  --mint-500: #67ccb0;
-  --sky-400: #92c6f7;
-  --ink-900: #061018;
-  --ink-850: #0a1520;
-  --glass-soft: rgba(9, 18, 28, .58);
-  --glass-strong: rgba(8, 16, 24, .72);
-  --glass-line: rgba(150, 222, 230, .18);
-}
-
-
-
-/* Replace the old moody background with the bright scenic Minecraft render,
-   but keep readability through a calmer top overlay. */
-.page[data-page="home"]::before {
-  background-image: url("/home-bg.png");
-  background-size: cover;
-  transform: scale(1.01);
-}
-
-
-/* Home hero: slightly smaller, a bit shifted, easier to read on the new art. */
-[data-page="home"] .home-intro {
-  -webkit-backdrop-filter: blur(18px) saturate(120%);
-  backdrop-filter: blur(18px) saturate(120%);
-}
-
-
-
-
-[data-page="home"] .intro-aside {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-}
-
-
-
-/* Friendlier aqua / mint palette instead of aggressive neon. */
-
-.desktop-nav a:hover {
-  text-shadow: 0 0 12px rgba(114,211,229,.18);
-}
-.desktop-nav a.active {
-  background: rgba(9, 18, 28, .56) !important;
-  border-color: rgba(185,237,246,.14);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.018);
-}
-.desktop-nav a:nth-child(1).active {
-  color: var(--aqua-300);
-  text-shadow: 0 0 12px rgba(114,211,229,.24);
-}
-.desktop-nav a:nth-child(2).active {
-  color: #b9d6ff;
-  text-shadow: 0 0 12px rgba(146,198,247,.22);
-}
-.desktop-nav a:nth-child(3).active {
-  color: var(--mint-400);
-  text-shadow: 0 0 12px rgba(103,204,176,.20);
-}
-.desktop-nav a:nth-child(4).active {
-  color: var(--aqua-400);
-  text-shadow: 0 0 12px rgba(114,211,229,.20);
-}
-
-/* Home tabs get brighter but controlled accents. */
-[data-page="home"] .home-stage-nav {
-  -webkit-backdrop-filter: blur(15px) saturate(115%);
-  backdrop-filter: blur(15px) saturate(115%);
-}
-
-
-[data-page="home"] .home-stage-nav button:nth-child(1):hover,
-[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"] {
-  color: #effcff;
-  background: linear-gradient(135deg, rgba(114,211,229,.28), rgba(146,198,247,.18)) !important;
-  border-color: rgba(114,211,229,.26);
-  box-shadow: 0 0 0 1px rgba(114,211,229,.08), 0 10px 24px rgba(114,211,229,.10) !important;
-  text-shadow: 0 0 10px rgba(114,211,229,.16);
-}
-[data-page="home"] .home-stage-nav button:nth-child(2):hover,
-[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"] {
-  color: #f5fff9;
-  background: linear-gradient(135deg, rgba(103,204,176,.26), rgba(114,211,229,.16)) !important;
-  border-color: rgba(103,204,176,.24);
-  box-shadow: 0 0 0 1px rgba(103,204,176,.08), 0 10px 24px rgba(103,204,176,.10) !important;
-  text-shadow: 0 0 10px rgba(103,204,176,.14);
-}
-[data-page="home"] .home-stage-nav button:nth-child(3):hover,
-[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
-  color: #f7fbff;
-  background: linear-gradient(135deg, rgba(146,198,247,.26), rgba(114,211,229,.16)) !important;
-  border-color: rgba(146,198,247,.24);
-  box-shadow: 0 0 0 1px rgba(146,198,247,.08), 0 10px 24px rgba(146,198,247,.10) !important;
-  text-shadow: 0 0 10px rgba(146,198,247,.15);
-}
-[data-page="home"] .home-stage-nav button[aria-selected="true"] small {
-  color: currentColor;
-  opacity: .72;
-}
-
-/* Buttons: calmer glow, better match with the new palette. */
-
-
-
-
-
-/* Semi-transparent cards that clearly separate from the background image. */
-[data-page="home"] .stage-heading,
-[data-page="home"] .section-heading.home-news-heading,
-[data-page="home"] .stage-footer,
-[data-page="home"] .banner-empty,
-[data-page="home"] .banner-item,
-[data-page="home"] .news-item {
-  border: 1px solid rgba(150, 222, 230, .16);
-  background: linear-gradient(180deg, rgba(9, 18, 28, .64), rgba(8, 16, 24, .54));
-  box-shadow:
-    0 18px 44px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.035);
-  -webkit-backdrop-filter: blur(16px) saturate(118%);
-  backdrop-filter: blur(16px) saturate(118%);
-}
-
-
-
-
-[data-page="home"] .news-list {
-  border-top-color: rgba(150, 222, 230, .12);
-}
-
-
-
-
-
-[data-page="home"] .news-pill,
-[data-page="home"] .news-date-block time,
-[data-page="home"] .news-arrow {
-  color: var(--aqua-300);
-  text-shadow: none;
-}
-
-[data-page="home"] .banner-item {
-  border-color: rgba(150, 222, 230, .18);
-  background: linear-gradient(135deg, rgba(7, 15, 24, .58), rgba(10, 18, 28, .42));
-}
-
-
-
-
-[data-page="home"] .banner-item[data-variant="spotlight"] .banner-kicker {
-  color: #d8f5fc;
-  background: rgba(114,211,229,.12) !important;
-  border-color: rgba(114,211,229,.18) !important;
-}
-[data-page="home"] .banner-item[data-variant="chronicle"] .banner-kicker {
-  color: #e5f8ff;
-  background: rgba(146,198,247,.12) !important;
-  border-color: rgba(146,198,247,.18) !important;
-}
-[data-page="home"] .banner-item[data-variant="signal"] .banner-kicker,
-[data-page="home"] .banner-item[data-variant="update"] .banner-kicker {
-  color: #e1fff2;
-  background: rgba(103,204,176,.12) !important;
-  border-color: rgba(103,204,176,.18) !important;
-}
-
-/* Make other section cards cleaner too, but not over-neon. */
-.book-sheet,
-.lore-toc-list,
-.lore-categories,
-.rule-item,
-.contact-line,
-.profile-card,
-.profile-section,
-.overview-card,
-.server-control-card,
-.dialog-card,
-.auth-panel,
-.settings-panel,
-.dashboard-panel,
-.home-status {
-  border-color: rgba(150, 222, 230, .12);
-  box-shadow: 0 18px 40px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.03);
-}
-.rule-item:hover,
-.contact-line:hover,
-.profile-card:hover,
-.overview-card:hover,
-.server-control-card:hover {
-  border-color: rgba(150, 222, 230, .20);
-}
-
-/* Mobile: keep the hero compact and centered. */
-@media (max-width: 900px) {
-  [data-page="home"] .home-intro {
-    padding: 28px 24px;
-  }
-  [data-page="home"] .intro-copy {
-    margin-left: 0;
-    max-width: none;
-  }
-}
-@media (max-width: 760px) {
-  .page[data-page="home"]::before {
-    background-position: 38% center;
-    filter: saturate(.96) contrast(1.01) brightness(.56);
-  }
-  [data-page="home"] .intro-copy h1 {
-    font-size: clamp(30px, 9vw, 44px);
-    max-width: 12ch;
-  }
-  [data-page="home"] .intro-text { font-size: 15px; }
-  [data-page="home"] .home-stage-nav {
-    gap: 5px;
-    padding: 5px;
-  }
-  [data-page="home"] .home-stage-nav button {
-    min-height: 50px;
-    font-size: 11px;
-  }
-}
 

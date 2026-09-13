@@ -1,3 +1,273 @@
+/* v5.5.8 — seamless scenic pages, clock, and silk transitions ------------- */
+
+/* One neutral background treatment everywhere. The previous violet page-wide
+   tint is intentionally removed: internal pages now see the same landscape as Home. */
+.page-texture {
+  background:
+    linear-gradient(180deg, rgba(5, 9, 14, .38) 0%, rgba(5, 9, 14, .48) 42%, rgba(5, 9, 14, .64) 100%),
+    radial-gradient(circle at 82% 16%, rgba(140,255,59,.035), transparent 24%),
+    url('/home-bg.png') center center / cover no-repeat !important;
+  background-attachment: scroll !important;
+}
+.page:not([data-page="admin"]) {
+  background: transparent !important;
+}
+
+/* Remove the violet cast from interior glass panels. */
+[data-page="news"] .article-page,
+[data-page="lore"] .lore-header,
+[data-page="lore"] .lore-categories,
+[data-page="lore"] .lore-toc-list,
+[data-page="lore"] .book-sheet,
+[data-page="rules"] .simple-head,
+[data-page="rules"] .rule-item,
+[data-page="contact"] .simple-head,
+[data-page="contact"] .contact-line,
+[data-page="account"] .profile-hero,
+[data-page="account"] .settings-section,
+[data-page="play"] .simple-head,
+[data-page="play"] .play-steps li,
+[data-page="clans"] .simple-head,
+[data-page="clans"] .placeholder-section,
+[data-page="notfound"] .simple-head {
+  background:
+    radial-gradient(circle at 94% 8%, rgba(140,255,59,.028), transparent 28%),
+    linear-gradient(180deg, rgba(7, 14, 21, .67), rgba(5, 11, 18, .57)) !important;
+  border-color: rgba(185, 222, 228, .14) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+[data-page="news"] .article-body {
+  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
+  border-color: rgba(185,222,228,.12) !important;
+}
+[data-page="rules"] .rule-item,
+[data-page="contact"] .contact-line {
+  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
+}
+[data-page="lore"] .book-sheet {
+  background:
+    radial-gradient(circle at 96% 6%, rgba(184,255,114,.035), transparent 28%),
+    linear-gradient(180deg, rgba(7,14,21,.66), rgba(5,11,18,.56)) !important;
+}
+
+/* Contact header no longer reads as a purple rectangle. */
+[data-page="contact"] .simple-head,
+[data-page="rules"] .simple-head,
+[data-page="lore"] .lore-header {
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(17px) saturate(114%);
+  backdrop-filter: blur(17px) saturate(114%);
+}
+
+/* Account screenshot fix: four children now have four intended columns, so the
+   second logout button no longer wraps underneath the avatar. */
+[data-page="account"] .account-page { max-width: 1080px; }
+[data-page="account"] .profile-hero {
+  grid-template-columns: auto minmax(0,1fr) auto auto;
+  gap: 18px;
+  padding: 24px 26px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(17px) saturate(114%);
+  backdrop-filter: blur(17px) saturate(114%);
+}
+[data-page="account"] .profile-hero .logout-link {
+  align-self: center;
+  margin: 0;
+  white-space: nowrap;
+}
+[data-page="account"] .settings-section {
+  padding: 24px 26px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(185,222,228,.12);
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(16px) saturate(112%);
+  backdrop-filter: blur(16px) saturate(112%);
+}
+
+/* Header clock: compact enough to live next to server status. */
+.header-clock {
+  min-width: 78px;
+  min-height: 40px;
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 1px;
+  padding: 5px 10px;
+  border: 1px solid rgba(185,222,228,.10);
+  border-radius: 12px;
+  background: rgba(7, 14, 22, .46);
+  color: #eef8fa;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+  backdrop-filter: blur(14px) saturate(112%);
+}
+.header-clock span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .045em;
+}
+.header-clock small {
+  color: #90a7ae;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Silk route transitions: the old and new page overlap gently for the whole
+   animation instead of snapping at the midpoint. */
+::view-transition-group(portal-page) {
+  overflow: clip;
+  animation-duration: 900ms !important;
+  animation-timing-function: cubic-bezier(.22,1,.36,1) !important;
+}
+::view-transition-old(portal-page),
+::view-transition-new(portal-page) {
+  mix-blend-mode: normal;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+@keyframes portal-silk-out-forward {
+  0%   { opacity: 1; transform: translate3d(0,0,0); }
+  55%  { opacity: .58; transform: translate3d(-12px,0,0); }
+  100% { opacity: 0; transform: translate3d(-22px,0,0); }
+}
+@keyframes portal-silk-in-forward {
+  0%   { opacity: 0; transform: translate3d(24px,0,0); }
+  45%  { opacity: .70; transform: translate3d(8px,0,0); }
+  100% { opacity: 1; transform: translate3d(0,0,0); }
+}
+@keyframes portal-silk-out-back {
+  0%   { opacity: 1; transform: translate3d(0,0,0); }
+  55%  { opacity: .58; transform: translate3d(12px,0,0); }
+  100% { opacity: 0; transform: translate3d(22px,0,0); }
+}
+@keyframes portal-silk-in-back {
+  0%   { opacity: 0; transform: translate3d(-24px,0,0); }
+  45%  { opacity: .70; transform: translate3d(-8px,0,0); }
+  100% { opacity: 1; transform: translate3d(0,0,0); }
+}
+html[data-route-direction="forward"]::view-transition-old(portal-page) {
+  animation: portal-silk-out-forward 760ms cubic-bezier(.22,1,.36,1) both !important;
+}
+html[data-route-direction="forward"]::view-transition-new(portal-page) {
+  animation: portal-silk-in-forward 900ms cubic-bezier(.16,1,.3,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-old(portal-page) {
+  animation: portal-silk-out-back 760ms cubic-bezier(.22,1,.36,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-new(portal-page) {
+  animation: portal-silk-in-back 900ms cubic-bezier(.16,1,.3,1) both !important;
+}
+
+/* Home tabs stay compositor-only. */
+.home-stage {
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  contain: layout style;
+}
+
+@media (max-width: 980px) {
+  .header-clock small { display: none; }
+  .header-clock { min-width: 58px; }
+  [data-page="account"] .profile-hero {
+    grid-template-columns: auto minmax(0,1fr) auto;
+  }
+  [data-page="account"] .profile-hero .logout-link:last-child {
+    grid-column: 3;
+  }
+}
+@media (max-width: 760px) {
+  .page-texture {
+    background:
+      linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
+      url('/home-bg.png') 34% center / cover no-repeat !important;
+  }
+  .header-clock { display: none; }
+  [data-page="account"] .profile-hero {
+    grid-template-columns: auto 1fr;
+    padding: 20px;
+  }
+  [data-page="account"] .profile-hero .logout-link {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  [data-page="account"] .settings-section { padding: 20px; }
+}
+
+/* v5.5.9 — auto-hide header + compositor-only transitions ------------------ */
+
+/* View Transition snapshots were the main source of visible hitching on pages
+   with a large scenic image + many backdrop-filter panels. The route animation
+   is now performed directly on the page elements with opacity/translate only. */
+.app-main,
+.site-header,
+.page,
+.page.active {
+  view-transition-name: none !important;
+}
+.page.active {
+  animation: none !important;
+}
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(portal-page),
+::view-transition-new(portal-page),
+::view-transition-old(portal-header),
+::view-transition-new(portal-header) {
+  animation: none !important;
+}
+
+/* GPU-friendly route motion. Never animate blur/backdrop-filter/background. */
+.page.active,
+.home-stage {
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
+html.route-switching .page.active {
+  will-change: transform, opacity;
+}
+
+/* Header gently leaves the viewport while scrolling down and returns as soon
+   as the user scrolls upward. Sticky layout remains intact, so content never jumps. */
+.site-header {
+  transform: translate3d(0,0,0);
+  opacity: 1;
+  transition:
+    transform 520ms cubic-bezier(.16,1,.3,1),
+    opacity 360ms ease;
+  will-change: transform, opacity;
+}
+.site-header.header-hidden {
+  transform: translate3d(0, calc(-100% - 18px), 0);
+  opacity: .06;
+  pointer-events: none;
+}
+.site-header.header-hidden .header-shell {
+  pointer-events: none;
+}
+
+/* A tiny edge marker makes the reveal feel intentional rather than abrupt. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: min(220px, 36vw);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgba(140,255,59,.24), transparent);
+  opacity: .55;
+  transition: opacity 320ms ease;
+}
+.site-header.header-hidden::after { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none !important; }
+}
+html.motion-off .site-header { transition: none !important; }
+
 /* v5.6.0 — seamless backdrop, aurora veil transition, lore search fix ------ */
 
 /* Keep the scenic layer inside the normal stacking context. Negative z-index
@@ -9,9 +279,10 @@ body {
 }
 .page-texture {
   z-index: 0 !important;
-  background: linear-gradient(180deg, rgba(5,9,14,.36) 0%, rgba(5,9,14,.46) 44%, rgba(5,9,14,.63) 100%),
+  background:
+    linear-gradient(180deg, rgba(5,9,14,.36) 0%, rgba(5,9,14,.46) 44%, rgba(5,9,14,.63) 100%),
     radial-gradient(circle at 82% 16%, rgba(140,255,59,.028), transparent 24%),
-    url("/home-bg.png") center center / cover no-repeat !important;
+    url('/home-bg.png') center center / cover no-repeat !important;
 }
 .app-main,
 .site-footer {
@@ -46,7 +317,8 @@ body {
   pointer-events: none;
   opacity: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(4,9,14,.08), rgba(4,9,14,.16));
+  background:
+    linear-gradient(180deg, rgba(4,9,14,.08), rgba(4,9,14,.16));
   will-change: opacity;
 }
 .route-veil > span {
@@ -72,7 +344,9 @@ body {
 html.route-switching {
   scroll-behavior: auto;
 }
-
+html.route-switching .site-footer {
+  pointer-events: none;
+}
 
 /* Do not let old per-page fills peek through during route changes. */
 .page:not([data-page="admin"]),
@@ -95,94 +369,28 @@ html.route-switching {
 }
 html.motion-off .route-veil { display: none !important; }
 
-/* v5.6.1 — stable tab surfaces + smoother compositor transitions ---------- */
-
-/* The old route veil briefly changed the visual fill of the whole viewport and
-   made the route change feel heavier than it was. Routes now animate only the
-   stable app container, so keep the veil completely out of the pipeline. */
-.route-veil {
-  display: none !important;
+/* 5.6.1: neutral scenery and stable, overlapping tab slides. */
+.page-texture {
+  background: linear-gradient(180deg, rgba(5,9,14,.36), rgba(5,9,14,.56)), url('/home-bg.png') center / cover no-repeat !important;
+  filter: none !important;
+}
+.page-texture::after { display:none !important; }
+.route-veil { display:none !important; }
+.site-footer, .footer-line { background:transparent !important; box-shadow:none !important; }
+.site-footer::before, .site-footer::after { display:none !important; }
+html, body { overflow-anchor:none; }
+.app-main { overflow-x:clip; }
+.home-stage-viewport { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; overflow:clip; }
+.home-stage-viewport > .home-stage { grid-area:1 / 1; width:100%; min-width:0; align-self:start; }
+.home-stage-viewport.is-sliding > .home-stage { will-change:transform,opacity; pointer-events:none; }
+.home-stage-viewport.is-sliding .reveal-in { animation:none !important; }
+[data-page="home"] .home-stage-nav { background:rgba(12,18,24,.28) !important; }
+[data-page="home"] .home-stage-nav button { background:transparent !important; }
+[data-page="home"] .home-stage-nav button[aria-selected="true"] { background:transparent !important; }
+@media (max-width:760px) {
+  .page-texture { background-position:34% center !important; }
 }
 
-/* Keep all navigation pills on the same acrylic surface in every state.
-   Active state is communicated with text/border/marker only — there is no
-   transparent -> filled switch anymore. */
-.desktop-nav a,
-.desktop-nav a:hover,
-.desktop-nav a.active,
-.desktop-nav a:nth-child(1).active,
-.desktop-nav a:nth-child(2).active,
-.desktop-nav a:nth-child(3).active,
-.desktop-nav a:nth-child(4).active {
-  background: rgba(18, 18, 36, .48) !important;
-  border-color: rgba(196, 186, 255, .11) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
-  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
-}
-.desktop-nav a:hover {
-  color: #ffffff;
-  border-color: rgba(196,186,255,.17) !important;
-}
-.desktop-nav a.active,
-.desktop-nav a:nth-child(1).active,
-.desktop-nav a:nth-child(2).active,
-.desktop-nav a:nth-child(3).active,
-.desktop-nav a:nth-child(4).active {
-  color: #ffffff;
-  border-color: rgba(216,209,255,.22) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 0 14px rgba(143,109,255,.045) !important;
-}
-
-[data-page="home"] .home-stage-nav button,
-[data-page="home"] .home-stage-nav button:hover,
-[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"],
-[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"],
-[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
-  background: rgba(24, 22, 46, .52) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.022) !important;
-  transition: color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
-}
-[data-page="home"] .home-stage-nav button {
-  color: #a8a4b5;
-  border-color: rgba(196,186,255,.08);
-}
-[data-page="home"] .home-stage-nav button:hover {
-  color: #f7f5ff;
-  border-color: rgba(196,186,255,.15);
-  transform: none !important;
-}
-[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"],
-[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"],
-[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
-  color: #ffffff;
-  border-color: rgba(216,209,255,.22);
-}
-
-/* Route motion only touches compositor-friendly properties. No background,
-   blur, shadow or backdrop-filter is animated during the actual switch. */
-.app-main {
-  backface-visibility: hidden;
-  transform: translate3d(0,0,0);
-}
-html.route-switching .app-main {
-  will-change: transform, opacity;
-  contain: layout paint style;
-}
-html.route-switching .site-footer {
-  pointer-events: none;
-}
-.home-stage {
-  backface-visibility: hidden;
-  transform: translate3d(0,0,0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .desktop-nav a,
-  [data-page="home"] .home-stage-nav button {
-    transition: none !important;
-  }
-}
-html.motion-off .desktop-nav a,
-html.motion-off [data-page="home"] .home-stage-nav button {
-  transition: none !important;
-}
+/* Preserve glass appearance: do not fade or transform its ancestor panels. */
+.page.active, .home-stage { opacity:1 !important; transform:none !important; animation:none !important; will-change:auto !important; }
+[data-page="home"] .reveal-in { animation:none !important; }

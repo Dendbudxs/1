@@ -11,9 +11,15 @@ body {
 }
 .page-texture {
   inset: 0;
+  z-index: -3;
   opacity: 1;
   mask-image: none;
   -webkit-mask-image: none;
+  background:
+    linear-gradient(180deg, rgba(5, 9, 14, .38) 0%, rgba(5, 9, 14, .48) 38%, rgba(5, 9, 14, .66) 100%),
+    radial-gradient(circle at 18% 18%, rgba(143, 109, 255, .10), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(140, 255, 59, .055), transparent 24%),
+    url('/home-bg.png') center center / cover no-repeat fixed;
 }
 .page-texture::after {
   content: "";
@@ -81,13 +87,22 @@ body {
 [data-page="contact"] .simple-head::before {
   opacity: .80;
 }
-
-
-
+[data-page="rules"] .rule-item,
+[data-page="contact"] .contact-line {
+  background: linear-gradient(180deg, rgba(15,16,31,.62), rgba(8,9,19,.54)) !important;
+}
+[data-page="lore"] .book-sheet {
+  background:
+    radial-gradient(circle at 94% 5%, rgba(143,109,255,.10), transparent 28%),
+    linear-gradient(180deg, rgba(16,17,33,.66), rgba(8,9,19,.58)) !important;
+}
+[data-page="news"] .article-body {
+  background: linear-gradient(180deg, rgba(13,14,29,.62), rgba(8,9,19,.54)) !important;
+}
 
 /* View Transitions: page content slides with depth while header remains calm. */
-
-
+.site-header { view-transition-name: portal-header; }
+.page.active { view-transition-name: portal-page; }
 
 ::view-transition-group(portal-header) {
   animation-duration: 1ms;
@@ -97,7 +112,9 @@ body {
 ::view-transition-new(portal-header) {
   animation: none;
 }
-
+::view-transition-group(portal-page) {
+  overflow: clip;
+}
 
 @keyframes portal-out-forward {
   from { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
@@ -116,10 +133,18 @@ body {
   to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
 }
 
-
-
-
-
+html[data-route-direction="forward"]::view-transition-old(portal-page) {
+  animation: portal-out-forward 260ms cubic-bezier(.4,0,.2,1) both;
+}
+html[data-route-direction="forward"]::view-transition-new(portal-page) {
+  animation: portal-in-forward 520ms cubic-bezier(.16,1,.3,1) both;
+}
+html[data-route-direction="back"]::view-transition-old(portal-page) {
+  animation: portal-out-back 260ms cubic-bezier(.4,0,.2,1) both;
+}
+html[data-route-direction="back"]::view-transition-new(portal-page) {
+  animation: portal-in-back 520ms cubic-bezier(.16,1,.3,1) both;
+}
 
 /* Browsers without View Transitions still get a subtle entrance shift. */
 @supports not (view-transition-name: portal-page) {
@@ -144,7 +169,7 @@ html.motion-off ::view-transition-new(portal-page) { animation: none !important;
     background:
       linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
       radial-gradient(circle at 18% 12%, rgba(143,109,255,.08), transparent 24%),
-      url("/home-bg.png") 34% center / cover no-repeat fixed;
+      url('/home-bg.png') 34% center / cover no-repeat fixed;
   }
   [data-page="news"] .article-page,
   [data-page="lore"] .lore-header,
@@ -172,6 +197,12 @@ html {
 /* page-texture is already position:fixed, so background-attachment:fixed is
    redundant and can stutter during view-transition snapshots in Chromium. */
 .page-texture {
+  background:
+    linear-gradient(180deg, rgba(5, 9, 14, .38) 0%, rgba(5, 9, 14, .48) 38%, rgba(5, 9, 14, .66) 100%),
+    radial-gradient(circle at 18% 18%, rgba(143, 109, 255, .10), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(140, 255, 59, .055), transparent 24%),
+    url('/home-bg.png') center center / cover no-repeat !important;
+  background-attachment: scroll !important;
   transform: translateZ(0);
   backface-visibility: hidden;
   contain: paint;
@@ -180,25 +211,28 @@ html {
 /* v5.4.x left a second transition group on app-main and the base .page
    animation was also running under the newer transition. Disable both so one
    compositor-only animation controls the route change. */
-.app-main {
-  view-transition-name: none !important;
-}
+.app-main { view-transition-name: none !important; }
 @supports (view-transition-name: portal-page) {
   .page.active { animation: none !important; }
 }
 
-.site-header {
-  view-transition-name: portal-header;
-}
-.page.active {
-  view-transition-name: portal-page;
-}
+.site-header { view-transition-name: portal-header; }
+.page.active { view-transition-name: portal-page; }
 
-
+::view-transition-group(portal-page) {
+  overflow: clip;
+  animation-duration: 640ms;
+  animation-timing-function: cubic-bezier(.16,1,.3,1);
+}
 ::view-transition-image-pair(portal-page) {
   isolation: isolate;
 }
-
+::view-transition-old(portal-page),
+::view-transition-new(portal-page) {
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
 
 @keyframes portal-smooth-out-forward {
   from { opacity: 1; transform: translate3d(0,0,0); }
@@ -217,10 +251,18 @@ html {
   to   { opacity: 1; transform: translate3d(0,0,0); }
 }
 
-
-
-
-
+html[data-route-direction="forward"]::view-transition-old(portal-page) {
+  animation: portal-smooth-out-forward 500ms cubic-bezier(.4,0,.2,1) both !important;
+}
+html[data-route-direction="forward"]::view-transition-new(portal-page) {
+  animation: portal-smooth-in-forward 640ms cubic-bezier(.16,1,.3,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-old(portal-page) {
+  animation: portal-smooth-out-back 500ms cubic-bezier(.4,0,.2,1) both !important;
+}
+html[data-route-direction="back"]::view-transition-new(portal-page) {
+  animation: portal-smooth-in-back 640ms cubic-bezier(.16,1,.3,1) both !important;
+}
 
 /* Fix Play / Clans: in v5.5.6 the whole simple-page became one giant dark
    rectangle. The page wrapper is transparent again; content gets intentional
@@ -350,6 +392,8 @@ html {
    Only opacity + translate3d are animated from JS. */
 .home-stage {
   will-change: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @media (max-width: 900px) {
@@ -366,7 +410,7 @@ html {
     background:
       linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
       radial-gradient(circle at 18% 12%, rgba(143,109,255,.08), transparent 24%),
-      url("/home-bg.png") 34% center / cover no-repeat !important;
+      url('/home-bg.png') 34% center / cover no-repeat !important;
     background-attachment: scroll !important;
   }
   [data-page="play"] .simple-head,
@@ -385,269 +429,5 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .page.active { animation: none !important; }
 }
-html.motion-off .page.active {
-  animation: none !important;
-}
-
-/* v5.5.8 — seamless scenic pages, clock, and silk transitions ------------- */
-
-/* One neutral background treatment everywhere. The previous violet page-wide
-   tint is intentionally removed: internal pages now see the same landscape as Home. */
-.page-texture {
-  background-attachment: scroll !important;
-}
-.page:not([data-page="admin"]) {
-  background: transparent !important;
-}
-
-/* Remove the violet cast from interior glass panels. */
-[data-page="news"] .article-page,
-[data-page="lore"] .lore-header,
-[data-page="lore"] .lore-categories,
-[data-page="lore"] .lore-toc-list,
-[data-page="lore"] .book-sheet,
-[data-page="rules"] .simple-head,
-[data-page="rules"] .rule-item,
-[data-page="contact"] .simple-head,
-[data-page="contact"] .contact-line,
-[data-page="account"] .profile-hero,
-[data-page="account"] .settings-section,
-[data-page="play"] .simple-head,
-[data-page="play"] .play-steps li,
-[data-page="clans"] .simple-head,
-[data-page="clans"] .placeholder-section,
-[data-page="notfound"] .simple-head {
-  background:
-    radial-gradient(circle at 94% 8%, rgba(140,255,59,.028), transparent 28%),
-    linear-gradient(180deg, rgba(7, 14, 21, .67), rgba(5, 11, 18, .57)) !important;
-  border-color: rgba(185, 222, 228, .14) !important;
-  box-shadow: 0 20px 48px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
-[data-page="news"] .article-body {
-  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
-  border-color: rgba(185,222,228,.12) !important;
-}
-[data-page="rules"] .rule-item,
-[data-page="contact"] .contact-line {
-  background: linear-gradient(180deg, rgba(7,14,21,.62), rgba(5,11,18,.54)) !important;
-}
-[data-page="lore"] .book-sheet {
-  background: radial-gradient(circle at 96% 6%, rgba(184,255,114,.035), transparent 28%),
-    linear-gradient(180deg, rgba(7,14,21,.66), rgba(5,11,18,.56)) !important;
-}
-
-/* Contact header no longer reads as a purple rectangle. */
-[data-page="contact"] .simple-head,
-[data-page="rules"] .simple-head,
-[data-page="lore"] .lore-header {
-  border-radius: 22px;
-  -webkit-backdrop-filter: blur(17px) saturate(114%);
-  backdrop-filter: blur(17px) saturate(114%);
-}
-
-/* Account screenshot fix: four children now have four intended columns, so the
-   second logout button no longer wraps underneath the avatar. */
-[data-page="account"] .account-page { max-width: 1080px; }
-[data-page="account"] .profile-hero {
-  grid-template-columns: auto minmax(0,1fr) auto auto;
-  gap: 18px;
-  padding: 24px 26px;
-  margin-bottom: 18px;
-  border-radius: 22px;
-  -webkit-backdrop-filter: blur(17px) saturate(114%);
-  backdrop-filter: blur(17px) saturate(114%);
-}
-[data-page="account"] .profile-hero .logout-link {
-  align-self: center;
-  margin: 0;
-  white-space: nowrap;
-}
-[data-page="account"] .settings-section {
-  padding: 24px 26px;
-  margin-bottom: 14px;
-  border: 1px solid rgba(185,222,228,.12);
-  border-radius: 20px;
-  -webkit-backdrop-filter: blur(16px) saturate(112%);
-  backdrop-filter: blur(16px) saturate(112%);
-}
-
-/* Header clock: compact enough to live next to server status. */
-.header-clock {
-  min-width: 78px;
-  min-height: 40px;
-  display: grid;
-  align-content: center;
-  justify-items: end;
-  gap: 1px;
-  padding: 5px 10px;
-  border: 1px solid rgba(185,222,228,.10);
-  border-radius: 12px;
-  background: rgba(7, 14, 22, .46);
-  color: #eef8fa;
-  font-variant-numeric: tabular-nums;
-  -webkit-backdrop-filter: blur(14px) saturate(112%);
-  backdrop-filter: blur(14px) saturate(112%);
-}
-.header-clock span {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .045em;
-}
-.header-clock small {
-  color: #90a7ae;
-  font-size: 8px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-/* Silk route transitions: the old and new page overlap gently for the whole
-   animation instead of snapping at the midpoint. */
-::view-transition-group(portal-page) {
-  overflow: clip;
-  animation-duration: 900ms !important;
-  animation-timing-function: cubic-bezier(.22,1,.36,1) !important;
-}
-::view-transition-old(portal-page),
-::view-transition-new(portal-page) {
-  mix-blend-mode: normal;
-  transform-origin: center center;
-  backface-visibility: hidden;
-  will-change: transform, opacity;
-}
-@keyframes portal-silk-out-forward {
-  0%   { opacity: 1; transform: translate3d(0,0,0); }
-  55%  { opacity: .58; transform: translate3d(-12px,0,0); }
-  100% { opacity: 0; transform: translate3d(-22px,0,0); }
-}
-@keyframes portal-silk-in-forward {
-  0%   { opacity: 0; transform: translate3d(24px,0,0); }
-  45%  { opacity: .70; transform: translate3d(8px,0,0); }
-  100% { opacity: 1; transform: translate3d(0,0,0); }
-}
-@keyframes portal-silk-out-back {
-  0%   { opacity: 1; transform: translate3d(0,0,0); }
-  55%  { opacity: .58; transform: translate3d(12px,0,0); }
-  100% { opacity: 0; transform: translate3d(22px,0,0); }
-}
-@keyframes portal-silk-in-back {
-  0%   { opacity: 0; transform: translate3d(-24px,0,0); }
-  45%  { opacity: .70; transform: translate3d(-8px,0,0); }
-  100% { opacity: 1; transform: translate3d(0,0,0); }
-}
-html[data-route-direction="forward"]::view-transition-old(portal-page) {
-  animation: portal-silk-out-forward 760ms cubic-bezier(.22,1,.36,1) both !important;
-}
-html[data-route-direction="forward"]::view-transition-new(portal-page) {
-  animation: portal-silk-in-forward 900ms cubic-bezier(.16,1,.3,1) both !important;
-}
-html[data-route-direction="back"]::view-transition-old(portal-page) {
-  animation: portal-silk-out-back 760ms cubic-bezier(.22,1,.36,1) both !important;
-}
-html[data-route-direction="back"]::view-transition-new(portal-page) {
-  animation: portal-silk-in-back 900ms cubic-bezier(.16,1,.3,1) both !important;
-}
-
-/* Home tabs stay compositor-only. */
-.home-stage {
-  contain: layout style;
-}
-
-@media (max-width: 980px) {
-  .header-clock small { display: none; }
-  .header-clock { min-width: 58px; }
-  [data-page="account"] .profile-hero {
-    grid-template-columns: auto minmax(0,1fr) auto;
-  }
-  [data-page="account"] .profile-hero .logout-link:last-child {
-    grid-column: 3;
-  }
-}
-@media (max-width: 760px) {
-  .page-texture {
-    background:
-      linear-gradient(180deg, rgba(5,9,14,.46) 0%, rgba(5,9,14,.58) 46%, rgba(5,9,14,.76) 100%),
-      url("/home-bg.png") 34% center / cover no-repeat !important;
-  }
-  .header-clock { display: none; }
-  [data-page="account"] .profile-hero {
-    grid-template-columns: auto 1fr;
-    padding: 20px;
-  }
-  [data-page="account"] .profile-hero .logout-link {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-  [data-page="account"] .settings-section { padding: 20px; }
-}
-
-/* v5.5.9 — auto-hide header + compositor-only transitions ------------------ */
-
-/* View Transition snapshots were the main source of visible hitching on pages
-   with a large scenic image + many backdrop-filter panels. The route animation
-   is now performed directly on the page elements with opacity/translate only. */
-.app-main,
-.site-header,
-.page,
-.page.active {
-  view-transition-name: none !important;
-}
-.page.active {
-  animation: none !important;
-}
-::view-transition-old(root),
-::view-transition-new(root),
-::view-transition-old(portal-page),
-::view-transition-new(portal-page),
-::view-transition-old(portal-header),
-::view-transition-new(portal-header) {
-  animation: none !important;
-}
-
-/* GPU-friendly route motion. Never animate blur/backdrop-filter/background. */
-.page.active,
-.home-stage {
-  backface-visibility: hidden;
-  transform: translate3d(0,0,0);
-}
-html.route-switching .page.active {
-  will-change: transform, opacity;
-}
-
-/* Header gently leaves the viewport while scrolling down and returns as soon
-   as the user scrolls upward. Sticky layout remains intact, so content never jumps. */
-.site-header {
-  transform: translate3d(0,0,0);
-  opacity: 1;
-  transition: transform 520ms cubic-bezier(.16,1,.3,1),
-    opacity 360ms ease;
-  will-change: transform, opacity;
-}
-.site-header.header-hidden {
-  transform: translate3d(0, calc(-100% - 18px), 0);
-  opacity: .06;
-  pointer-events: none;
-}
-.site-header.header-hidden .header-shell {
-  pointer-events: none;
-}
-
-/* A tiny edge marker makes the reveal feel intentional rather than abrupt. */
-.site-header::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -1px;
-  width: min(220px, 36vw);
-  height: 1px;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(140,255,59,.24), transparent);
-  opacity: .55;
-  transition: opacity 320ms ease;
-}
-.site-header.header-hidden::after { opacity: 0; }
-
-@media (prefers-reduced-motion: reduce) {
-  .site-header { transition: none !important; }
-}
-html.motion-off .site-header { transition: none !important; }
+html.motion-off .page.active { animation: none !important; }
 
