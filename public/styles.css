@@ -5567,3 +5567,7 @@ html, body { overflow-anchor:none; }
 @media (max-width:760px) {
   .page-texture { background-position:34% center !important; }
 }
+
+/* Preserve glass appearance: do not fade or transform its ancestor panels. */
+.page.active, .home-stage { opacity:1 !important; transform:none !important; animation:none !important; will-change:auto !important; }
+[data-page="home"] .reveal-in { animation:none !important; }

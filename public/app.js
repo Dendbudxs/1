@@ -293,97 +293,9 @@ function routeMotionEnabled() {
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-async function animateRouteSwitch(path, direction = 'forward') {
-  const current = document.querySelector('.page.active');
-  const targetName = pageForPath(path);
-  const target = document.querySelector(`.page[data-page="${targetName}"]`);
-
-  if (!current || !target || current === target || !routeMotionEnabled() || !current.animate || !target.animate) {
-    performPageSwitch(path);
-    return;
-  }
-
-  const appMain = $('#appMain');
-  const veil = $('#routeVeil');
-  const streak = veil?.querySelector('span');
-  const sign = direction === 'back' ? -1 : 1;
-  const currentHeight = Math.max(current.offsetHeight, window.innerHeight - 90);
-
-  // Keep the document from changing height while the old/new pages cross over.
-  // This removes the visible twitch near the bottom/footer on short pages.
-  appMain.style.minHeight = `${currentHeight}px`;
-  document.documentElement.classList.add('route-switching');
-  current.style.pointerEvents = 'none';
-
-  try {
-    const veilAnimation = veil?.animate([
-      { opacity: 0 },
-      { opacity: .42, offset: .34 },
-      { opacity: .34, offset: .58 },
-      { opacity: 0 }
-    ], {
-      duration: 980,
-      easing: 'cubic-bezier(.22,1,.36,1)',
-      fill: 'both'
-    });
-
-    const streakAnimation = streak?.animate([
-      { transform: `translate3d(${sign * -125}vw,0,0)`, opacity: 0 },
-      { opacity: .75, offset: .28 },
-      { opacity: .68, offset: .62 },
-      { transform: `translate3d(${sign * 125}vw,0,0)`, opacity: 0 }
-    ], {
-      duration: 980,
-      easing: 'cubic-bezier(.22,1,.36,1)',
-      fill: 'both'
-    });
-
-    const outgoing = current.animate([
-      { opacity: 1, transform: 'translate3d(0,0,0)' },
-      { opacity: .65, transform: `translate3d(${sign * -14}px,0,0)`, offset: .55 },
-      { opacity: 0, transform: `translate3d(${sign * -32}px,0,0)` }
-    ], {
-      duration: 390,
-      easing: 'cubic-bezier(.4,0,.2,1)',
-      fill: 'forwards'
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 315));
-    performPageSwitch(path);
-
-    const next = document.querySelector('.page.active');
-    if (!next) return;
-    const targetHeight = Math.max(next.offsetHeight, window.innerHeight - 90);
-    appMain.style.minHeight = `${Math.max(currentHeight, targetHeight)}px`;
-    next.style.pointerEvents = 'none';
-
-    const incoming = next.animate([
-      { opacity: 0, transform: `translate3d(${sign * 36}px,0,0)` },
-      { opacity: .8, transform: `translate3d(${sign * 10}px,0,0)`, offset: .42 },
-      { opacity: 1, transform: 'translate3d(0,0,0)' }
-    ], {
-      duration: 720,
-      easing: 'cubic-bezier(.16,1,.3,1)',
-      fill: 'both'
-    });
-
-    await Promise.allSettled([
-      outgoing.finished,
-      incoming.finished,
-      veilAnimation?.finished || Promise.resolve(),
-      streakAnimation?.finished || Promise.resolve()
-    ]);
-
-    outgoing.cancel();
-    incoming.cancel();
-    veilAnimation?.cancel();
-    streakAnimation?.cancel();
-    next.style.pointerEvents = '';
-  } finally {
-    current.style.pointerEvents = '';
-    appMain.style.minHeight = '';
-    document.documentElement.classList.remove('route-switching');
-  }
+async function animateRouteSwitch(path) {
+  // Keep backdrop-filter panels fully opaque throughout navigation.
+  performPageSwitch(path);
 }
 
 async function ensureRouteData(path) {
@@ -1228,17 +1140,6 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     next.inert = false;
     next.removeAttribute('aria-hidden');
     viewport.style.minHeight = Math.max(oldHeight, next.offsetHeight) + 'px';
-    if (routeMotionEnabled() && current.animate && next.animate) {
-      animations.push(current.animate([
-        { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: 0, transform: `translate3d(${direction * -48}px,0,0)` }
-      ], { duration: 440, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' }));
-      animations.push(next.animate([
-        { opacity: 0, transform: `translate3d(${direction * 64}px,0,0)` },
-        { opacity: 1, transform: 'translate3d(0,0,0)' }
-      ], { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }));
-      await Promise.allSettled(animations.map(animation => animation.finished));
-    }
   } finally {
     panels.forEach(panel => {
       panel.hidden = panel !== next;
