@@ -288,6 +288,62 @@ function performPageSwitch(path) {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
+function routeMotionEnabled() {
+  return !document.documentElement.classList.contains('motion-off')
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+async function animateRouteSwitch(path, direction = 'forward') {
+  const current = document.querySelector('.page.active');
+  const targetName = pageForPath(path);
+  const target = document.querySelector(`.page[data-page="${targetName}"]`);
+
+  if (!current || !target || current === target || !routeMotionEnabled() || !current.animate || !target.animate) {
+    performPageSwitch(path);
+    return;
+  }
+
+  const sign = direction === 'back' ? -1 : 1;
+  document.documentElement.classList.add('route-switching');
+  current.style.pointerEvents = 'none';
+
+  try {
+    const out = current.animate([
+      { opacity: 1, transform: 'translate3d(0,0,0)' },
+      { opacity: .72, transform: `translate3d(${sign * -4}px,0,0)`, offset: .52 },
+      { opacity: 0, transform: `translate3d(${sign * -10}px,0,0)` }
+    ], {
+      duration: 300,
+      easing: 'cubic-bezier(.4,0,.2,1)',
+      fill: 'forwards'
+    });
+    await out.finished.catch(() => {});
+    out.cancel();
+
+    performPageSwitch(path);
+    const next = document.querySelector('.page.active');
+    if (!next) return;
+
+    next.style.pointerEvents = 'none';
+    const incoming = next.animate([
+      { opacity: 0, transform: `translate3d(${sign * 12}px,0,0)` },
+      { opacity: .30, transform: `translate3d(${sign * 8}px,0,0)`, offset: .20 },
+      { opacity: .78, transform: `translate3d(${sign * 2}px,0,0)`, offset: .64 },
+      { opacity: 1, transform: 'translate3d(0,0,0)' }
+    ], {
+      duration: 620,
+      easing: 'cubic-bezier(.16,1,.3,1)',
+      fill: 'both'
+    });
+    await incoming.finished.catch(() => {});
+    incoming.cancel();
+    next.style.pointerEvents = '';
+  } finally {
+    current.style.pointerEvents = '';
+    document.documentElement.classList.remove('route-switching');
+  }
+}
+
 async function ensureRouteData(path) {
   if (/^\/news\/\d+$/.test(path)) {
     const id = Number(path.split('/').pop());
@@ -320,16 +376,8 @@ async function navigate(rawPath, { replace = false } = {}) {
 
   const current = normalizePath(location.pathname);
   const direction = routeTransitionDirection(current, path);
-  document.documentElement.dataset.routeDirection = direction;
-  const switchPage = () => performPageSwitch(path);
-  const canTransition = document.startViewTransition && !document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (canTransition) {
-    const transition = document.startViewTransition(switchPage);
-    transition.finished.finally(() => { delete document.documentElement.dataset.routeDirection; });
-  } else {
-    switchPage();
-    delete document.documentElement.dataset.routeDirection;
-  }
+  await animateRouteSwitch(path, direction);
+  showSiteHeader();
 
   const fullPath = path + destination.search + destination.hash;
   if (fullPath !== location.pathname + location.search + location.hash || replace) history[replace ? 'replaceState' : 'pushState']({}, '', fullPath);
@@ -1050,6 +1098,42 @@ function updateHeaderClock() {
 updateHeaderClock();
 setInterval(updateHeaderClock, 1000);
 
+// Auto-hide header on downward scroll, reveal it immediately on upward scroll.
+let lastHeaderScrollY = Math.max(0, window.scrollY);
+let headerScrollTicking = false;
+let headerHidden = false;
+
+function showSiteHeader() {
+  if (!headerHidden) return;
+  headerHidden = false;
+  document.querySelector('.site-header')?.classList.remove('header-hidden');
+}
+
+function hideSiteHeader() {
+  if (headerHidden || document.body.classList.contains('menu-open') || document.body.classList.contains('dialog-open')) return;
+  headerHidden = true;
+  document.querySelector('.site-header')?.classList.add('header-hidden');
+}
+
+function updateHeaderVisibility() {
+  const y = Math.max(0, window.scrollY);
+  const delta = y - lastHeaderScrollY;
+
+  if (y <= 36) showSiteHeader();
+  else if (delta > 7 && y > 96) hideSiteHeader();
+  else if (delta < -5) showSiteHeader();
+
+  lastHeaderScrollY = y;
+  headerScrollTicking = false;
+}
+
+window.addEventListener('scroll', () => {
+  if (headerScrollTicking) return;
+  headerScrollTicking = true;
+  requestAnimationFrame(updateHeaderVisibility);
+}, { passive: true });
+window.addEventListener('focus', showSiteHeader);
+
 // Event wiring ---------------------------------------------------------------
 let homeStageTransitioning = false;
 
@@ -1079,10 +1163,11 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
     if (motionEnabled && current.animate) {
       const out = current.animate([
         { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: .82, transform: `translate3d(${direction * -10}px,0,0)` }
+        { opacity: .74, transform: `translate3d(${direction * -4}px,0,0)`, offset: .58 },
+        { opacity: 0, transform: `translate3d(${direction * -9}px,0,0)` }
       ], {
-        duration: 180,
-        easing: 'cubic-bezier(.33,1,.68,1)',
+        duration: 300,
+        easing: 'cubic-bezier(.4,0,.2,1)',
         fill: 'forwards'
       });
       await out.finished.catch(() => {});
@@ -1093,11 +1178,12 @@ async function selectHomeStage(name, { focusPanel = false } = {}) {
 
     if (motionEnabled && next.animate) {
       const incoming = next.animate([
-        { opacity: .62, transform: `translate3d(${direction * 18}px,0,0)` },
-        { opacity: .90, transform: `translate3d(${direction * 4}px,0,0)`, offset: .58 },
+        { opacity: 0, transform: `translate3d(${direction * 11}px,0,0)` },
+        { opacity: .34, transform: `translate3d(${direction * 7}px,0,0)`, offset: .22 },
+        { opacity: .82, transform: `translate3d(${direction * 2}px,0,0)`, offset: .66 },
         { opacity: 1, transform: 'translate3d(0,0,0)' }
       ], {
-        duration: 780,
+        duration: 600,
         easing: 'cubic-bezier(.16,1,.3,1)',
         fill: 'both'
       });
@@ -1172,15 +1258,9 @@ window.addEventListener('popstate', async () => {
   const activePage = $('.page.active');
   const currentPageName = activePage?.dataset.page || 'home';
   const pathForCurrentPage = currentPageName === 'home' ? '/' : `/${currentPageName}`;
-  document.documentElement.dataset.routeDirection = routeTransitionDirection(pathForCurrentPage, path);
-  const canTransition = document.startViewTransition && !document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (canTransition) {
-    const transition = document.startViewTransition(() => performPageSwitch(path));
-    transition.finished.finally(() => { delete document.documentElement.dataset.routeDirection; });
-  } else {
-    performPageSwitch(path);
-    delete document.documentElement.dataset.routeDirection;
-  }
+  const direction = routeTransitionDirection(pathForCurrentPage, path);
+  await animateRouteSwitch(path, direction);
+  showSiteHeader();
 });
 
 $('#menuButton').addEventListener('click', openMobileMenu);
