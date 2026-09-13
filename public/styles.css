@@ -3220,3 +3220,257 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,.18);
   }
 }
+
+
+/* v5.5.2 — Neon Typography ------------------------------------------------ */
+:root {
+  --text-cyan: #69e8ff;
+  --text-blue: #7aa0ff;
+  --text-violet: #b58cff;
+  --text-pink: #ff78bd;
+  --text-amber: #ffd27a;
+  --text-mint: #86ffd0;
+}
+
+/* The idea: no bright fills. Dark glass surfaces + luminous text. */
+.desktop-nav a,
+[data-page="home"] .home-stage-nav button,
+.primary-button,
+[data-page="home"] .hero-actions .primary-button,
+.subtle-button,
+.copy-chapter,
+.text-button,
+.banner-link,
+.copy-ip,
+.stage-footer .subtle-button {
+  background: rgba(9, 13, 23, .62) !important;
+  color: #dce6f3;
+  animation: none !important;
+  filter: none;
+}
+
+/* Top navigation: glowing words, almost no fill. */
+.desktop-nav a {
+  border-color: transparent;
+  box-shadow: none;
+}
+.desktop-nav a:hover {
+  background: rgba(255,255,255,.025) !important;
+  color: var(--text-cyan);
+  text-shadow: 0 0 10px rgba(105,232,255,.45), 0 0 22px rgba(105,232,255,.18);
+  border-color: rgba(105,232,255,.10);
+}
+.desktop-nav a.active {
+  background: rgba(10, 14, 24, .52) !important;
+  border-color: rgba(255,255,255,.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.018), 0 0 18px rgba(0,0,0,.18);
+  transform: none;
+}
+.desktop-nav a:nth-child(1).active {
+  color: var(--text-cyan);
+  text-shadow: 0 0 10px rgba(105,232,255,.56), 0 0 22px rgba(105,232,255,.22);
+}
+.desktop-nav a:nth-child(2).active {
+  color: var(--text-amber);
+  text-shadow: 0 0 10px rgba(255,210,122,.48), 0 0 22px rgba(255,210,122,.18);
+}
+.desktop-nav a:nth-child(3).active {
+  color: var(--text-pink);
+  text-shadow: 0 0 10px rgba(255,120,189,.50), 0 0 22px rgba(255,120,189,.18);
+}
+.desktop-nav a:nth-child(4).active {
+  color: var(--text-mint);
+  text-shadow: 0 0 10px rgba(134,255,208,.48), 0 0 22px rgba(134,255,208,.18);
+}
+
+/* Home tabs: the label itself is the accent. */
+[data-page="home"] .home-stage-nav {
+  background: rgba(7, 10, 18, .62);
+  border-color: rgba(255,255,255,.07);
+}
+[data-page="home"] .home-stage-nav button {
+  background: transparent !important;
+  border-color: rgba(255,255,255,.045);
+  box-shadow: none !important;
+  color: #9eabc0;
+}
+[data-page="home"] .home-stage-nav button:hover {
+  background: rgba(255,255,255,.02) !important;
+  transform: translateY(-1px);
+}
+[data-page="home"] .home-stage-nav button:nth-child(1):hover,
+[data-page="home"] .home-stage-nav button:nth-child(1)[aria-selected="true"] {
+  color: var(--text-cyan);
+  border-color: rgba(105,232,255,.15);
+  text-shadow: 0 0 10px rgba(105,232,255,.55), 0 0 24px rgba(105,232,255,.20);
+  background: rgba(105,232,255,.035) !important;
+}
+[data-page="home"] .home-stage-nav button:nth-child(2):hover,
+[data-page="home"] .home-stage-nav button:nth-child(2)[aria-selected="true"] {
+  color: var(--text-pink);
+  border-color: rgba(255,120,189,.15);
+  text-shadow: 0 0 10px rgba(255,120,189,.52), 0 0 24px rgba(255,120,189,.18);
+  background: rgba(255,120,189,.035) !important;
+}
+[data-page="home"] .home-stage-nav button:nth-child(3):hover,
+[data-page="home"] .home-stage-nav button:nth-child(3)[aria-selected="true"] {
+  color: var(--text-violet);
+  border-color: rgba(181,140,255,.15);
+  text-shadow: 0 0 10px rgba(181,140,255,.54), 0 0 24px rgba(181,140,255,.18);
+  background: rgba(181,140,255,.035) !important;
+}
+[data-page="home"] .home-stage-nav button[aria-selected="true"] small {
+  color: currentColor;
+  opacity: .64;
+}
+
+/* Main CTA: dark button, neon words and edge instead of a bright slab. */
+.primary-button,
+[data-page="home"] .hero-actions .primary-button {
+  color: var(--text-cyan);
+  background: rgba(7, 13, 23, .78) !important;
+  border: 1px solid rgba(105,232,255,.28);
+  box-shadow: inset 0 0 0 1px rgba(105,232,255,.04), 0 0 18px rgba(105,232,255,.08);
+  text-shadow: 0 0 9px rgba(105,232,255,.44), 0 0 18px rgba(105,232,255,.14);
+}
+.primary-button:hover,
+[data-page="home"] .hero-actions .primary-button:hover {
+  color: #dffaff;
+  background: rgba(10, 20, 32, .88) !important;
+  border-color: rgba(105,232,255,.46);
+  box-shadow: inset 0 0 0 1px rgba(105,232,255,.08), 0 0 24px rgba(105,232,255,.16);
+  text-shadow: 0 0 12px rgba(105,232,255,.62), 0 0 28px rgba(105,232,255,.22);
+}
+
+.subtle-button,
+.copy-chapter,
+.text-button,
+.banner-link,
+.copy-ip,
+.stage-footer .subtle-button {
+  color: var(--text-violet);
+  border-color: rgba(181,140,255,.20);
+  text-shadow: 0 0 8px rgba(181,140,255,.30);
+}
+.subtle-button:hover,
+.copy-chapter:hover,
+.text-button:hover,
+.banner-link:hover,
+.copy-ip:hover,
+.stage-footer .subtle-button:hover {
+  color: #efe8ff;
+  background: rgba(19, 14, 32, .74) !important;
+  border-color: rgba(181,140,255,.38);
+  box-shadow: 0 0 20px rgba(181,140,255,.11);
+  text-shadow: 0 0 10px rgba(181,140,255,.54);
+}
+
+/* Colorful typography on page headings, not body copy. */
+[data-page="home"] .section-heading h2,
+[data-page="home"] .stage-heading h2,
+[data-page="home"] .hero-copy h1 {
+  background: linear-gradient(90deg, #f6fbff 0%, var(--text-cyan) 42%, var(--text-blue) 82%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(105,232,255,.10));
+}
+[data-page="lore"] .lore-header h1,
+[data-page="lore"] .book-sheet h2 {
+  background: linear-gradient(90deg, #fff7e9 0%, var(--text-amber) 56%, #ff9c7c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 9px rgba(255,210,122,.10));
+}
+[data-page="rules"] .simple-head h1 {
+  background: linear-gradient(90deg, #fff3f8 0%, var(--text-pink) 52%, var(--text-violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 9px rgba(255,120,189,.12));
+}
+[data-page="contact"] .simple-head h1 {
+  background: linear-gradient(90deg, #f2fff9 0%, var(--text-mint) 50%, var(--text-cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 9px rgba(134,255,208,.12));
+}
+
+/* Smaller labels get clean neon colors with glow. */
+[data-page="home"] .kicker,
+[data-page="news"] .kicker,
+.news-date-block time,
+.news-arrow {
+  color: var(--text-cyan);
+  text-shadow: 0 0 8px rgba(105,232,255,.34);
+}
+[data-page="lore"] .kicker,
+[data-page="lore"] .book-chapter-number,
+[data-page="lore"] .book-prose::first-letter {
+  color: var(--text-amber);
+  text-shadow: 0 0 8px rgba(255,210,122,.28);
+}
+[data-page="rules"] .kicker,
+[data-page="rules"] .rule-index {
+  color: var(--text-pink);
+  text-shadow: 0 0 8px rgba(255,120,189,.28);
+}
+[data-page="contact"] .kicker,
+[data-page="contact"] .contact-line span {
+  color: var(--text-mint);
+  text-shadow: 0 0 8px rgba(134,255,208,.24);
+}
+
+/* News type labels use colored text, not colored pills. */
+.news-pill,
+.banner-kicker,
+#newsDetailVariantTag {
+  background: rgba(8, 12, 21, .52) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+.news-item[data-variant="chronicle"] .news-pill,
+.banner-item[data-variant="chronicle"] .banner-kicker,
+.article-page[data-variant="chronicle"] #newsDetailVariantTag {
+  color: var(--text-amber);
+  text-shadow: 0 0 8px rgba(255,210,122,.32);
+}
+.news-item[data-variant="spotlight"] .news-pill,
+.banner-item[data-variant="spotlight"] .banner-kicker,
+.article-page[data-variant="spotlight"] #newsDetailVariantTag {
+  color: var(--text-cyan);
+  text-shadow: 0 0 8px rgba(105,232,255,.34);
+}
+.news-item[data-variant="update"] .news-pill,
+.banner-item[data-variant="update"] .banner-kicker,
+.article-page[data-variant="update"] #newsDetailVariantTag {
+  color: var(--text-violet);
+  text-shadow: 0 0 8px rgba(181,140,255,.34);
+}
+.banner-item[data-variant="signal"] .banner-kicker {
+  color: var(--text-mint);
+  text-shadow: 0 0 8px rgba(134,255,208,.30);
+}
+
+/* Preserve readability: paragraphs remain neutral, only emphasis glows. */
+.news-item p,
+.article-body,
+[data-page="lore"] .book-prose,
+[data-page="rules"] .rule-item p,
+[data-page="contact"] .contact-line strong {
+  text-shadow: none;
+}
+
+@media (max-width: 760px) {
+  [data-page="home"] .hero-copy h1,
+  [data-page="lore"] .lore-header h1,
+  [data-page="rules"] .simple-head h1,
+  [data-page="contact"] .simple-head h1 {
+    filter: none;
+  }
+}
