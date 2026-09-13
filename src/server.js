@@ -101,6 +101,21 @@ function cleanText(value, max = 1000) {
   return String(value ?? '').trim().slice(0, max);
 }
 
+function touchPresence(userId) {
+  if (!Number.isInteger(Number(userId))) return;
+  db.prepare(`
+    UPDATE users
+    SET last_seen_at = datetime('now')
+    WHERE id = ?
+      AND (last_seen_at IS NULL OR datetime(last_seen_at) <= datetime('now', '-25 seconds'))
+  `).run(Number(userId));
+}
+
+function clearPresence(userId) {
+  if (!Number.isInteger(Number(userId))) return;
+  db.prepare('UPDATE users SET last_seen_at = NULL WHERE id = ?').run(Number(userId));
+}
+
 function boolInt(value) {
   return value === true || value === 1 || value === '1' ? 1 : 0;
 }
@@ -343,6 +358,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
   `).run(username, hash);
   db.prepare('INSERT INTO profiles (user_id, display_name) VALUES (?, ?)').run(info.lastInsertRowid, username);
   const user = userRow(Number(info.lastInsertRowid));
+  touchPresence(user.id);
   setAuthCookie(res, signUser(user));
   res.status(201).json({ user: publicUser(user) });
 });
@@ -358,23 +374,32 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
   }
   const full = userRow(user.id);
+  touchPresence(full.id);
   setAuthCookie(res, signUser(full));
   res.json({ user: publicUser(full) });
 });
 
-app.post('/api/auth/logout', (_req, res) => {
+app.post('/api/auth/logout', (req, res) => {
+  if (req.user) clearPresence(req.user.id);
   clearAuthCookie(res);
   res.json({ ok: true });
 });
 
 app.post('/api/auth/logout-all', requireAuth, (req, res) => {
+  clearPresence(req.user.id);
   db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(req.user.id);
   clearAuthCookie(res);
   res.json({ ok: true });
 });
 
 app.get('/api/auth/me', requireAuth, (req, res) => {
+  touchPresence(req.user.id);
   res.json({ user: publicUser(userRow(req.user.id)) });
+});
+
+app.post('/api/presence', requireAuth, (req, res) => {
+  touchPresence(req.user.id);
+  res.json({ ok: true });
 });
 
 app.get('/auth/discord', (req, res) => {
@@ -577,11 +602,13 @@ app.delete('/api/profile/discord', requireAuth, (req, res) => {
 app.get('/api/admin/overview', requireAdmin, (_req, res) => {
   const users = db.prepare('SELECT COUNT(*) AS count FROM users').get().count;
   const admins = db.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'").get().count;
+  const onlineUsers = db.prepare("SELECT COUNT(*) AS count FROM users WHERE last_seen_at IS NOT NULL AND datetime(last_seen_at) >= datetime('now', '-90 seconds')").get().count;
   const publishedNews = db.prepare("SELECT COUNT(*) AS count FROM news WHERE status = 'published'").get().count;
   const chapters = db.prepare('SELECT COUNT(*) AS count FROM lore_chapters').get().count;
   const latestNews = db.prepare('SELECT id, title, updated_at, status FROM news ORDER BY datetime(updated_at) DESC, id DESC LIMIT 1').get() || null;
   res.json({
     users,
+    onlineUsers,
     admins,
     publishedNews,
     chapters,

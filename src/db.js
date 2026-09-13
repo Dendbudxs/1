@@ -138,6 +138,7 @@ db.exec(`
 // Migrations from earlier DARK versions.
 ensureColumn('users', 'session_version', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'local_login_enabled', 'INTEGER NOT NULL DEFAULT 1');
+ensureColumn('users', 'last_seen_at', 'TEXT');
 ensureColumn('profiles', 'theme_preset', "TEXT NOT NULL DEFAULT 'graphite'");
 ensureColumn('profiles', 'accent_color', "TEXT NOT NULL DEFAULT '#7b98a3'");
 ensureColumn('profiles', 'ui_density', "TEXT NOT NULL DEFAULT 'normal'");
@@ -148,6 +149,8 @@ ensureColumn('profiles', 'acrylic_opacity', 'INTEGER NOT NULL DEFAULT 74');
 ensureColumn('profiles', 'texture_intensity', 'INTEGER NOT NULL DEFAULT 22');
 ensureColumn('news', 'style_variant', "TEXT NOT NULL DEFAULT 'chronicle'");
 ensureColumn('banners', 'style_variant', "TEXT NOT NULL DEFAULT 'spotlight'");
+
+db.exec('CREATE INDEX IF NOT EXISTS idx_users_last_seen_at ON users(last_seen_at)');
 
 db.prepare(`
   INSERT OR IGNORE INTO profiles (user_id, display_name)
