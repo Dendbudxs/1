@@ -285,7 +285,7 @@ function performPageSwitch(path) {
   updateActiveNav(path);
   const heading = document.querySelector('.page.active h1');
   document.title = `${heading?.textContent || 'DARK'} · DARK Games`;
-  window.scrollTo({ top: 0, behavior: 'auto' });
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function routeMotionEnabled() {
@@ -340,8 +340,8 @@ async function animateRouteSwitch(path, direction = 'forward') {
 
     const outgoing = current.animate([
       { opacity: 1, transform: 'translate3d(0,0,0)' },
-      { opacity: .82, transform: `translate3d(0,${sign * -3}px,0)`, offset: .55 },
-      { opacity: .42, transform: `translate3d(0,${sign * -7}px,0)` }
+      { opacity: .65, transform: `translate3d(${sign * -14}px,0,0)`, offset: .55 },
+      { opacity: 0, transform: `translate3d(${sign * -32}px,0,0)` }
     ], {
       duration: 390,
       easing: 'cubic-bezier(.4,0,.2,1)',
@@ -358,8 +358,8 @@ async function animateRouteSwitch(path, direction = 'forward') {
     next.style.pointerEvents = 'none';
 
     const incoming = next.animate([
-      { opacity: .34, transform: `translate3d(0,${sign * 10}px,0)` },
-      { opacity: .68, transform: `translate3d(0,${sign * 4}px,0)`, offset: .42 },
+      { opacity: 0, transform: `translate3d(${sign * 36}px,0,0)` },
+      { opacity: .8, transform: `translate3d(${sign * 10}px,0,0)`, offset: .42 },
       { opacity: 1, transform: 'translate3d(0,0,0)' }
     ], {
       duration: 720,
@@ -1199,63 +1199,58 @@ let homeStageTransitioning = false;
 
 async function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
-  if (!next || !next.classList.contains('home-stage')) return;
-
   const panels = $$('.home-stage');
   const current = panels.find(panel => !panel.hidden);
-  if (!current || current === next || homeStageTransitioning) return;
-
-  const currentIndex = Math.max(0, panels.indexOf(current));
-  const nextIndex = Math.max(0, panels.indexOf(next));
-  const direction = nextIndex >= currentIndex ? 1 : -1;
-  const motionEnabled = !document.documentElement.classList.contains('motion-off')
-    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+  if (!next || !panels.includes(next) || !current || current === next || homeStageTransitioning) return;
+  let viewport = document.getElementById('homeStageViewport');
+  if (!viewport) {
+    viewport = node('div', 'home-stage-viewport');
+    viewport.id = 'homeStageViewport';
+    current.before(viewport);
+    panels.forEach(panel => viewport.append(panel));
+  }
+  const direction = panels.indexOf(next) > panels.indexOf(current) ? 1 : -1;
+  const animations = [];
   homeStageTransitioning = true;
-  const tabs = $$('[data-home-stage]');
-  tabs.forEach(tab => {
+  viewport.classList.add('is-sliding');
+  const oldHeight = Math.max(viewport.getBoundingClientRect().height, current.offsetHeight);
+  viewport.style.minHeight = oldHeight + 'px';
+  $$('[data-home-stage]').forEach(tab => {
     const selected = tab.dataset.homeStage === name;
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
   });
-
   try {
-    if (motionEnabled && current.animate) {
-      const out = current.animate([
+    // Grid overlays the panels at exactly the same origin. Neither pushes the other down.
+    next.hidden = false;
+    current.inert = true;
+    current.setAttribute('aria-hidden', 'true');
+    next.inert = false;
+    next.removeAttribute('aria-hidden');
+    viewport.style.minHeight = Math.max(oldHeight, next.offsetHeight) + 'px';
+    if (routeMotionEnabled() && current.animate && next.animate) {
+      animations.push(current.animate([
         { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: .74, transform: `translate3d(${direction * -4}px,0,0)`, offset: .58 },
-        { opacity: 0, transform: `translate3d(${direction * -9}px,0,0)` }
-      ], {
-        duration: 300,
-        easing: 'cubic-bezier(.4,0,.2,1)',
-        fill: 'forwards'
-      });
-      await out.finished.catch(() => {});
-      out.cancel();
-    }
-
-    panels.forEach(panel => { panel.hidden = panel !== next; });
-
-    if (motionEnabled && next.animate) {
-      const incoming = next.animate([
-        { opacity: 0, transform: `translate3d(${direction * 11}px,0,0)` },
-        { opacity: .34, transform: `translate3d(${direction * 7}px,0,0)`, offset: .22 },
-        { opacity: .82, transform: `translate3d(${direction * 2}px,0,0)`, offset: .66 },
+        { opacity: 0, transform: `translate3d(${direction * -48}px,0,0)` }
+      ], { duration: 440, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' }));
+      animations.push(next.animate([
+        { opacity: 0, transform: `translate3d(${direction * 64}px,0,0)` },
         { opacity: 1, transform: 'translate3d(0,0,0)' }
-      ], {
-        duration: 600,
-        easing: 'cubic-bezier(.16,1,.3,1)',
-        fill: 'both'
-      });
-      await incoming.finished.catch(() => {});
-      incoming.cancel();
+      ], { duration: 620, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }));
+      await Promise.allSettled(animations.map(animation => animation.finished));
     }
-
-    if (focusPanel) next.focus({ preventScroll: true });
-    watchReveals();
   } finally {
+    panels.forEach(panel => {
+      panel.hidden = panel !== next;
+      panel.inert = panel !== next;
+      panel.removeAttribute('aria-hidden');
+    });
+    animations.forEach(animation => animation.cancel());
+    viewport.classList.remove('is-sliding');
     homeStageTransitioning = false;
   }
+  if (focusPanel) next.focus({ preventScroll: true });
+  watchReveals();
 }
 $$('[data-home-stage]').forEach((tab, index, tabs) => {
   tab.addEventListener('click', () => selectHomeStage(tab.dataset.homeStage));

@@ -5545,3 +5545,24 @@ html.route-switching .site-footer {
   .route-veil { display: none !important; }
 }
 html.motion-off .route-veil { display: none !important; }
+
+/* 5.6.1: neutral scenery and stable, overlapping tab slides. */
+.page-texture {
+  background: linear-gradient(180deg, rgba(5,9,14,.36), rgba(5,9,14,.56)), url('/home-bg.png') center / cover no-repeat !important;
+  filter: none !important;
+}
+.page-texture::after { display:none !important; }
+.route-veil { display:none !important; }
+.site-footer, .footer-line { background:transparent !important; box-shadow:none !important; }
+.site-footer::before, .site-footer::after { display:none !important; }
+html, body { overflow-anchor:none; }
+.app-main { overflow-x:clip; }
+.home-stage-viewport { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; overflow:clip; }
+.home-stage-viewport > .home-stage { grid-area:1 / 1; width:100%; min-width:0; align-self:start; }
+.home-stage-viewport.is-sliding > .home-stage { will-change:transform,opacity; pointer-events:none; }
+.home-stage-viewport.is-sliding .reveal-in { animation:none !important; }
+[data-page="home"] .home-stage-nav { background:rgba(12,18,24,.8) !important; }
+[data-page="home"] .home-stage-nav button[aria-selected="true"] { background:rgba(255,255,255,.07) !important; }
+@media (max-width:760px) {
+  .page-texture { background-position:34% center !important; }
+}
