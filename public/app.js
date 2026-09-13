@@ -285,7 +285,7 @@ function performPageSwitch(path) {
   updateActiveNav(path);
   const heading = document.querySelector('.page.active h1');
   document.title = `${heading?.textContent || 'DARK'} · DARK Games`;
-  window.scrollTo({ top: 0, behavior: 'auto' });
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function routeMotionEnabled() {
@@ -293,70 +293,9 @@ function routeMotionEnabled() {
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-async function animateRouteSwitch(path, direction = 'forward') {
-  const current = document.querySelector('.page.active');
-  const targetName = pageForPath(path);
-  const target = document.querySelector(`.page[data-page="${targetName}"]`);
-
-  if (!current || !target || current === target || !routeMotionEnabled()) {
-    performPageSwitch(path);
-    return;
-  }
-
-  const appMain = $('#appMain');
-  const sign = direction === 'back' ? -1 : 1;
-
-  // Animate the stable app container instead of two full pages or a fullscreen
-  // veil. The actual DOM/layout switch happens while the container is invisible,
-  // so there is no overlap, fill flash or expensive snapshot rendering.
-  document.documentElement.classList.add('route-switching');
-  appMain.style.pointerEvents = 'none';
-  appMain.style.willChange = 'transform, opacity';
-
-  try {
-    if (appMain.animate) {
-      const out = appMain.animate([
-        { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: .7, transform: `translate3d(${sign * -4}px,0,0)`, offset: .55 },
-        { opacity: 0, transform: `translate3d(${sign * -10}px,0,0)` }
-      ], {
-        duration: 180,
-        easing: 'cubic-bezier(.4,0,.2,1)',
-        fill: 'forwards'
-      });
-      await out.finished.catch(() => {});
-      out.cancel();
-    } else {
-      appMain.style.opacity = '0';
-    }
-
-    performPageSwitch(path);
-
-    // Give the browser two paints to settle the new layout while invisible.
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    if (appMain.animate) {
-      const incoming = appMain.animate([
-        { opacity: 0, transform: `translate3d(${sign * 10}px,0,0)` },
-        { opacity: .72, transform: `translate3d(${sign * 3}px,0,0)`, offset: .44 },
-        { opacity: 1, transform: 'translate3d(0,0,0)' }
-      ], {
-        duration: 360,
-        easing: 'cubic-bezier(.16,1,.3,1)',
-        fill: 'both'
-      });
-      await incoming.finished.catch(() => {});
-      incoming.cancel();
-    } else {
-      appMain.style.opacity = '';
-    }
-  } finally {
-    appMain.style.pointerEvents = '';
-    appMain.style.willChange = '';
-    appMain.style.opacity = '';
-    appMain.style.transform = '';
-    document.documentElement.classList.remove('route-switching');
-  }
+async function animateRouteSwitch(path) {
+  // Keep backdrop-filter panels fully opaque throughout navigation.
+  performPageSwitch(path);
 }
 
 async function ensureRouteData(path) {
@@ -1172,61 +1111,47 @@ let homeStageTransitioning = false;
 
 async function selectHomeStage(name, { focusPanel = false } = {}) {
   const next = document.getElementById(`stage-${name}`);
-  if (!next || !next.classList.contains('home-stage')) return;
-
   const panels = $$('.home-stage');
   const current = panels.find(panel => !panel.hidden);
-  if (!current || current === next || homeStageTransitioning) return;
-
-  const currentIndex = Math.max(0, panels.indexOf(current));
-  const nextIndex = Math.max(0, panels.indexOf(next));
-  const direction = nextIndex >= currentIndex ? 1 : -1;
-  const motionEnabled = !document.documentElement.classList.contains('motion-off')
-    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+  if (!next || !panels.includes(next) || !current || current === next || homeStageTransitioning) return;
+  let viewport = document.getElementById('homeStageViewport');
+  if (!viewport) {
+    viewport = node('div', 'home-stage-viewport');
+    viewport.id = 'homeStageViewport';
+    current.before(viewport);
+    panels.forEach(panel => viewport.append(panel));
+  }
+  const direction = panels.indexOf(next) > panels.indexOf(current) ? 1 : -1;
+  const animations = [];
   homeStageTransitioning = true;
-  const tabs = $$('[data-home-stage]');
-  tabs.forEach(tab => {
+  viewport.classList.add('is-sliding');
+  const oldHeight = Math.max(viewport.getBoundingClientRect().height, current.offsetHeight);
+  viewport.style.minHeight = oldHeight + 'px';
+  $$('[data-home-stage]').forEach(tab => {
     const selected = tab.dataset.homeStage === name;
     tab.setAttribute('aria-selected', String(selected));
     tab.tabIndex = selected ? 0 : -1;
   });
-
   try {
-    if (motionEnabled && current.animate) {
-      const out = current.animate([
-        { opacity: 1, transform: 'translate3d(0,0,0)' },
-        { opacity: 0, transform: `translate3d(${direction * -8}px,0,0)` }
-      ], {
-        duration: 150,
-        easing: 'cubic-bezier(.4,0,.2,1)',
-        fill: 'forwards'
-      });
-      await out.finished.catch(() => {});
-      out.cancel();
-    }
-
-    panels.forEach(panel => { panel.hidden = panel !== next; });
-    await new Promise(resolve => requestAnimationFrame(resolve));
-
-    if (motionEnabled && next.animate) {
-      const incoming = next.animate([
-        { opacity: 0, transform: `translate3d(${direction * 8}px,0,0)` },
-        { opacity: 1, transform: 'translate3d(0,0,0)' }
-      ], {
-        duration: 300,
-        easing: 'cubic-bezier(.16,1,.3,1)',
-        fill: 'both'
-      });
-      await incoming.finished.catch(() => {});
-      incoming.cancel();
-    }
-
-    if (focusPanel) next.focus({ preventScroll: true });
-    watchReveals();
+    // Grid overlays the panels at exactly the same origin. Neither pushes the other down.
+    next.hidden = false;
+    current.inert = true;
+    current.setAttribute('aria-hidden', 'true');
+    next.inert = false;
+    next.removeAttribute('aria-hidden');
+    viewport.style.minHeight = Math.max(oldHeight, next.offsetHeight) + 'px';
   } finally {
+    panels.forEach(panel => {
+      panel.hidden = panel !== next;
+      panel.inert = panel !== next;
+      panel.removeAttribute('aria-hidden');
+    });
+    animations.forEach(animation => animation.cancel());
+    viewport.classList.remove('is-sliding');
     homeStageTransitioning = false;
   }
+  if (focusPanel) next.focus({ preventScroll: true });
+  watchReveals();
 }
 $$('[data-home-stage]').forEach((tab, index, tabs) => {
   tab.addEventListener('click', () => selectHomeStage(tab.dataset.homeStage));
