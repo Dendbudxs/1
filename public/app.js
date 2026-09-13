@@ -355,6 +355,7 @@ function renderHome() {
   const bannerStrip = $('#bannerStrip');
   bannerStrip.replaceChildren();
   const banner = state.home.banners?.[0];
+  $('#bannerEmpty').hidden = Boolean(banner);
   if (banner) {
     const item = node('div', 'banner-item');
     if (banner.image_url) {
@@ -616,8 +617,8 @@ async function refreshMe() {
 
 const publicSections = {
   config: { url: '/api/config', target: '.home-intro', apply(data) { state.config = data; renderHome(); renderDiscordAvailability(); } },
-  status: { url: '/api/server/status', target: '.status-source', apply(data) { setServerState(data.state); } },
-  home: { url: '/api/content/home', target: '#newsList', apply(data) { state.home = data; renderHome(); } },
+  status: { url: '/api/server/status', target: '.intro-meta', apply(data) { setServerState(data.state); } },
+  home: { url: '/api/content/home', target: '.home-stage-nav', apply(data) { state.home = data; renderHome(); } },
   lore: { url: '/api/content/lore', target: '.lore-header', apply(data) { state.lore = data; renderLore(); selectLoreFromHash(); } },
   rules: { url: '/api/content/rules', target: '#rulesList', apply(data) { state.rules = data.rules || []; renderRules(); } },
   contact: { url: '/api/contact', target: '[data-page="contact"] .simple-head', apply(data) { state.contact = data; renderContact(); } }
@@ -956,6 +957,38 @@ function watchReveals() {
 }
 
 // Event wiring ---------------------------------------------------------------
+function selectHomeStage(name, { focusPanel = false } = {}) {
+  const next = document.getElementById(`stage-${name}`);
+  if (!next || !next.classList.contains('home-stage') || !next.hidden) return;
+  $$('.home-stage').forEach(panel => { panel.hidden = panel !== next; });
+  $$('[data-home-stage]').forEach(tab => {
+    const selected = tab.dataset.homeStage === name;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+  });
+  if (!document.documentElement.classList.contains('motion-off') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && next.animate) {
+    next.animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 580, easing: 'cubic-bezier(.22,1,.36,1)' });
+  }
+  if (focusPanel) next.focus({ preventScroll: true });
+  const nav = $('.home-stage-nav');
+  if (nav.getBoundingClientRect().top < 0) nav.scrollIntoView({ block: 'start', behavior: 'auto' });
+  watchReveals();
+}
+$$('[data-home-stage]').forEach((tab, index, tabs) => {
+  tab.addEventListener('click', () => selectHomeStage(tab.dataset.homeStage));
+  tab.addEventListener('keydown', event => {
+    let destination;
+    if (event.key === 'ArrowRight') destination = (index + 1) % tabs.length;
+    if (event.key === 'ArrowLeft') destination = (index + tabs.length - 1) % tabs.length;
+    if (event.key === 'Home') destination = 0;
+    if (event.key === 'End') destination = tabs.length - 1;
+    if (destination === undefined) return;
+    event.preventDefault();
+    tabs[destination].focus();
+    selectHomeStage(tabs[destination].dataset.homeStage);
+  });
+});
+$$('[data-stage-next]').forEach(button => button.addEventListener('click', () => selectHomeStage(button.dataset.stageNext, { focusPanel: true })));
 $('#newsMoreButton').addEventListener('click', () => {
   const previousCount = state.newsVisibleCount;
   state.newsVisibleCount += 6;

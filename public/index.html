@@ -65,6 +65,12 @@
 
   <main id="appMain" class="app-main">
     <section class="page active" data-page="home" aria-labelledby="homeTitle">
+      <div class="content-width home-stage-nav" role="tablist" aria-label="Разделы главной">
+        <button id="stage-tab-welcome" role="tab" aria-selected="true" aria-controls="stage-welcome" data-home-stage="welcome" type="button"><small>01</small> Начало</button>
+        <button id="stage-tab-banner" role="tab" aria-selected="false" aria-controls="stage-banner" data-home-stage="banner" tabindex="-1" type="button"><small>02</small> Событие</button>
+        <button id="stage-tab-news" role="tab" aria-selected="false" aria-controls="stage-news" data-home-stage="news" tabindex="-1" type="button"><small>03</small> Новости</button>
+      </div>
+      <div class="home-stage" id="stage-welcome" role="tabpanel" aria-labelledby="stage-tab-welcome" tabindex="0">
       <div class="content-width home-intro">
         <div class="intro-copy">
           <p class="kicker">DARK GAMES · MINECRAFT SMP</p>
@@ -90,18 +96,16 @@
         </div>
       </div>
 
-      <p class="content-width status-source">Статус обновляет администрация; это не автоматическая проверка сервера.</p>
-      <div class="content-width banner-strip" id="bannerStrip" data-reveal hidden></div>
-
-      <section class="content-width world-section" aria-labelledby="worldTitle" data-reveal>
-        <div class="world-heading"><p class="kicker">ЗА ПРЕДЕЛАМИ СПАВНА</p><h2 id="worldTitle">У каждого места —<br>своя история.</h2><p>Познакомься с миром перед первым входом. Или найди главу, которую продолжишь сам.</p></div>
-        <div class="world-links">
-          <a class="world-link" href="/lore" data-route="/lore"><span class="world-number">01 / АРХИВ</span><h3>Книга мира</h3><p>Истории, города и персонажи DARK.</p><span class="world-arrow" aria-hidden="true">↗</span></a>
-          <a class="world-link" href="/rules" data-route="/rules"><span class="world-number">02 / ПЕРЕД СТАРТОМ</span><h3>Правила игры</h3><p>Всё, о чём стоит договориться на берегу.</p><span class="world-arrow" aria-hidden="true">↗</span></a>
-        </div>
-      </section>
-
-      <div class="content-width section-heading home-news-heading" data-reveal>
+      <div class="content-width stage-footer"><span>Мир начинается с тебя.</span><button class="subtle-button" type="button" data-stage-next="banner">Дальше: событие <span aria-hidden="true">→</span></button></div>
+      </div>
+      <div class="home-stage" id="stage-banner" role="tabpanel" aria-labelledby="stage-tab-banner" tabindex="0" hidden>
+        <div class="content-width stage-heading"><p class="kicker">В ЦЕНТРЕ ВНИМАНИЯ</p><h2>Сейчас в DARK</h2></div>
+        <div class="content-width banner-strip" id="bannerStrip" hidden></div>
+        <div class="content-width banner-empty" id="bannerEmpty"><p>Здесь появится следующее событие мира.</p><a class="subtle-button" href="/lore" data-route="/lore">Пока загляни в книгу мира →</a></div>
+        <div class="content-width stage-footer"><button class="text-back" type="button" data-stage-next="welcome">← К началу</button><button class="subtle-button" type="button" data-stage-next="news">Дальше: новости →</button></div>
+      </div>
+      <div class="home-stage" id="stage-news" role="tabpanel" aria-labelledby="stage-tab-news" tabindex="0" hidden>
+      <div class="content-width section-heading home-news-heading">
         <div>
           <p class="kicker">ЖУРНАЛ ПРОЕКТА</p>
           <h2>Новости сервера</h2>
@@ -112,6 +116,8 @@
         <div class="empty-line">Загрузка новостей…</div>
       </div>
       <div class="content-width news-more-wrap"><button class="subtle-button" id="newsMoreButton" type="button" aria-controls="newsList" hidden>Показать ещё новости</button></div>
+      <div class="content-width stage-footer"><button class="text-back" type="button" data-stage-next="banner">← К событию</button><button class="subtle-button" type="button" data-stage-next="welcome">К началу ↑</button></div>
+      </div>
     </section>
 
     <section class="page" data-page="news" aria-labelledby="newsDetailTitle">
