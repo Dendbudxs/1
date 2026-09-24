@@ -1,33 +1,17 @@
 {
-  "name": "dark-games-fullstack",
-  "version": "5.6.6",
+  "name": "mandarin-event-department",
+  "version": "6.0.0",
   "private": true,
-  "description": "DARK Games full-stack Minecraft portal and CMS, Railway-ready with persistent storage",
-  "main": "src/server.js",
-  "type": "commonjs",
-  "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon",
-    "dev:native": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/storage.js && node --check src/db.js && node --check src/auth.js && node --check src/media.js && node --check src/discord.js && node --check src/serverControl.js && node --check public/app.js",
-    "test": "node --test tests/*.test.js",
-    "backup": "node scripts/backup.js"
-  },
+  "type": "module",
   "engines": {
-    "node": "24.x"
+    "node": ">=24.19.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/start.mjs",
+    "test": "node --test server/*.test.mjs",
+    "preview:login": "node server/render-login-preview.mjs"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.7",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
-    "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "sharp": "^0.35.4"
-  },
-  "devDependencies": {
-    "jsdom": "^30.0.1",
-    "nodemon": "^3.1.10"
+    "google-auth-library": "11.1.0"
   }
 }

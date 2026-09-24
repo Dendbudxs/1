@@ -1,0 +1,27 @@
+# Платное размещение: сервер + постоянный диск. См. DEPLOY_RENDER.md.
+# Первый запуск остаётся закрытым. GOOGLE_CLIENT_ID и GOOGLE_CLIENT_SECRET
+# добавляются в Render Environment после получения HTTPS-адреса сервиса.
+services:
+  - type: web
+    name: mandarin-event-department
+    runtime: node
+    region: frankfurt
+    plan: 0.5c-512mb
+    numInstances: 1
+    autoDeployTrigger: "off"
+    buildCommand: npm ci --omit=dev --ignore-scripts
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 24.19.0
+      - key: HOST
+        value: 0.0.0.0
+      - key: OWNER_GOOGLE_EMAIL
+        value: liryzliryz34@gmail.com
+      - key: AUTH_DB_PATH
+        value: /var/data/google-auth.sqlite
+    disk:
+      name: mandarin-access
+      mountPath: /var/data
+      sizeGB: 1
