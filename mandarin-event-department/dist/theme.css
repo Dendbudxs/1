@@ -1,0 +1,181 @@
+/* Mandarin identity: soft graphite, citrus orange and leaf green. */
+:root {
+  --bg: #191b1d;
+  --panel: #232629;
+  --panel-hover: #2b2e30;
+  --line: #404244;
+  --text: #f5efe7;
+  --muted: #bdbbb6;
+  --accent: #ffa763;
+  --green: #b8d8a5;
+  --warm-line: #846248;
+  --soft-shadow: 0 12px 32px #00000020;
+}
+body {
+  background: radial-gradient(ellipse 650px 500px at 0 0, #f8983d0b, transparent 80%), radial-gradient(ellipse 600px 500px at 100% 180px, #82b69108, transparent 85%), var(--bg);
+}
+.site-header {
+  border-top-color: #f29c58;
+  background: linear-gradient(110deg,#252525,#202426);
+  box-shadow: 0 1px 0 #ffffff07;
+}
+.brand { color: #fff0dc; }
+.brand-mark {
+  width: 3.75rem;
+  height: 3.75rem;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+.brand-mark img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 5px #0005); }
+.header-caption { border-color: var(--line); }
+.header-caption span, .eyebrow, .lead { color: var(--muted); }
+.department-control select {
+  color: #f9dfc8;
+  border-color: #806044;
+  background: #312b26;
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+.department-control option { background: #24272a; color: var(--text); }
+.snow-button { color: #c7d4d8; background: #252d32; border-color: #53626b; }
+.snow-button[aria-pressed="true"] { background: #34454e; border-color: #88a6b3; color: #f2fbff; }
+.sidebar { background: #202326f5; border-color: var(--line); }
+.nav-link { color: #c9c7c1; }
+.nav-count { color: #e0d3c2; background: #ffa7630e; }
+.nav-link.active { background: #ffa76307; }
+.breadcrumbs { color: #c4c4bf; }
+.crumb-slash { color: #8c908f; }
+.server-tabs { background: #25292a; border-color: #525d55; }
+.server-tabs a.active { background: #3c5140; color: #e1f0d3; }
+.search-wrap { background: #25282a; border-color: #575957; box-shadow: inset 0 1px 0 #ffffff05; }
+.search-wrap input::placeholder { color: #b6b8b3; }
+.search-wrap kbd { background: #353635; border-color: #5b5d58; color: #ddd9cf; }
+.search-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px #ffa76315; }
+.section-heading > span, .entry-hint { color: var(--muted); }
+
+/* Citrus images belong to the identity, with clear space around labels. */
+.department-card {
+  background: linear-gradient(120deg,#27302c,#25282a 70%);
+  border-color: #5b6a5d;
+  box-shadow: inset 0 1px 0 #edfff218, var(--soft-shadow);
+}
+.department-card:first-child {
+  background: linear-gradient(120deg,#36302a,#2c2b2a 70%);
+  border-color: #9c7553;
+}
+.department-card:hover, .department-card:first-child:hover {
+  background: linear-gradient(120deg,#39332c,#303332);
+  border-color: #ffc085;
+}
+.department-card::before { width: 3px; opacity: .85; }
+.department-card-top { min-height: 3.25rem; margin-bottom: .65rem; gap: .75rem; }
+.department-card-id { display: inline-flex; align-items: center; gap: .65rem; }
+.department-citrus { width: 5.25rem; height: 4.5rem; object-fit: contain; filter: drop-shadow(0 4px 6px #0004); flex-shrink: 0; }
+.department-card .directory-number { color: #c6b7a0; }
+.department-card h2 { color: #fff4e4; }
+.department-card p { color: #cbc9c0; }
+.department-card-bottom { color: #bcbcb5; }
+.department-enter { color: #ffb475; }
+.containment-art {
+  background: #25282a;
+  border-color: #7f837a;
+  box-shadow: inset 0 1px 0 #ffffff1a, var(--soft-shadow);
+}
+.containment-art figcaption {
+  background: #25292be8;
+  border-top-color: #b2b9ab45;
+  color: #e5e0d6;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.art-label { background: #262c2ddd; border-color: #b9c5bb50; color: #edf0e4; }
+.panel-art { border-color: #768273; }
+.panel-art img { opacity: .9; }
+.panel-art span { background: #24292ae8; border-color: #899083; color: #f0eadb; }
+.directory-card {
+  background: #272b2d;
+  border-color: #4a4e4d;
+  box-shadow: inset 0 1px 0 #ffffff06;
+}
+.directory-card:hover { background: #303536; border-color: #968369; }
+.directory-card p { color: #c6c7bf; }
+.directory-number { color: #a5aba0; }
+.directory-meta { color: #bcc0b6; }
+.directory-arrow { border-color: #636c61; color: #f0e4ce; }
+.directory-card:first-child { background: linear-gradient(110deg,#ffb06c,#ef995b); border-color: #ffc18b; color: #342316; }
+.directory-card:first-child:hover { background: #ffbd83; border-color: #ffd7b4; }
+.directory-card:first-child p, .directory-card:first-child .directory-meta { color: #52341e; }
+.directory-card:first-child .directory-number { color: #7a4929; }
+.directory-card:first-child .directory-arrow { color: #362417; border-color: #925d39; }
+.start-panel, .quick-row, .source-card, .guide-card, .announcement, .search-result {
+  background: var(--panel);
+  border-color: var(--line);
+}
+.start-panel { box-shadow: var(--soft-shadow); }
+.quick-row:hover, .guide-card:hover, .search-result:hover { background: var(--panel-hover); border-color: #967254; }
+.quick-index { color: #bca084; }
+.quick-row small { color: #b7bdb5; }
+.status-label { border-color: #77806e; color: #d3dfc5 !important; }
+.fact-label { color: #bfc5b8; font-size: .8125rem; }
+.fact-value small { color: #c7c7bd; }
+.event-card { background: var(--panel); border-color: #464b49; box-shadow: inset 0 1px 0 #ffffff07; }
+.event-card:hover { background: #2d302d; border-color: #bf926b; }
+.event-card .item-code { color: #d9b48e; }
+.event-card p, .guide-card p, .source-card p, .announcement p, .search-result p { color: #c4c6bd; }
+.card-footer { border-color: #474d45; color: #c1c5ba; }
+.tag { background: #e1dcc408; color: #d7d4c8; border-color: #676a5b; }
+.tag.gray { color: #d1d2c9; }
+.tag.orange { color: #ffc897; background: #ffaa5510; border-color: #9e744b; }
+.tag.green { color: #d1eabd; background: #99d2760b; border-color: #798d62; }
+.role-picker { background: linear-gradient(110deg,#302e29,#272d2b); border-color: #786a53; box-shadow: inset 0 1px 0 #fff2df0a; }
+.role-symbol { background: #ffa76313; border-color: #8e6848; }
+.role-heading p, .role-explanation { color: #c1c4b6; }
+.role-option { color: #d8dace; background: #232826; border-color: #69715f; }
+.role-option:hover { color: #fff0db; border-color: #c2996a; }
+.role-option.active, .filter.active { color: #342212; background: #ffb172; border-color: #ffce9f; }
+.filter { color: #d1d5c8; background: #242927; border-color: #66705e; }
+.filter:hover { background: #343c30; }
+.filter.active:hover { background: #ffbf89; color: #342212; }
+.event-unavailable { background: #252825; border-color: #666e5f; }
+.article p, .article ul, .article ol { color: #d4d4ca; }
+.article .detail-summary { color: #e1dfd2; }
+.article-aside { background: #22292a; border-color: #58655e; border-top-color: #a2b28b; }
+.article-aside h3, .article-aside a { color: #c6d1ba; }
+.article-aside .aside-source { border-color: #4b584c; }
+.article-aside .source-link { color: var(--accent); }
+.technical { border-color: #515a50; }
+.technical-row { background: #252c2b; border-color: #434e45; }
+.technical-row dt { color: #bdc9b3; }
+.technical-row dd { color: #e5e7db; }
+.code-panel { background: #151d1e; border-color: #53615a; }
+.code-head { color: #c0cbb9; border-color: #424f47; }
+.copy-button { color: #e3e9d8; background: #344239; border-color: #788b70; }
+.code-panel pre { color: #ffca99; }
+th { background: #2e3830; color: #e5ead9; }
+td, th { border-color: #515c4e; }
+td { color: #cbd4bf; }
+.announcement-icon { background: #3b3329; }
+.source-date, .result-section { color: #c6cfae; }
+.note { background: #322a23; color: #e3cfb6; border-color: #8c6848; border-left-color: var(--accent); }
+.article .note p { color: #e7d4bd; }
+.empty { background: #252a26; border-color: #7b886b; }
+.empty p { color: #cbd0bf; }
+footer { border-color: #4b5348; color: #bfc8b3; }
+.footer-brand { display: inline-flex; align-items: center; gap: .6rem; }
+.footer-brand img { width: 2.3rem; height: 2.3rem; object-fit: contain; }
+.footer-dot { color: #aab49b; }
+@media (max-width: 780px) {
+  .brand-mark { width: 3.3rem; height: 3.3rem; }
+  .sidebar { background: #202728; border-color: #5e6d60; }
+  .mobile-nav-heading { color: #e0e7d3; }
+  .nav-link.active { background: #ffa7630e; border-color: #a37e57; }
+  .nav-sources { border-top-color: #5d6a56; }
+}
+@media (max-width: 530px) {
+  .brand-mark { width: 3.1rem; height: 3.1rem; }
+  .brand { font-size: 1rem; }
+  .department-citrus { width: 4.8rem; height: 4.2rem; }
+  .department-enter { border-top-color: #b6a48635; }
+  .department-card-id { gap: .5rem; }
+  .department-card .tag { font-size: .8125rem; }
+}

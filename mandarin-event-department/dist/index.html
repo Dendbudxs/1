@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#191b1d">
+  <meta name="description" content="Мандариновый Комплекс — справочник ивент-отделов Medium RP и NoRules / Classic: сценарии, допуски по должностям, правила и команды.">
+  <title>Ивент-отдел — Мандариновый Комплекс</title>
+  <link rel="icon" type="image/png" href="assets/mandarin-snow-brand.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="data.js" defer></script>
+  <script src="catalog.js" defer></script>
+  <script src="departments.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="snow.js" defer></script>
+</head>
+<body>
+  <canvas id="snow" aria-hidden="true" hidden></canvas>
+  <noscript><p style="padding:20px">Для поиска и разделов включи JavaScript. <a href="https://docs.google.com/document/d/1VQaYesYeCG5DN_6SXj4vkQ_ML0QaU8BmZXMqcHdKeRY/edit?tab=t.0">Руководство</a> · <a href="https://docs.google.com/document/d/1HnL7cfYVDZBox1ryELCWo1bYlRjdniMP8poQBtjfC7s/edit?tab=t.rdsra8mf7pg8">Ивент-лист MRP</a> · <a href="https://docs.google.com/document/d/1S6xbqqKqEvTPCsdBkmW-STa_qs7qlljyGH-L9rle4UM/edit?tab=t.l5mq4pc8hoj9">C.A.S.S.I.E.</a></p></noscript>
+  <a class="skip" href="#" data-jump="main">К содержимому</a>
+  <button class="scrim" id="scrim" aria-label="Закрыть навигацию" hidden></button>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#departments" class="brand" aria-label="Мандариновый Комплекс — выбор отдела"><span class="brand-mark" aria-hidden="true"><img src="assets/mandarin-snow-brand.png" width="1254" height="1254" alt=""></span><span>Мандариновый<br>Комплекс</span></a>
+      <div class="header-caption">Ивент-отдел<span>Справочник команды</span></div>
+      <div class="header-actions">
+        <label class="department-control"><span class="sr-only">Выбрать отдел</span><select id="department-select"><option value="departments">Выбрать отдел</option value="mrp">Medium RP</option><option value="nr">NoRules / Classic</option></select></label>
+        <button class="snow-button" id="snow-toggle" type="button" aria-label="Падающий снег" aria-pressed="false" title="Включить снег"><span aria-hidden="true">❄</span><span class="snow-label">Снег</span></button>
+        <button class="icon-button menu-button" id="menu-button" aria-label="Открыть навигацию" aria-controls="sidebar" aria-expanded="false"><span data-icon="menu"></span></button>
+      </div>
+    </div>
+  </header>
+  <nav class="sidebar" id="sidebar" aria-label="Основная навигация">
+    <div class="mobile-nav-heading"><span>Навигация</span><button class="icon-button" id="nav-close" aria-label="Закрыть навигацию">✕</button></div>
+    <div class="nav-inner">
+      <a href="#home" class="nav-link" data-nav="home"><span data-icon="grid"></span> Главная</a>
+      <a href="#guide" class="nav-link" data-nav="guide"><span data-icon="book"></span> Руководство</a>
+      <a href="#events" class="nav-link" data-nav="events"><span data-icon="layers"></span> Ивент-лист <span class="nav-count" id="event-count"></span></a>
+      <a href="#cassie" class="nav-link" data-nav="cassie"><span data-icon="radio"></span> C.A.S.S.I.E.</a>
+      <a href="#commands" class="nav-link" data-nav="commands"><span data-icon="terminal"></span> Команды</a>
+      <a href="#sources" class="nav-link nav-sources" data-nav="sources"><span data-icon="external"></span> Источники</a>
+    </div>
+  </nav>
+  <div class="workspace">
+    <div class="topbar"><div class="breadcrumbs"><a href="#departments" class="muted">Ивент-отделы</a><span class="crumb-slash">/</span><span id="crumb">Выбор отдела</span></div><div id="server-switch"></div></div>
+    <main id="main" tabindex="-1">
+      <div class="page-intro"><div class="eyebrow">МАНДАРИНОВЫЙ КОМПЛЕКС / БАЗА ЗНАНИЙ</div><h1>Ивент-отдел<span class="orange">.</span></h1><p class="lead">Правила, сценарии и команды — всё для проведения ивентов.</p></div>
+      <div class="search-wrap"><span data-icon="search"></span><input id="search" type="search" placeholder="Найти правило, ивент или команду…" aria-label="Поиск по всему справочнику" autocomplete="off"><kbd>/</kbd></div>
+      <div id="content" aria-live="polite"></div>
+      <footer><span class="footer-brand"><img src="assets/mandarin-snow-brand.png" width="1254" height="1254" alt=""><span>Мандариновый Комплекс <span class="footer-dot">·</span> Ивент-отдел</span></span><a href="#mrp/sources" id="footer-source">Источники и актуальность <span data-icon="external"></span></a></footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
