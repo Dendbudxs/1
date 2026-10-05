@@ -1,17 +1,12 @@
 {
-  "name": "mandarin-event-department",
-  "version": "6.0.0",
+  "name": "mandarin-medium-rp",
+  "version": "1.13.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=24.19.0"
-  },
+  "engines": { "node": ">=24.19.0" },
   "scripts": {
     "start": "node --env-file-if-exists=.env server/start.mjs",
-    "test": "node --test server/*.test.mjs",
-    "preview:login": "node server/render-login-preview.mjs"
-  },
-  "dependencies": {
-    "google-auth-library": "11.1.0"
+    "owner": "node --env-file-if-exists=.env server/setup-owner.mjs",
+    "test": "node --test server/*.test.mjs"
   }
 }

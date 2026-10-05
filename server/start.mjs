@@ -1,37 +1,24 @@
 import { createServer } from 'node:http';
 import { Readable } from 'node:stream';
-import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
-import { createApplication,readConfig } from './auth.mjs';
-
-const root=fileURLToPath(new URL('../',import.meta.url));
-const config=readConfig();
+import { readConfig } from './access-store.mjs';
+import { createApplication } from './application.mjs';
+const config=readConfig(),app=createApplication(config);
+if(!app.store.db.prepare('SELECT id FROM access_users WHERE email=? AND role=?').get(config.ownerEmail,'owner')){
+  app.close();throw Error('Сначала создайте владельца командой npm run owner. Сайт пока закрыт.');
+}
 const port=Number(process.env.PORT||8787),host=process.env.HOST||'127.0.0.1';
-if(!Number.isInteger(port)||port<1||port>65535)throw Error('PORT must be between 1 and 65535.');
-const app=createApplication(config,{siteDir:resolve(root,'dist')});
-const server=createServer({maxHeaderSize:16384,requestTimeout:30000,headersTimeout:15000},async(incoming,outgoing)=>{
+if(!Number.isInteger(port)||port<1||port>65535)throw Error('Неверный PORT.');
+const server=createServer(async(req,res)=>{
   try{
-    if(!incoming.url?.startsWith('/')||incoming.url.startsWith('//')){outgoing.writeHead(400);outgoing.end();return;}
-    const headers=new Headers();
-    for(const [name,value] of Object.entries(incoming.headers))if(value!==undefined)headers.set(name,Array.isArray(value)?value.join('; '):value);
-    const method=incoming.method||'GET';
-    const init={method,headers};
-    if(!['GET','HEAD'].includes(method)){init.body=Readable.toWeb(incoming);init.duplex='half';}
-    const request=new Request(config.origin+incoming.url,init);
-    const response=await app.handle(request,{remoteAddress:incoming.socket.remoteAddress||'unknown'});
-    outgoing.statusCode=response.status;
-    for(const [name,value] of response.headers)if(name!=='set-cookie')outgoing.setHeader(name,value);
-    const cookies=response.headers.getSetCookie();if(cookies.length)outgoing.setHeader('Set-Cookie',cookies);
-    if(method==='HEAD'){outgoing.end();return;}
-    outgoing.end(Buffer.from(await response.arrayBuffer()));
-  }catch{
-    // Never log request URLs: OAuth callbacks contain one-time authorization codes.
-    if(!outgoing.headersSent)outgoing.writeHead(500,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});
-    outgoing.end('Не удалось обработать запрос.');
-  }
+    const url=new URL(req.url,config.origin);
+    if(url.origin!==config.origin)throw Error('Invalid request origin');
+    const headers=new Headers();for(const [name,value] of Object.entries(req.headers)){if(Array.isArray(value))value.forEach(v=>headers.append(name,v));else if(value!==undefined)headers.set(name,value);}
+    const request=new Request(url,{method:req.method,headers,...(['GET','HEAD'].includes(req.method)?{}:{body:Readable.toWeb(req),duplex:'half'})});
+    const response=await app.handle(request,{ip:req.socket.remoteAddress||'unknown'});
+    res.writeHead(response.status,Object.fromEntries(response.headers));
+    if(!response.body||req.method==='HEAD')res.end();else Readable.fromWeb(response.body).pipe(res);
+  }catch{res.writeHead(400,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});res.end('Неверный запрос.');}
 });
-server.maxConnections=256;
-server.listen(port,host,()=>{
-  console.log('Справочник запущен: '+host+':'+port+'. '+(config.ready?'Google настроен.':'Материалы закрыты: заполните настройки в .env.'));
-});
+server.requestTimeout=15000;server.headersTimeout=10000;
+server.listen(port,host,()=>console.log('Mandarin Medium RP 1.13 · '+config.origin));
 for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>server.close(()=>{app.close();process.exit(0);}));
